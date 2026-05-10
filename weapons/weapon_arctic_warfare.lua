@@ -160,6 +160,7 @@ function SWEP:Deploy()
 end
 
 function SWEP:Holster()
+	self:GetOwner():SetFOV(0, 0, self)
     self:SetDeploySpeed(GetConVar("sv_defaultdeployspeed"):GetFloat() * 0.5)
     self:GetOwner():SetWalkSpeed(200)
     self:GetOwner():SetRunSpeed(400)
