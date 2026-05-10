@@ -58,15 +58,9 @@ function SWEP:PrimaryAttack()
 	bullet.Dir = self:GetOwner():GetAimVector()
 	bullet.Src = self:GetOwner():GetShootPos()
 
-	local velocity = self:GetOwner():GetVelocity()
-
-	local speed = velocity:Length()
-
-	AccuracyMeter = AccuracyMeter + 0.008 * speed * 0.005
-
 	bullet.Spread = Vector(AccuracyMeter, AccuracyMeter, AccuracyMeter)
 
-	AccuracyMeter = AccuracyMeter + 0.008
+	AccuracyMeter = AccuracyMeter + 0.015
     self:FireBullets(bullet)
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     self:GetOwner():SetAnimation(PLAYER_ATTACK1)
@@ -78,8 +72,10 @@ end
 function SWEP:SecondaryAttack()
     if scoped == 0 then
 
-        self:GetOwner():SetWalkSpeed(100)
-	self:GetOwner():SetRunSpeed(100)
+        self:GetOwner():SetWalkSpeed(150)
+	self:GetOwner():SetRunSpeed(150)
+        self:GetOwner():SetDuckSpeed(0.25)
+    	self:GetOwner():SetUnDuckSpeed(0.25)
 	self:GetOwner():SetJumpPower(0)
         self:SetNextPrimaryFire(CurTime() + 1)
 
@@ -91,9 +87,11 @@ function SWEP:SecondaryAttack()
 
     else
 	timer.Simple(0.7, function()
-    	    self:GetOwner():SetWalkSpeed(175)
-    	    self:GetOwner():SetRunSpeed(350)
+    	    self:GetOwner():SetWalkSpeed(200)
+    	    self:GetOwner():SetRunSpeed(400)
 	    self:GetOwner():SetJumpPower(200)
+    	    self:GetOwner():SetDuckSpeed(0.1)
+    	    self:GetOwner():SetUnDuckSpeed(0.1)
 	end)
 
 	self:SetNextPrimaryFire(CurTime() + 1)
@@ -109,9 +107,11 @@ function SWEP:Reload()
     self:DefaultReload(ACT_VM_RELOAD)
     self:GetOwner():SetAnimation(ACT_RELOAD)
     self:GetOwner():SetFOV(0, 0.25, self)
-    self:GetOwner():SetWalkSpeed(175)
-    self:GetOwner():SetRunSpeed(350)
+    self:GetOwner():SetWalkSpeed(200)
+    self:GetOwner():SetRunSpeed(400)
     self:GetOwner():SetJumpPower(200)
+    self:GetOwner():SetDuckSpeed(0.1)
+    self:GetOwner():SetUnDuckSpeed(0.1)
     scoped = 0
 end
 
@@ -127,24 +127,17 @@ function SWEP:Think()
 	end
 
         if AccuracyMeter > 0.05 then
-	    AccuracyMeter = math.max(0, AccuracyMeter - (0.0025 * FrameTime()))
+	    AccuracyMeter = math.max(0, AccuracyMeter - (0.1 * FrameTime()))
 	end
     end
 
     if scoped == 1 then
         if AccuracyMeter > 0.002 then
-	    AccuracyMeter = math.max(0, AccuracyMeter - (0.025 * FrameTime()))
+	    AccuracyMeter = math.max(0, AccuracyMeter - (0.1 * FrameTime()))
 	end
     end
 end
 
-function SWEP:Deploy()
-    self:GetOwner():SetWalkSpeed(175)
-    self:GetOwner():SetRunSpeed(350)
-    self:GetOwner():SetDuckSpeed(0.25)
-    self:GetOwner():SetUnDuckSpeed(0.25)
-    return true
-end
 
 function SWEP:Holster()
     self:GetOwner():SetFOV(0, 0, self)
