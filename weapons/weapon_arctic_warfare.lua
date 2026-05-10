@@ -79,6 +79,7 @@ function SWEP:PrimaryAttack()
     self:TakePrimaryAmmo(1)
 
     timer.Simple(0.25, function()
+		self:SetNextSecondaryFire(CurTime() + 1.15)
     	self:GetOwner():SetFOV(0, 0.2, self)
     	self:GetOwner():SetWalkSpeed(130)
     	self:GetOwner():SetRunSpeed(220)
