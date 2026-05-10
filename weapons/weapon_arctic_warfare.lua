@@ -19,8 +19,8 @@ SWEP.ViewModelFov = 50
 
 -- slots
 
-SWEP.SlotPos = 5
-SWEP.Slot = 1
+SWEP.SlotPos = 1
+SWEP.Slot = 3
 
 -- stats
 
