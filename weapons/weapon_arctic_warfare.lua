@@ -90,7 +90,7 @@ end
 
 function SWEP:SecondaryAttack()
     if scoped == 0 then
-
+	self:SetNextSecondaryFire(CurTime() + 1)
         self:GetOwner():SetWalkSpeed(75)
 	self:GetOwner():SetRunSpeed(75)
 	self:GetOwner():SetJumpPower(0)
@@ -103,6 +103,7 @@ function SWEP:SecondaryAttack()
 	self:GetOwner():SetFOV(5, 1, self)
 
     else
+	self:SetNextSecondaryFire(CurTime() + 1)
 	timer.Simple(0.7, function()
     	    self:GetOwner():SetWalkSpeed(130)
     	    self:GetOwner():SetRunSpeed(220)
