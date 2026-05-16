@@ -131,8 +131,9 @@ function SWEP:SecondaryAttack()
 	bullet.Distance = 78
 	bullet.Dir = self:GetOwner():GetAimVector()
 	bullet.Src = self:GetOwner():GetShootPos()
-	bullet.Damage = 4
+	bullet.Damage = 3
 	bullet.Num = 1
+	bullet.Spread = Vector(0, 0, 0)
     end)
     timer.Simple(0.1, function()
     	self:FireBullets(bullet)
@@ -140,21 +141,47 @@ function SWEP:SecondaryAttack()
 	bullet.Src = self:GetOwner():GetShootPos()
 	bullet.Distance = 79
     end)
-    timer.Simple(0.2, function()
+    timer.Simple(0.15, function()
     	self:FireBullets(bullet)
 	bullet.Dir = self:GetOwner():GetAimVector()
 	bullet.Src = self:GetOwner():GetShootPos()
 	bullet.Distance = 80
     end)
+    timer.Simple(0.2, function()
+    	self:FireBullets(bullet)
+	bullet.Dir = self:GetOwner():GetAimVector()
+	bullet.Src = self:GetOwner():GetShootPos()
+	bullet.Distance = 81
+    end)
+    timer.Simple(0.25, function()
+    	self:FireBullets(bullet)
+	bullet.Dir = self:GetOwner():GetAimVector()
+	bullet.Src = self:GetOwner():GetShootPos()
+	bullet.Distance = 82
+    end)
     timer.Simple(0.3, function()
     	self:FireBullets(bullet)
 	bullet.Dir = self:GetOwner():GetAimVector()
 	bullet.Src = self:GetOwner():GetShootPos()
+	bullet.Distance = 83
+    end)
+    timer.Simple(0.35, function()
+    	self:FireBullets(bullet)
+	bullet.Dir = self:GetOwner():GetAimVector()
+	bullet.Src = self:GetOwner():GetShootPos()
+	bullet.Distance = 84
     end)
     timer.Simple(0.4, function()
     	self:FireBullets(bullet)
 	bullet.Dir = self:GetOwner():GetAimVector()
 	bullet.Src = self:GetOwner():GetShootPos()
+	bullet.Distance = 85
+    end)
+    timer.Simple(0.45, function()
+    	self:FireBullets(bullet)
+	bullet.Dir = self:GetOwner():GetAimVector()
+	bullet.Src = self:GetOwner():GetShootPos()
+	bullet.Distance = 86
     end)
     timer.Simple(0.5, function()
     	self:FireBullets(bullet)
