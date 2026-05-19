@@ -46,6 +46,7 @@ end
 -- shoot
 function SWEP:PrimaryAttack()
     if self:Clip1() < 1 then
+	self:GetOwner():ConCommand("lastinv")
 	self:GetOwner():SetWalkSpeed(200)
         self:GetOwner():SetRunSpeed(400)
 	self:GetOwner():SetDuckSpeed(0.1)
