@@ -69,7 +69,7 @@ function SWEP:PrimaryAttack()
 	self:TakePrimaryAmmo(1)
 	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
-        self:EmitSound("weapons/stinger_fire1.wav", 120, math.Rand(90, 133), 1, CHAN_WEAPON)
+        self:EmitSound("npc/waste_scanner/grenade_fire.wav", 120, math.Rand(90, 133), 1, CHAN_WEAPON)
         local rocket = ents.Create("prop_dynamic")
         if !IsValid(rocket) then return end
     	rocket:SetModel("models/weapons/w_missile.mdl")
