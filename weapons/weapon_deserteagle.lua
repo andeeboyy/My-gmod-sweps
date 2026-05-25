@@ -59,7 +59,7 @@ function SWEP:PrimaryAttack()
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     self:GetOwner():SetAnimation(PLAYER_ATTACK1)
     self:EmitSound("weapons/shotgun/shotgun_dbl_fire.wav", 140, 80, 1, CHAN_WEAPON)
-    self:SetNextPrimaryFire(CurTime() + 0.2)
+    self:SetNextPrimaryFire(CurTime() + 0.3)
     self:TakePrimaryAmmo(1)
 end
 
