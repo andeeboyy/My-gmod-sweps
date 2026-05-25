@@ -53,7 +53,7 @@ function SWEP:PrimaryAttack()
 	bullet.Dir = self:GetOwner():GetAimVector()
 	bullet.Src = self:GetOwner():GetShootPos()
 	bullet.Spread = Vector(AccuracyMeter, AccuracyMeter, AccuracyMeter)
-	AccuracyMeter = AccuracyMeter + 0.03
+	AccuracyMeter = AccuracyMeter + 0.0275
     self:FireBullets(bullet)
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     self:GetOwner():SetAnimation(PLAYER_ATTACK1)
