@@ -58,7 +58,7 @@ function SWEP:PrimaryAttack()
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     self:GetOwner():SetAnimation(PLAYER_ATTACK1)
     self:EmitSound("weapons/alyx_gun/alyx_gun_fire4.wav", 140, 75, 1, CHAN_WEAPON)
-    self:SetNextPrimaryFire(CurTime() + 0.15)
+    self:SetNextPrimaryFire(CurTime() + 0.12)
     self:TakePrimaryAmmo(1)
 end
 
