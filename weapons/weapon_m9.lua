@@ -65,6 +65,14 @@ end
 -- reload the magazine to shoot more bullets
 
 function SWEP:Reload()
+	timer.Simple(1.8, function()
+	 	self:GetOwner():DrawViewModel(false, 0)
+    end)
+
+
+    timer.Simple(3, function()
+	 	 self:GetOwner():DrawViewModel(true, 0)
+    end)
     self:DefaultReload(ACT_VM_RELOAD)
     self:GetOwner():SetAnimation(ACT_RELOAD)
 end
