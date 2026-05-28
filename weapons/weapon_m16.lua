@@ -1,5 +1,8 @@
 AddCSLuaFile()
 local AccuracyMeter = 0
+
+local burst = 0
+
 -- spawnmenu
 local ShotsFired = 0
 SWEP.Spawnable = true
@@ -23,7 +26,7 @@ SWEP.AccurateCrossHair = true
 SWEP.Primary.Ammo = "SMG1"
 SWEP.Primary.ClipSize = 30
 SWEP.Primary.DefaultClip = 30
-SWEP.Primary.Automatic = true
+SWEP.Primary.Automatic = false
 
 -- secondary
 
@@ -42,27 +45,63 @@ end
 
 -- shoot
 function SWEP:PrimaryAttack()
-    if ( !self:CanPrimaryAttack() ) then return end
-    self:GetOwner():ViewPunch( Angle( AccuracyMeter * -16, math.random(AccuracyMeter * 5, AccuracyMeter * -6), 0 ) )
-    local bullet = {}
-	bullet.Damage = 12
-	bullet.Num = 1
-	bullet.Force = 4
-	bullet.Dir = self:GetOwner():GetAimVector()
-	bullet.Src = self:GetOwner():GetShootPos()
-	bullet.Spread = Vector(AccuracyMeter, AccuracyMeter, AccuracyMeter)
-	AccuracyMeter = AccuracyMeter + 0.0175
-    self:FireBullets(bullet)
-    self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
-    self:GetOwner():SetAnimation(PLAYER_ATTACK1)
-    self:EmitSound("weapons/ar1/ar1_dist1.wav", 140, 110, 1, CHAN_WEAPON)
-    self:SetNextPrimaryFire(CurTime() + 0.08)
-    self:TakePrimaryAmmo(1)
+    if burst == 1 then
+    	timer.Create("burst", 0.06, 3, function()
+    	    if ( !self:CanPrimaryAttack() ) then
+	        timer.Remove("burst")
+	    	return
+	    end
+    	    if !self:GetOwner():IsNPC() then
+    	    	self:GetOwner():ViewPunch( Angle( AccuracyMeter * -16, math.random(AccuracyMeter * 5, AccuracyMeter * -6), 0 ) )
+    	    end
+    	    local bullet = {}
+	    	bullet.Damage = 12
+	    	bullet.Num = 1
+	    	bullet.Force = 4
+	    	bullet.Dir = self:GetOwner():GetAimVector()
+	    	bullet.Src = self:GetOwner():GetShootPos()
+	    	bullet.Spread = Vector(AccuracyMeter, AccuracyMeter, AccuracyMeter)
+	    	AccuracyMeter = AccuracyMeter + 0.05
+    	    self:FireBullets(bullet)
+    	    self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+    	    self:GetOwner():SetAnimation(PLAYER_ATTACK1)
+    	    self:EmitSound("weapons/ar1/ar1_dist1.wav", 140, 110, 1, CHAN_WEAPON)
+    	    self:SetNextPrimaryFire(CurTime() + 0.3)
+    	    self:TakePrimaryAmmo(1)
+    	end)
+    else
+	if ( !self:CanPrimaryAttack() ) then return end
+    	if !self:GetOwner():IsNPC() then
+    	    self:GetOwner():ViewPunch( Angle( AccuracyMeter * -16, math.random(AccuracyMeter * 5, AccuracyMeter * -6), 0 ) )
+    	end
+    	local bullet = {}
+	    bullet.Damage = 12
+	    bullet.Num = 1
+	    bullet.Force = 4
+	    bullet.Dir = self:GetOwner():GetAimVector()
+	    bullet.Src = self:GetOwner():GetShootPos()
+	    bullet.Spread = Vector(AccuracyMeter, AccuracyMeter, AccuracyMeter)
+	    AccuracyMeter = AccuracyMeter + 0.05
+    	self:FireBullets(bullet)
+    	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+    	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
+    	self:EmitSound("weapons/ar1/ar1_dist1.wav", 140, 110, 1, CHAN_WEAPON)
+    	self:SetNextPrimaryFire(CurTime() + 0.1)
+    	self:TakePrimaryAmmo(1)
+    end
 end
 
 
-
-
+function SWEP:SecondaryAttack()
+    self:SetNextSecondaryFire(CurTime() + 0.7)
+    if burst == 1 then
+	self:EmitSound("weapons/smg1/switch_single.wav", 140, 80, 1, CHAN_WEAPON)
+	burst = 0
+    else
+	self:EmitSound("weapons/smg1/switch_burst.wav", 140, 80, 1, CHAN_WEAPON)
+	burst = 1
+    end
+end
 -- reload the magazine to shoot more bullets
 
 function SWEP:Reload()
