@@ -77,7 +77,7 @@ function SWEP:Reload()
 	return
     else
     	self:SendWeaponAnim(ACT_SHOTGUN_RELOAD_START)
-    	timer.Create("reload", 0.75, 0, function()
+    	timer.Create("reload", 0.6, 0, function()
 	    if !IsValid(self:GetOwner()) then
 		timer.Remove("reload")
 		return
