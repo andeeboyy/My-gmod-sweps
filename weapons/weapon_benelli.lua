@@ -38,7 +38,7 @@ SWEP.Secondary.Ammo        = "none"
 
 -- anim
 function SWEP:Initialize()
-    self:SetHoldType("ar2")
+    self:SetHoldType("Shotgun")
 end
 
 
@@ -98,8 +98,8 @@ function SWEP:Reload()
 	    end)
 	    self:SendWeaponAnim(ACT_VM_RELOAD)
 	end)
-        self:GetOwner():SetAnimation(ACT_RELOAD)
     end
+    self:GetOwner():SetAnimation(PLAYER_RELOAD)
 end
 
 function SWEP:Think()
@@ -107,4 +107,5 @@ function SWEP:Think()
 	AccuracyMeter = math.max(0, AccuracyMeter - (0.5 * FrameTime()))
     end
 end
+
 
