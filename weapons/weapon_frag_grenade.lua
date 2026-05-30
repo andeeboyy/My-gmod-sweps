@@ -1,0 +1,166 @@
+AddCSLuaFile()
+local CanFire = 1
+-- spawnmenu
+local nextReload = 0
+SWEP.Spawnable = true
+SWEP.PrintName = "Frag Grenade"
+SWEP.Base = "weapon_base"
+SWEP.Category = "my guns"
+
+-- viewmodel
+
+SWEP.ViewModel = "models/weapons/cstrike/c_eq_fraggrenade.mdl"
+SWEP.WorldModel = "models/weapons/w_eq_fraggrenade.mdl"
+SWEP.UseHands = true
+SWEP.ViewModelFov = 50
+
+-- slots
+
+SWEP.SlotPos = 3
+SWEP.Slot = 4
+
+-- stats
+SWEP.AccurateCrossHair = true
+SWEP.Primary.Ammo = "Grenade"
+SWEP.Primary.ClipSize = 1
+SWEP.Primary.DefaultClip = 1
+SWEP.Primary.Automatic = false
+
+-- secondary
+
+SWEP.Secondary.ClipSize    = -1
+SWEP.Secondary.DefaultClip = -1
+SWEP.Secondary.Automatic   = true
+SWEP.Secondary.Ammo        = "none"
+
+-- function stuff
+
+-- anim
+function SWEP:Initialize()
+    self:SetHoldType("grenade")
+end
+
+
+
+
+
+
+-- throw grenade
+function SWEP:PrimaryAttack()
+    nextReload = CurTime() + 2
+    if self:Ammo1() < 1 and self:Clip1() < 1 then
+	self:GetOwner():StripWeapon("weapon_frag_grenade")
+    end
+
+    if (self:Clip1() < 1) then return end
+    
+    local prop = ents.Create("prop_physics")
+    if !IsValid(prop) then return end
+    self:SetNextPrimaryFire(CurTime() + 1)
+    timer.Simple(0.5, function()
+	if CanFire == 0 then return end
+	self:EmitSound("weapons/slam/throw.wav", 100, 133, 1, CHAN_WEAPON)
+	self:TakePrimaryAmmo(1)
+    	prop:SetModel("models/weapons/w_eq_fraggrenade.mdl")
+    	prop:SetPos(self:GetOwner():GetShootPos())
+    	prop:SetKeyValue("massScale", "3")
+    	prop:SetAngles(self:GetOwner():GetAimVector():Angle())
+
+   
+    	timer.Simple(math.Rand(4, 5), function()
+	    if IsValid(prop) then
+	    	prop:Remove()
+	    end
+    	end)
+
+    	prop:Spawn()
+    end)
+    prop:CallOnRemove("Explode", function(ent)
+	
+	ParticleEffect("explosion_turret_break", prop:GetPos(), Angle(0, 0, 0))
+	ParticleEffect("striderbuster_explode_dummy_core", prop:GetPos(), Angle(0, 0, 0))
+	ParticleEffect("striderbuster_break_d", prop:GetPos(), Angle(0, 0, 0))
+	ParticleEffect("striderbuster_break_e", prop:GetPos(), Angle(0, 0, 0))
+	ParticleEffect("striderbuster_break_b", prop:GetPos(), Angle(0, 0, 0))
+	ParticleEffect("striderbuster_break_explode", prop:GetPos(), Angle(0, 0, 0))
+	local boom = EffectData()
+	boom:SetFlags(4)
+	boom:SetOrigin(prop:GetPos())
+	boom:SetScale(2000)
+	util.Effect("Explosion", boom)
+	local dust = EffectData()
+	dust:SetOrigin(prop:GetPos())
+	dust:SetScale(1000)
+	util.Effect("ThumperDust", dust)
+
+	local rand = math.random(1, 3)
+	if rand == 1 then
+	    prop:EmitSound("weapons/mortar/mortar_explode1.wav", 140, math.Rand(66, 133), 1, CHAN_AUTO)
+	end
+	if rand == 2 then
+	    prop:EmitSound("weapons/mortar/mortar_explode2.wav", 140, math.Rand(66, 133), 1, CHAN_AUTO)
+	end
+	if rand == 3 then
+	    prop:EmitSound("weapons/mortar/mortar_explode3.wav", 140, math.Rand(66, 133), 1, CHAN_AUTO)
+	end
+	
+	local boom = ents.Create("env_explosion")
+	boom:SetPos(prop:GetPos())
+	boom:SetKeyValue("iMagnitude", 175)
+	boom:SetKeyValue("iRadiusOverride", 1250)
+	boom:SetKeyValue("DamageForce", 0)
+	boom:Fire("Explode")
+
+	local boom2 = ents.Create("env_explosion")
+	boom2:SetPos(prop:GetPos())
+	boom2:SetKeyValue("iMagnitude", 75)
+	boom2:SetKeyValue("iRadiusOverride", 2250)
+	boom2:SetKeyValue("DamageForce", 0)
+	boom2:Fire("Explode")
+
+	local boom3 = ents.Create("env_physexplosion")
+	boom3:SetPos(prop:GetPos())
+	boom3:SetKeyValue("Magnitude", 100)
+	boom3:SetKeyValue("radius", 2000)
+	boom3:Fire("Explode")
+    end)
+
+
+
+
+
+    timer.Simple(0.5, function()
+    	local woosh = prop:GetPhysicsObject()
+    	if IsValid(woosh) then
+	    woosh:Wake()
+	    local throwVelocity = self:GetOwner():GetAimVector() * 1000
+            local playerVelocity = self:GetOwner():GetVelocity()
+            woosh:SetVelocity(throwVelocity + playerVelocity)
+	    local spin = Vector(math.random(-500, 500), math.random(-500, 500), math.random(-500, 500))
+            woosh:AddAngleVelocity(spin)
+    	end
+    end)
+    self:SendWeaponAnim(ACT_VM_THROW)
+    self:GetOwner():SetAnimation(PLAYER_ATTACK1)
+end
+
+-- reload
+function SWEP:Reload()
+    self:GetOwner():DrawViewModel(true, 0)
+    if (nextReload > CurTime()) then return end
+    self:DefaultReload(ACT_VM_DRAW)
+end
+
+function SWEP:Deploy()
+    if self:Clip1() < 1 then
+	self:DefaultReload(ACT_VM_DRAW)
+	self:SetNextPrimaryFire(nextReload)
+    end
+    CanFire = 1
+    return true
+end
+
+function SWEP:Holster()
+    CanFire = 0
+    return true
+end
