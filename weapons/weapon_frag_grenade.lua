@@ -193,7 +193,7 @@ function SWEP:PrimaryAttack()
 	    local throwVelocity = self:GetOwner():GetAimVector() * 1000
             local playerVelocity = self:GetOwner():GetVelocity()
             woosh:SetVelocity(throwVelocity + playerVelocity)
-	    local spin = Vector(math.Rand(-150, 150), math.Rand(-500, 500), 0)
+	    local spin = Vector(math.Rand(-150, 150), math.Rand(-200, 200), 0)
             woosh:AddAngleVelocity(spin)
     	end
     end)
