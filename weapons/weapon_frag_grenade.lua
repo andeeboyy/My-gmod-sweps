@@ -81,7 +81,7 @@ function SWEP:PrimaryAttack()
     	prop:Spawn()
     end)
     prop:CallOnRemove("Explode", function(ent)
-	for i = 1, math.random(50, 150) do
+	for i = 1, math.random(10, 30) do
 	    local debrisoffset = Vector(math.Rand(-50, 50), math.Rand(-50, 50), math.Rand(0, 50))
 	    local debris = ents.Create("prop_physics")
 	    debris:SetPos(prop:GetPos() + debrisoffset)
