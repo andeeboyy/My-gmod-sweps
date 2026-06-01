@@ -211,7 +211,7 @@ end
 function SWEP:Deploy()
     if self:Clip1() < 1 then
 	self:DefaultReload(ACT_VM_DRAW)
-	self:SetNextPrimaryFire(nextReload)
+	self:SetNextPrimaryFire(nextReload + 1)
     end
     CanFire = 1
     return true
