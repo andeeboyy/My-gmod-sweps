@@ -51,7 +51,7 @@ function SWEP:PrimaryAttack()
 	bullet.Dir = self:GetOwner():GetAimVector()
 	bullet.Src = self:GetOwner():GetShootPos()
 	bullet.Spread = Vector(AccuracyMeter, AccuracyMeter, AccuracyMeter)
-	AccuracyMeter = AccuracyMeter + 0.11
+	AccuracyMeter = AccuracyMeter + 0.1075
     self:FireBullets(bullet)
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     self:GetOwner():SetAnimation(PLAYER_ATTACK1)
@@ -60,7 +60,7 @@ function SWEP:PrimaryAttack()
     self:SetNextPrimaryFire(CurTime() + 0.1)
     self:TakePrimaryAmmo(1)
     if !self:GetOwner():IsNPC() then
-        self:GetOwner():SetEyeAngles(self:GetOwner():EyeAngles() + Angle(math.Rand(-1.25, -0.35), math.Rand(-0.75, 0.75), 0))
+        self:GetOwner():SetEyeAngles(self:GetOwner():EyeAngles() + Angle(math.Rand(-1, -0.25), math.Rand(-0.5, 0.5), 0))
     end
 end
 
