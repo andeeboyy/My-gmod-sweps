@@ -90,7 +90,6 @@ function SWEP:Reload()
     end
 end
 function SWEP:ReloadLoop()
-    self:SetNextPrimaryFire(CurTime() + 5.9)
     timer.Simple(0.6, function()
 	if reloading == 0 then return end
 	if !IsValid(self:GetOwner()) then return end
