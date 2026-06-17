@@ -3,7 +3,7 @@ local CanFire = 1
 -- spawnmenu
 local nextReload = 0
 SWEP.Spawnable = true
-SWEP.PrintName = "Frag Grenade"
+SWEP.PrintName = "M26 Frag Grenade"
 SWEP.Base = "weapon_base"
 SWEP.Category = "my guns"
 
