@@ -136,7 +136,7 @@ function SWEP:PrimaryAttack()
 	    	ParticleEffect("striderbuster_explode_dummy_parts", prop:GetPos(), Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)))
 	    end
 	    ParticleEffect("striderbuster_break_d", prop:GetPos(), Angle(0, 0, 0))
-	    ParticleEffect("striderbuster_break_a", prop:GetPos(), Angle(0, 0, 0))
+	    ParticleEffect("striderbuster_break_e", prop:GetPos(), Angle(0, 0, 0))
 	    ParticleEffect("striderbuster_break_b", prop:GetPos(), Angle(0, 0, 0))
 	    ParticleEffect("striderbuster_break_explode", prop:GetPos(), Angle(0, 0, 0))
 	    local randompicker = math.random(1, 4)
