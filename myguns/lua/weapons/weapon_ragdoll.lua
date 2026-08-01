@@ -1,5 +1,16 @@
 AddCSLuaFile()
 
+local function TransferBodygroups(source, target)
+    for i, bg in ipairs(source:GetBodyGroups()) do
+	local id = bg.id
+	local state = source:GetBodygroup(id)
+	target:SetBodygroup(id, state)
+    end
+
+    if target.SetSkin and source.GetSkin then
+	target:SetSkin(source:GetSkin())
+    end
+end
 
 local candeploy = 1
 local timerRunning = 0
@@ -60,7 +71,6 @@ function SWEP:Deploy()
     self.camfollow:SetMaterial("Models/effects/vol_light001")
     self.ragname = "ragdoll" .. self:EntIndex()
     self.hookname2 = "damage" .. self:EntIndex()
-    plr:SetNoDraw(true)
     plr:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
     self.hookname = "hook" .. self:EntIndex()
     local ragdoll = ents.Create("prop_ragdoll")
@@ -94,13 +104,16 @@ function SWEP:Deploy()
 
     ragdoll:SetModel(plr:GetModel())
     ragdoll:SetPos(plr:GetPos())
+
     ragdoll:Spawn()
+
+    TransferBodygroups(plr, ragdoll)
 
     local physobj = ragdoll:GetPhysicsObject()
     physobj:ApplyForceCenter(plr:GetVelocity() * 100)
     local savedhookname = "hook" .. self:EntIndex()
     local savedhookname2 = "damage" .. self:EntIndex()
-
+    plr:SetNoDraw(true)
     hook.Add("Tick", self.hookname, function()
 
 
