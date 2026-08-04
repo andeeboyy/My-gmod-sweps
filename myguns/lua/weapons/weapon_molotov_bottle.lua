@@ -7,6 +7,7 @@ AddCSLuaFile()
 local nextReload = 0
 SWEP.Spawnable = true
 SWEP.PrintName = "Molotov"
+SWEP.Purpose = "Burn things!\nSecondary fire to only drop it."
 SWEP.Base = "weapon_base"
 SWEP.Category = "my guns"
 
