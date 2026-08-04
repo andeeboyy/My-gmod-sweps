@@ -57,7 +57,10 @@ function SWEP:PrimaryAttack()
 	     self:GetOwner():StripWeapon("weapon_molotov_bottle")
 	end)
     end
-
+    self:SetNextPrimaryFire(CurTime() + 1)
+    if (self:Clip1() < 1) then
+    	return 
+    end
     timer.Simple(0.3, function()
     if self:IsValid() then
     	if (self:Clip1() < 1) then return end
