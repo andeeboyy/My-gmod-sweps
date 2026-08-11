@@ -65,7 +65,7 @@ function SWEP:Deploy()
     	end)
     end
 
-    plr:DrawWorldModel(false)
+    
     self.camfollow = ents.Create("prop_physics")
     self.camfollow:SetModel("models/props_junk/PopCan01a.mdl")
     self.camfollow:SetMaterial("Models/effects/vol_light001")
@@ -100,20 +100,28 @@ function SWEP:Deploy()
     local pangles = plr:GetAngles()
     pangles.roll = 0
 
-    ragdoll:SetAngles(pangles)
 
     ragdoll:SetModel(plr:GetModel())
-    ragdoll:SetPos(plr:GetPos())
+
 
     ragdoll:Spawn()
-
     TransferBodygroups(plr, ragdoll)
 
-    local physobj = ragdoll:GetPhysicsObject()
-    physobj:ApplyForceCenter(plr:GetVelocity() * 100)
+    if SERVER then
+	for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
+	    local physbone = ragdoll:GetPhysicsObjectNum(i)
+	    physbone:SetVelocity(plr:GetVelocity())
+	    physbone:SetPos(plr:GetBonePosition(ragdoll:TranslatePhysBoneToBone(i)))
+	    physbone:SetAngles(plr:GetBoneMatrix(ragdoll:TranslatePhysBoneToBone(i)):GetAngles())
+	end
+    end
+
     local savedhookname = "hook" .. self:EntIndex()
     local savedhookname2 = "damage" .. self:EntIndex()
+
+    plr:DrawWorldModel(false)
     plr:SetNoDraw(true)
+
     hook.Add("Tick", self.hookname, function()
 
 
@@ -153,13 +161,27 @@ function SWEP:Deploy()
 	end
 
 	self.ignoreblock = 0
-
-	if plr:GetMoveType() == MOVETYPE_NOCLIP then
-	    plr:SetMoveType(MOVETYPE_WALK)
+	if SERVER then
+	    for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
+	    	local physbone = ragdoll:GetPhysicsObjectNum(i)
+	    	if plr:GetMoveType() == MOVETYPE_NOCLIP then
+		    physbone:EnableGravity(false)
+		    physbone:EnableCollisions(false)
+		    if plr:KeyDown(IN_SPEED) or plr:KeyDown(IN_JUMP) then
+			physbone:SetDragCoefficient(25)
+		    else
+			physbone:SetDragCoefficient(250)
+		    end
+	    	else
+		    physbone:EnableGravity(true)
+		    physbone:EnableCollisions(true)
+		    physbone:SetDragCoefficient(10)
+	    	end
+	    end
 	end
+	
 	if !IsValid(ragdoll) and !IsValid(plr) then return end
 
-	plr:SetNoDraw(true)
 	local head = ragdoll:LookupBone("ValveBiped.Bip01_Head1")
 	local headmatrix = ragdoll:GetBoneMatrix(head)
 	local headang = headmatrix:GetAngles()
@@ -241,9 +263,14 @@ function SWEP:Deploy()
 
 
 
-	if plr:IsSprinting() then
+	if plr:KeyDown(IN_SPEED) then
 	    local torso = ragdoll:GetPhysicsObjectNum(0)
-	    torso:ApplyForceCenter(plr:EyeAngles():Forward() * 150)
+	    if plr:GetMoveType() == MOVETYPE_NOCLIP and !plr:KeyDown(IN_DUCK) then
+		torso:ApplyForceCenter(plr:EyeAngles():Forward() * 3000)
+	    else
+		torso:ApplyForceCenter(plr:EyeAngles():Forward() * 300)
+	    end
+	    
 	end
 
     end)
