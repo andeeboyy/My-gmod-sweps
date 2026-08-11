@@ -20,7 +20,7 @@ SWEP.Spawnable = true
 SWEP.PrintName = "Ragdoll"
 SWEP.Base = "weapon_base"
 SWEP.Category = "my guns - Other"
-SWEP.Purpose = "\nRagdoll!\n\nHold jump to bring your head up.\n\nHold sprint to move slightly.\n\nPrimary and Secondary attack lunge the corresponding arm on the side forward.\n\nUse left and right movement keys to grab things."
+SWEP.Purpose = "\nRagdoll!\n\nHold jump to bring your head up.\n\nHold sprint to move slightly.\n\nPrimary and Secondary attack lunge the corresponding arm on the side forward.\n\nUse left and right movement keys to grab things.\nNoclip works, and you can use run to move, and hold duck to slow down."
 -- viewmodel
 SWEP.ViewModel = "models/props_junk/PopCan01a.mdl"
 SWEP.WorldModel = "models/props_junk/PopCan01a.mdl"
