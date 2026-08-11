@@ -167,7 +167,7 @@ function SWEP:Deploy()
 	    	if plr:GetMoveType() == MOVETYPE_NOCLIP then
 		    physbone:EnableGravity(false)
 		    physbone:EnableCollisions(false)
-		    if plr:KeyDown(IN_SPEED) or plr:KeyDown(IN_JUMP) then
+		    if plr:KeyDown(IN_SPEED) then
 			physbone:SetDragCoefficient(25)
 		    else
 			physbone:SetDragCoefficient(250)
