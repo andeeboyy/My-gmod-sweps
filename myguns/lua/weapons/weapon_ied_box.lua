@@ -52,7 +52,7 @@ function SWEP:PrimaryAttack()
     local bombname = "boxbomb" .. self:EntIndex()
     nextReload = CurTime() + 2
     if (self:Clip1() < 1) then return end
-    self:SetNextSecondaryFire(CurTime() + 3)
+    self:SetNextSecondaryFire(CurTime() + 1.3)
     local prop = ents.Create("prop_physics_override")
     if !IsValid(prop) then return end
     prop:SetKeyValue("ExplodeDamage", "2000")
@@ -223,8 +223,7 @@ function SWEP:SecondaryAttack()
     self:SetNextSecondaryFire(CurTime() + 1)
     self:EmitSound("buttons/blip1.wav", 40, 100, 1, CHAN_AUTO)
     for _, bombdet in ipairs(ents.FindByName(bombname)) do
-	bombdet:EmitSound("buttons/button8.wav", 70, 100, 1, CHAN_AUTO)
-	timer.Simple(0.5, function()
+	timer.Simple(0.25, function()
 	    if IsValid(bombdet) then
 	    	bombdet:TakeDamage(100)
 	    end
@@ -243,12 +242,12 @@ function SWEP:Reload()
     self:GetOwner():DrawViewModel(true, 0)
     self:DefaultReload(ACT_VM_DRAW)
     self:SetNextPrimaryFire(CurTime() + 1)
-    self:SetNextSecondaryFire(CurTime() + 3)
+    self:SetNextSecondaryFire(CurTime() + 1.3)
 end
 
 function SWEP:Deploy()
     self:SetNextPrimaryFire(CurTime() + 2 / GetConVar("sv_defaultdeployspeed"):GetFloat())
-    self:SetNextSecondaryFire(CurTime() + 3)
+    self:SetNextSecondaryFire(CurTime() + 1.3)
     if self:Clip1() < 1 then
 	self:SetNextPrimaryFire(CurTime() + 5)
 	if self:Ammo1() < 1 then
@@ -256,8 +255,7 @@ function SWEP:Deploy()
 	    return
         end
 	self:GetOwner():DrawViewModel(true, 0)
-	self:SetClip1(self:Clip1() + 1)
-	self:GetOwner():RemoveAmmo(1, "slam")
+	self:DefaultReload(ACT_VM_DRAW)
 	if nextReload > 0 then
 	    self:SetNextPrimaryFire(nextReload + 1)
 	else
