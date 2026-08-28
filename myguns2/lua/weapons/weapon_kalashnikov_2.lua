@@ -1,7 +1,6 @@
 AddCSLuaFile()
 
 CreateConVar("sv_myguns2_enabled", 1)
-
 local canchamber = 0
 local timerRunning = 0
 
@@ -91,8 +90,12 @@ function SWEP:PrimaryAttack()
     shot = 1
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     self:GetOwner():SetAnimation(PLAYER_ATTACK1)
-    EmitSound("weapons/shotgun/shotgun_fire6.wav", self:GetPos(), 0, CHAN_WEAPON, 1, 140, 0, 100)
     self:EmitSound("weapons/ar2/fire1.wav", 140, 75, 1, CHAN_WEAPON)
+    local extrasound = ents.Create("base_gmodentity")
+    extrasound:Spawn()
+    extrasound:SetPos(self:GetOwner():GetShootPos())
+    extrasound:EmitSound("weapons/shotgun/shotgun_fire6.wav", 140, 100, 1, CHAN_WEAPON)
+    extrasound:Remove()
     self:TakePrimaryAmmo(1)
     if !self:GetOwner():IsNPC() then
 	if ads == 0 then
@@ -123,7 +126,7 @@ end
 local sprinton = 1
 function SWEP:Reload()
     if CLIENT then return end
-    if self:GetOwner():KeyDown(IN_SPEED) then return end
+    if self:GetOwner():KeyDown(IN_SPEED) then return end 
     shot = 0
     self:DefaultReload(ACT_VM_RELOAD)
     if self:Clip1() < self:GetMaxClip1() then

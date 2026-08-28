@@ -91,9 +91,14 @@ function SWEP:PrimaryAttack()
     self:FireBullets(bullet)
     shot = 1
     self:GetOwner():SetAnimation(PLAYER_ATTACK1)
-    EmitSound("weapons/shotgun/shotgun_fire7.wav", self:GetPos(), 0, CHAN_WEAPON, 1, 140, 0, 100)
     self:EmitSound("weapons/ar1/ar1_dist1.wav", 140, 75, 1, CHAN_WEAPON)
-    
+
+    local extrasound = ents.Create("base_gmodentity")
+    extrasound:Spawn()
+    extrasound:SetPos(self:GetOwner():GetShootPos())
+    extrasound:EmitSound("weapons/shotgun/shotgun_fire7.wav", 140, 100, 1, CHAN_WEAPON)
+    extrasound:Remove()
+
     self:TakePrimaryAmmo(1)
     if !self:GetOwner():IsNPC() then
 	if ads == 0 then
