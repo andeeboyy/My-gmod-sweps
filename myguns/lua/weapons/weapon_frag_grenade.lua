@@ -71,7 +71,12 @@ local function throw(time, ent, toss)
 	ent:EmitSound("weapons/slam/throw.wav", 100, 133, 1, CHAN_WEAPON)
 	ent:TakePrimaryAmmo(1)
     	prop:SetModel("models/weapons/w_eq_fraggrenade.mdl")
-	prop:SetPos(ent:GetOwner():GetShootPos())
+	if toss == true then
+	    local offsetshootpos = Vector(0, 0, -20)
+	    prop:SetPos(ent:GetOwner():GetShootPos() + offsetshootpos)
+	else
+	    prop:SetPos(ent:GetOwner():GetShootPos())
+	end
     	prop:SetAngles(ent:GetOwner():GetAimVector():Angle())
 	prop:SetCollisionGroup(COLLISION_GROUP_PASSABLE_DOOR)
 	timer.Simple(0.05, function()
@@ -316,13 +321,13 @@ function SWEP:Think()
     	end
 	if self:GetOwner():KeyReleased(IN_RELOAD) then
 	    if CurTime() - starttime > 1 and specialpullpin == 0 then
-	    	primed2 = 0
-		specialpullpin = 0
-		threw2 = 1
 		self:SendWeaponAnim(ACT_VM_DRAW)
 		self:SetHoldType("grenade")
+		specialpullpin = 0
+        	shot = 0
+    		holdingattack = 0
+    		primed2 = 0
 		self:EmitSound("weapons/pistol/pistol_empty.wav", 100, 100, 1, CHAN_WEAPON)
-	 	toss = 0
 	    end
 	end
     end
