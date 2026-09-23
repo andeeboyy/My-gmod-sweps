@@ -81,6 +81,9 @@ function SWEP:PrimaryAttack()
 		        debris:Remove()
 		    end
 	        end)
+	        if !self:VisibleVec(debris:GetPos()) then
+	    	    debris:Remove()
+	    	end
 	     end
         end
 	

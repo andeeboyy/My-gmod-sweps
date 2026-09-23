@@ -116,6 +116,9 @@ function SWEP:PrimaryAttack()
 		    	debris:Remove()
 		    end
 	    	end)
+	    	if !prop:VisibleVec(debris:GetPos()) then
+	    	    debris:Remove()
+	    	end
 	    end
 	end
 	local offset = Vector(0, 0, 100)

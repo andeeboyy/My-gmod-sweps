@@ -80,7 +80,7 @@ function SWEP:PrimaryAttack()
 	local prop = ents.Create("prop_physics")
 	prop:SetModel("models/props_phx/construct/wood/wood_boardx1.mdl")
 	prop:SetKeyValue("modelscale", 0.35)
-	prop:SetKeyValue("physdamagescale", 100)
+	prop:SetKeyValue("physdamagescale", 0.3)
 	prop:SetPos(self:GetOwner():GetShootPos())
 	prop:SetAngles(self:GetOwner():GetAimVector():Angle())
 	prop:SetKeyValue("ExplodeDamage", "5000")
@@ -126,8 +126,11 @@ function SWEP:PrimaryAttack()
 		    	if IsValid(debris) then
 		    	    debris:Remove()
 		    	end
-	    	    end)
 
+	    	    end)
+	    	    if !prop:VisibleVec(debris:GetPos()) then
+	    		debris:Remove()
+	            end
 	    	end
 	    end
 	    local offset = Vector(0, 0, 100)
@@ -196,7 +199,7 @@ function SWEP:PrimaryAttack()
 	    woosh:Wake()
 	    local shootVelocity = self:GetOwner():GetAimVector() * 5000
             local playerVelocity = self:GetOwner():GetVelocity()
-            woosh:SetVelocity(shootVelocity + playerVelocity + spread)
+            woosh:SetVelocity(shootVelocity + playerVelocity)
 	end
     end
 end

@@ -1,10 +1,17 @@
 AddCSLuaFile()
 local CanFire = 1
+local shot = 0
+local holdingattack = 0
+local specialpullpin = 0
+local primed = 0
+local canswitch = 1
+local primed2 = 0
+local timerrunning = 0
 -- spawnmenu
 local nextReload = 0
 SWEP.Spawnable = true
 SWEP.PrintName = "M26 Frag Grenade"
-SWEP.Purpose = "M26 Hand, Fragmentation, Delay, Grenade"
+SWEP.Purpose = "M26 Hand, Fragmentation, Delay, Grenade\n\nPrimary Attack will pull the pin and release the spoon.\n\nSecondary attack will pull the pin, and release the spoon as you throw the grenade.\n\nPressing primary attack while using secondary attack will release the spoon.\n\nHold reload and release attack to do a short toss.\n\nIf reload is released while holding secondary attack, it puts the pin back in."
 SWEP.Base = "weapon_base"
 SWEP.Category = "my guns - Explosives"
 
@@ -31,14 +38,14 @@ SWEP.Primary.Automatic = false
 
 SWEP.Secondary.ClipSize    = -1
 SWEP.Secondary.DefaultClip = -1
-SWEP.Secondary.Automatic   = true
+SWEP.Secondary.Automatic   = false
 SWEP.Secondary.Ammo        = "none"
 
 -- function stuff
 
 -- anim
 function SWEP:Initialize()
-    self:SetHoldType("grenade")
+    self:SetHoldType("knife")
 end
 
 
@@ -47,24 +54,25 @@ end
 
 
 -- throw grenade
-function SWEP:PrimaryAttack()
-    nextReload = CurTime() + 2
-    if self:Ammo1() == 0 then
+local function throw(time, ent, toss)
+    nextReload = CurTime() + 1.15
+    if ent:Ammo1() == 0 then
 	timer.Simple(0.65, function()
-	     self:GetOwner():StripWeapon("weapon_frag_grenade")
+	     ent:GetOwner():StripWeapon("weapon_frag_grenade")
 	end)
     end
-    if (self:Clip1() < 1) then return end
+    if CLIENT then return end
+    canswitch = 0
     local prop = ents.Create("prop_physics")
     if !IsValid(prop) then return end
-    self:SetNextPrimaryFire(CurTime() + 1)
+    ent:SetNextPrimaryFire(CurTime() + 1)
     timer.Simple(0.5, function()
 	if CanFire == 0 then return end
-	self:EmitSound("weapons/slam/throw.wav", 100, 133, 1, CHAN_WEAPON)
-	self:TakePrimaryAmmo(1)
+	ent:EmitSound("weapons/slam/throw.wav", 100, 133, 1, CHAN_WEAPON)
+	ent:TakePrimaryAmmo(1)
     	prop:SetModel("models/weapons/w_eq_fraggrenade.mdl")
-	prop:SetPos(self:GetOwner():GetShootPos())
-    	prop:SetAngles(self:GetOwner():GetAimVector():Angle())
+	prop:SetPos(ent:GetOwner():GetShootPos())
+    	prop:SetAngles(ent:GetOwner():GetAimVector():Angle())
 	prop:SetCollisionGroup(COLLISION_GROUP_PASSABLE_DOOR)
 	timer.Simple(0.05, function()
 	    if IsValid(prop) then
@@ -72,12 +80,15 @@ function SWEP:PrimaryAttack()
 	    end
 	end)
    
-    	timer.Simple(math.Rand(4, 5), function()
+    	timer.Simple(time, function()
 	    if IsValid(prop) then
 	    	prop:Remove()
 	    end
     	end)
     	prop:Spawn()
+    end)
+    timer.Simple(1, function()
+	canswitch = 1
     end)
     prop:CallOnRemove("Explode", function(ent)
 	for i = 1, math.random(50, 100) do
@@ -115,6 +126,9 @@ function SWEP:PrimaryAttack()
 		    	debris:Remove()
 		    end
 	    	end)
+	    if !prop:VisibleVec(debris:GetPos()) then
+	    	debris:Remove()
+	    end
 
 	    end
 	end
@@ -179,6 +193,7 @@ function SWEP:PrimaryAttack()
 	boom3:SetKeyValue("radius", 2000)
 	boom3:Fire("Explode")
 	boom3:Remove()
+
     end)
 
 
@@ -190,34 +205,178 @@ function SWEP:PrimaryAttack()
     	if IsValid(woosh) then
 	    woosh:Wake()
 	    woosh:SetMaterial("Grenade")
-	    local throwVelocity = self:GetOwner():GetAimVector() * 1000
-            local playerVelocity = self:GetOwner():GetVelocity()
-            woosh:SetVelocity(throwVelocity + playerVelocity)
-	    local spin = Vector(math.Rand(-150, 150), math.Rand(-200, 200), 0)
+
+	    local throwVelocity = Vector(0, 0, 0)
+            local playerVelocity = Vector(0, 0, 0)
+	    local spin = Vector(0, 0, 0)
+	    if toss == true then
+		local forward = ent:GetOwner():GetAimVector() * 500
+		local up = ent:GetOwner():EyeAngles():Up() * 200
+	        throwVelocity = Vector((forward.x + up.x), (forward.y + up.y), (forward.z + up.z))
+                playerVelocity = ent:GetOwner():GetVelocity()
+	        spin = Vector(math.Rand(500, 1000), math.Rand(-150, 150), 0)
+	    else
+	    	throwVelocity = ent:GetOwner():GetAimVector() * 1000
+            	playerVelocity = ent:GetOwner():GetVelocity()
+	    	spin = Vector(math.Rand(-500, 500), math.Rand(-300, 300), 0)
+	    end
+	    woosh:SetVelocity(throwVelocity + playerVelocity)
             woosh:AddAngleVelocity(spin)
     	end
     end)
-    self:SendWeaponAnim(ACT_VM_THROW)
-    self:GetOwner():SetAnimation(PLAYER_ATTACK1)
+    ent:SendWeaponAnim(ACT_VM_THROW)
+    ent:GetOwner():SetAnimation(PLAYER_ATTACK1)
+    ent:SetHoldType("knife")
+    primed = 0
+end
+local threw = 0
+local fusetime = 0
+local starttime = CurTime()
+local threw2 = 0
+function SWEP:PrimaryAttack()
+    if (self:Clip1() < 1) or shot == 1 then return end
+    primed = 1
+    self:SendWeaponAnim(ACT_VM_PULLPIN)
+    self:SetHoldType("grenade")
+    if shot == 0 then
+	timer.Simple(1.25, function()	
+	    if IsValid(self) then
+	        self:EmitSound("weapons/smg1/switch_single.wav", 100, 90, 1, CHAN_WEAPON)
+	    end
+	end)
+	threw = 0
+	fusetime = 0
+    	starttime = CurTime()
+	timerrunning = timerrunning + 1
+	timer.Simple(5.25, function()
+	    timerrunning = timerrunning - 1
+	    if threw == 0 and timerrunning < 1 then
+		primed = 0
+		throw(1, self, false)
+	    end
+	end)
+    end
+    shot = 1
 end
 
+function SWEP:SecondaryAttack()
+    if (self:Clip1() < 1) or shot == 1 then return end
+    primed2 = 1
+    self:SendWeaponAnim(ACT_VM_PULLPIN)
+    self:SetHoldType("grenade")
+    starttime = CurTime()
+    if shot == 0 then
+	threw2 = 0
+    end
+    shot = 1
+end
+
+function SWEP:Think()
+    if primed == 1 then
+    	if !self:GetOwner():KeyDown(IN_ATTACK) then
+	    if CurTime() - starttime > 1.65 then
+	    	threw = 1
+            	local timeheld = CurTime() - starttime
+	    	fusetime = (5 - timeheld) + 1.25
+		if self:GetOwner():KeyDown(IN_RELOAD) then
+		    throw(fusetime, self, true)
+		else
+    	    	    throw(fusetime, self, false)
+		end
+	    	primed = 0
+	    end
+    	end
+    end
+    if primed2 == 1 then
+    	if !self:GetOwner():KeyDown(IN_ATTACK2) then
+	    if CurTime() - starttime > 1 then
+	    	threw2 = 1
+		if specialpullpin == 0 then
+		    if self:GetOwner():KeyDown(IN_RELOAD) then
+    	    	        throw(5, self, true)
+		    else
+			throw(5, self, false)
+		    end
+		    timer.Simple(0.65, function()
+		    	if IsValid(self) and specialpullpin == 0 and CanFire == 1 and threw2 == 1 then
+			    self:EmitSound("weapons/smg1/switch_single.wav", 100, 90, 1, CHAN_WEAPON)
+		    	end
+		    end)
+		else
+		    local timeheld = CurTime() - starttime
+		    fusetime = 5 - timeheld
+		    if self:GetOwner():KeyDown(IN_RELOAD) then
+		        throw(fusetime, self, true)
+		    else
+			throw(fusetime, self, false)
+		    end
+		end
+	    	primed2 = 0
+	    end
+    	end
+	if self:GetOwner():KeyReleased(IN_RELOAD) then
+	    if CurTime() - starttime > 1 and specialpullpin == 0 then
+	    	primed2 = 0
+		specialpullpin = 0
+		threw2 = 1
+		self:SendWeaponAnim(ACT_VM_DRAW)
+		self:SetHoldType("grenade")
+		self:EmitSound("weapons/pistol/pistol_empty.wav", 100, 100, 1, CHAN_WEAPON)
+	 	toss = 0
+	    end
+	end
+    end
+    if self:GetOwner():KeyDown(IN_ATTACK2) and (self:Clip1() > 0) then
+	if self:GetOwner():KeyPressed(IN_ATTACK) and specialpullpin == 0 then
+	    starttime = CurTime()
+	    self:EmitSound("weapons/smg1/switch_single.wav", 100, 90, 1, CHAN_WEAPON)
+	    specialpullpin = 1
+	    timerrunning = timerrunning + 1
+	    timer.Simple(4, function()
+	    	timerrunning = timerrunning - 1
+	    	if threw2 == 0 and timerrunning < 1 and specialpullpin == 1 then
+		    primed2 = 0
+		    throw(1, self, false)
+	    	end
+	    end)
+	end
+    end
+end
 -- reload
 function SWEP:Reload()
+    if primed == 1 and threw == 0 or primed2 == 1 and threw2 == 0 then return end
+    specialpullpin = 0
+    holdingattack = 0
+    shot = 0
     self:GetOwner():DrawViewModel(true, 0)
     if (nextReload > CurTime()) then return end
     self:DefaultReload(ACT_VM_DRAW)
+    primed = 0
+    primed2 = 0
 end
 
 function SWEP:Deploy()
+    canswitch = 1
     if self:Clip1() < 1 then
 	self:DefaultReload(ACT_VM_DRAW)
 	self:SetNextPrimaryFire(nextReload + 1)
     end
     CanFire = 1
+    self:SetHoldType("knife")
     return true
 end
 
 function SWEP:Holster()
-    CanFire = 0
-    return true
+    if primed == 1 or specialpullpin == 1 or canswitch == 0 then
+	return false
+    else
+	specialpullpin = 0
+        shot = 0
+    	holdingattack = 0
+    	primed2 = 0
+	CanFire = 0
+        return true
+    end
 end
+
+
