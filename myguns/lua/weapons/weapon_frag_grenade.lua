@@ -54,24 +54,34 @@ end
 
 
 -- throw grenade
-local function throw(time, ent, toss)
+local function throw(time, ent, toss, deathgrenade)
     nextReload = CurTime() + 1.15
-    if ent:Ammo1() == 0 then
-	timer.Simple(0.65, function()
-	     ent:GetOwner():StripWeapon("weapon_frag_grenade")
-	end)
+    if deathgrenade == false then
+    	if ent:Ammo1() == 0 then
+	    timer.Simple(0.65, function()
+	        ent:GetOwner():StripWeapon("weapon_frag_grenade")
+	    end)
+        end
     end
     if CLIENT then return end
     canswitch = 0
     local prop = ents.Create("prop_physics")
     if !IsValid(prop) then return end
-    ent:SetNextPrimaryFire(CurTime() + 1)
-    timer.Simple(0.5, function()
+    if deathgrenade == false then
+    	ent:SetNextPrimaryFire(CurTime() + 1)
+    end
+    local delay = 0.5
+    if deathgrenade == true then
+	delay = 0
+    end
+    timer.Simple(delay, function()
 	if CanFire == 0 then return end
-	ent:EmitSound("weapons/slam/throw.wav", 100, 133, 1, CHAN_WEAPON)
-	ent:TakePrimaryAmmo(1)
+	if deathgrenade == false then
+	    ent:EmitSound("weapons/slam/throw.wav", 100, 133, 1, CHAN_WEAPON)
+	    ent:TakePrimaryAmmo(1)
+	end
     	prop:SetModel("models/weapons/w_eq_fraggrenade.mdl")
-	if toss == true then
+	if toss == true and deathgrenade == false then
 	    local offsetshootpos = Vector(0, 0, -20)
 	    prop:SetPos(ent:GetOwner():GetShootPos() + offsetshootpos)
 	else
@@ -205,7 +215,7 @@ local function throw(time, ent, toss)
 
 
 
-    timer.Simple(0.5, function()
+    timer.Simple(delay, function()
     	local woosh = prop:GetPhysicsObject()
     	if IsValid(woosh) then
 	    woosh:Wake()
@@ -214,14 +224,18 @@ local function throw(time, ent, toss)
 	    local throwVelocity = Vector(0, 0, 0)
             local playerVelocity = Vector(0, 0, 0)
 	    local spin = Vector(0, 0, 0)
-	    if toss == true then
+	    if toss == true and deathgrenade == false then
 		local forward = ent:GetOwner():GetAimVector() * 500
 		local up = ent:GetOwner():EyeAngles():Up() * 200
 	        throwVelocity = Vector((forward.x + up.x), (forward.y + up.y), (forward.z + up.z))
                 playerVelocity = ent:GetOwner():GetVelocity()
 	        spin = Vector(math.Rand(500, 1000), math.Rand(-150, 150), 0)
 	    else
-	    	throwVelocity = ent:GetOwner():GetAimVector() * 1000
+		if deathgrenade == true then
+		    throwVelocity = Vector(0, 0, 0)
+		else
+	    	    throwVelocity = ent:GetOwner():GetAimVector() * 1000
+		end
             	playerVelocity = ent:GetOwner():GetVelocity()
 	    	spin = Vector(math.Rand(-500, 500), math.Rand(-300, 300), 0)
 	    end
@@ -257,7 +271,7 @@ function SWEP:PrimaryAttack()
 	    timerrunning = timerrunning - 1
 	    if threw == 0 and timerrunning < 1 then
 		primed = 0
-		throw(1, self, false)
+		throw(1, self, false, false)
 	    end
 	end)
     end
@@ -284,9 +298,9 @@ function SWEP:Think()
             	local timeheld = CurTime() - starttime
 	    	fusetime = (5 - timeheld) + 1.25
 		if self:GetOwner():KeyDown(IN_RELOAD) then
-		    throw(fusetime, self, true)
+		    throw(fusetime, self, true, false)
 		else
-    	    	    throw(fusetime, self, false)
+    	    	    throw(fusetime, self, false, false)
 		end
 	    	primed = 0
 	    end
@@ -294,13 +308,13 @@ function SWEP:Think()
     end
     if primed2 == 1 then
     	if !self:GetOwner():KeyDown(IN_ATTACK2) then
-	    if CurTime() - starttime > 1 then
+	    if CurTime() - starttime > 1 or specialpullpin == 1 then
 	    	threw2 = 1
 		if specialpullpin == 0 then
 		    if self:GetOwner():KeyDown(IN_RELOAD) then
-    	    	        throw(5, self, true)
+    	    	        throw(5, self, true, false)
 		    else
-			throw(5, self, false)
+			throw(5, self, false, false)
 		    end
 		    timer.Simple(0.65, function()
 		    	if IsValid(self) and specialpullpin == 0 and CanFire == 1 and threw2 == 1 then
@@ -311,9 +325,9 @@ function SWEP:Think()
 		    local timeheld = CurTime() - starttime
 		    fusetime = 5 - timeheld
 		    if self:GetOwner():KeyDown(IN_RELOAD) then
-		        throw(fusetime, self, true)
+		        throw(fusetime, self, true, false)
 		    else
-			throw(fusetime, self, false)
+			throw(fusetime, self, false, false)
 		    end
 		end
 	    	primed2 = 0
@@ -322,7 +336,7 @@ function SWEP:Think()
 	if self:GetOwner():KeyReleased(IN_RELOAD) then
 	    if CurTime() - starttime > 1 and specialpullpin == 0 then
 		self:SendWeaponAnim(ACT_VM_DRAW)
-		self:SetHoldType("grenade")
+		self:SetHoldType("knife")
 		specialpullpin = 0
         	shot = 0
     		holdingattack = 0
@@ -332,7 +346,7 @@ function SWEP:Think()
 	end
     end
     if self:GetOwner():KeyDown(IN_ATTACK2) and (self:Clip1() > 0) then
-	if self:GetOwner():KeyPressed(IN_ATTACK) and specialpullpin == 0 then
+	if self:GetOwner():KeyPressed(IN_ATTACK) and specialpullpin == 0 and CurTime() - starttime > 1.5 then
 	    starttime = CurTime()
 	    self:EmitSound("weapons/smg1/switch_single.wav", 100, 90, 1, CHAN_WEAPON)
 	    specialpullpin = 1
@@ -384,4 +398,25 @@ function SWEP:Holster()
     end
 end
 
+-- not working death grenade mechanic
 
+--[[
+function SWEP:OnRemove()
+    if !self:GetOwner():Alive() then
+	if primed2 == 1 then
+	    if specialpullpin == 1 then
+		local timeheld = CurTime() - starttime
+	    	fusetime = (5 - timeheld)
+		throw(fusetime, self, false, true)
+	    else
+		throw(5, self, false, true)
+	    end
+	end
+	if primed == 1 then
+	    local timeheld = CurTime() - starttime
+	    fusetime = (5 - timeheld) + 1.25
+	    throw(fusetime, self, false, true)
+	end
+    end
+end
+]]
