@@ -199,6 +199,7 @@ function SWEP:SecondaryAttack()
 end
 
 function SWEP:Reload()
+    if (self:Ammo1()) < 1 then return end
     if (nextReload > CurTime()) then return end
     self:DefaultReload(ACT_VM_RELOAD)
     self:GetOwner():SetAnimation(ACT_RELOAD)
