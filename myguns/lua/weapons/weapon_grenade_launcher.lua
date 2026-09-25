@@ -162,7 +162,7 @@ function SWEP:PrimaryAttack()
 	local boom2 = ents.Create("env_explosion")
 	boom2:SetPos(prop:GetPos())
 	boom2:SetKeyValue("iMagnitude", 125)
-	boom2:SetKeyValue("iRadiusOverride", 3000)
+	boom2:SetKeyValue("iRadiusOverride", 1750)
 	boom2:SetKeyValue("DamageForce", 0)
 	boom2:Fire("Explode")
 
@@ -199,26 +199,27 @@ function SWEP:SecondaryAttack()
 end
 
 function SWEP:Reload()
-    if (self:Ammo1()) < 1 then return end
     if (nextReload > CurTime()) then return end
     self:DefaultReload(ACT_VM_RELOAD)
     self:GetOwner():SetAnimation(ACT_RELOAD)
-    self:EmitSound("weapons/smg1/switch_single.wav", 100, 100, 1, CHAN_WEAPON)
-    timer.Simple(0.65, function()
-        if self:GetOwner():GetActiveWeapon() == self and self:GetActivity() == 183 and IsValid(self) then
-            self:EmitSound("weapons/shotgun/shotgun_reload3.wav", 100, 90, 1, CHAN_WEAPON)
-	end
-    end)
-    timer.Simple(1.4, function()
-        if self:GetOwner():GetActiveWeapon() == self and self:GetActivity() == 183 and IsValid(self) then
-            self:EmitSound("weapons/shotgun/shotgun_reload2.wav", 100, 90, 1, CHAN_WEAPON)
-	end
-    end)
-    timer.Simple(2, function()
-        if self:GetOwner():GetActiveWeapon() == self and self:GetActivity() == 183 and IsValid(self) then
-            self:EmitSound("weapons/smg1/switch_burst.wav", 100, 100, 1, CHAN_WEAPON)
-	end
-    end)
+    if self:Ammo1() > 0 and self:Clip1() < 1 then
+    	self:EmitSound("weapons/smg1/switch_single.wav", 100, 100, 1, CHAN_WEAPON)
+    	timer.Simple(0.65, function()
+            if self:GetOwner():GetActiveWeapon() == self and self:GetActivity() == 183 and IsValid(self) and self:Clip1() == 0 then
+            	self:EmitSound("weapons/shotgun/shotgun_reload3.wav", 100, 90, 1, CHAN_WEAPON)
+	    end
+    	end)
+    	timer.Simple(1.4, function()
+            if self:GetOwner():GetActiveWeapon() == self and self:GetActivity() == 183 and IsValid(self) and self:Clip1() == 0 then
+            	self:EmitSound("weapons/shotgun/shotgun_reload2.wav", 100, 90, 1, CHAN_WEAPON)
+	    end
+     	end)
+    	timer.Simple(2, function()
+            if self:GetOwner():GetActiveWeapon() == self and self:GetActivity() == 183 and IsValid(self) and self:Clip1() == 0 then
+            	self:EmitSound("weapons/smg1/switch_burst.wav", 100, 100, 1, CHAN_WEAPON)
+	    end
+    	end)
+    end
 end
 
 function SWEP:Deploy()
