@@ -184,8 +184,8 @@ function SWEP:PrimaryAttack()
     if IsValid(woosh) then
 	woosh:Wake()
 	woosh:SetMaterial("Grenade")
-	local forward = self:GetOwner():GetAimVector() * 1500
-	local up = self:GetOwner():EyeAngles():Up() * 300
+	local forward = self:GetOwner():GetAimVector() * 3000
+	local up = self:GetOwner():EyeAngles():Up() * 600
 	throwVelocity = Vector((forward.x + up.x), (forward.y + up.y), (forward.z + up.z))
         local playerVelocity = self:GetOwner():GetVelocity()
         woosh:SetVelocity(throwVelocity + playerVelocity)
