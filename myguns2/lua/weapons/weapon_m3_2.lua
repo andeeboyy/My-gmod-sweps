@@ -141,29 +141,28 @@ function SWEP:Reload()
     end
 end
 function SWEP:ReloadLoop()
-    timer.Simple(0.6, function()
+    timer.Simple(0.45, function()
         canads = 0
-	if SERVER then
+	if SERVER and IsValid(self) and IsValid(self:GetOwner()) then
 	    self:GetOwner():CrosshairEnable()
 	    self:GetOwner():SprintDisable()
 	end
-	if reloading == 0 then
+	if reloading == 0 and IsValid(self) and IsValid(self:GetOwner()) then
 	    canads = 1
-	    self:SetNextPrimaryFire(CurTime() + 1.25)
+	    self:SetNextPrimaryFire(CurTime() + 0.4)
 	    self:SendWeaponAnim(ACT_SHOTGUN_RELOAD_FINISH)
 	    self:GetOwner():SprintEnable()
 	    self:SetHoldType("Shotgun")
 	    self:GetOwner():SetFOV(0, 0, self)
 	    return
 	end
-	if !IsValid(self:GetOwner()) then return end
 	    
-	if self:Ammo1() == 1 then
+	if IsValid(self) and IsValid(self:GetOwner()) and self:Ammo1() == 1 then
 	    self:SetNextPrimaryFire(CurTime() + 1.25)
 	    reloading = 0
 	end
 
-	if self:Clip1() > self:GetMaxClip1() - 2 then
+	if IsValid(self) and IsValid(self:GetOwner()) and self:Clip1() > self:GetMaxClip1() - 2 then
 	    self:SetNextPrimaryFire(CurTime() + 1.25)
 	    reloading = 0
 	end
@@ -171,21 +170,24 @@ function SWEP:ReloadLoop()
     	
 	timer.Simple(0.3, function()
 	    local randsound = math.random(1, 3)
-	    if randsound == 1 then
+	    if randsound == 1 and IsValid(self) and IsValid(self:GetOwner()) then
 	    	self:EmitSound("weapons/shotgun/shotgun_reload1.wav", 100, 110, 1, CHAN_WEAPON)
 	    end
-	    if randsound == 2 then
+	    if randsound == 2 and IsValid(self) and IsValid(self:GetOwner()) then
 	    	self:EmitSound("weapons/shotgun/shotgun_reload2.wav", 100, 110, 1, CHAN_WEAPON)
 	    end
-	    if randsound == 3 then
+	    if randsound == 3 and IsValid(self) and IsValid(self:GetOwner()) then
 	    	self:EmitSound("weapons/shotgun/shotgun_reload3.wav", 100, 110, 1, CHAN_WEAPON)
 	    end
-	    if !IsValid(self:GetOwner()) then return end
-	    self:SetClip1(self:Clip1() + 1)
-	    self:GetOwner():RemoveAmmo(1, "Buckshot")
-	    self:ReloadLoop()
+	    if IsValid(self) and IsValid(self:GetOwner()) then
+	    	self:SetClip1(self:Clip1() + 1)
+	    	self:GetOwner():RemoveAmmo(1, "Buckshot")
+	    	self:ReloadLoop()
+	    end
 	end)
-	self:SendWeaponAnim(ACT_VM_RELOAD)
+	if IsValid(self) and IsValid(self:GetOwner()) then
+	    self:SendWeaponAnim(ACT_VM_RELOAD)
+	end
     end)
 end
 
@@ -200,6 +202,7 @@ function SWEP:Holster()
     moveside = 0
     ads = 0
     turn = 0
+    reloading = 0
     return true
 end
 
@@ -223,7 +226,7 @@ function SWEP:Think()
 
     if self:GetOwner():KeyPressed(IN_ATTACK2) and canads == 1 and !self:GetOwner():KeyDown(IN_SPEED) then
 	ads = 1
-	self:SetNextPrimaryFire(CurTime() + 0.8)
+	self:SetNextPrimaryFire(CurTime() + 0.25)
 	self:EmitSound("player/footsteps/sand1.wav", 50, 100, 1, CHAN_BODY)
 	self:GetOwner():SetFOV(70, 0.35, self)
 	moveside = -4.25
@@ -235,7 +238,7 @@ function SWEP:Think()
     end
  
     if self:GetOwner():KeyReleased(IN_ATTACK2) or self:GetOwner():KeyPressed(IN_SPEED) then
-	self:SetNextPrimaryFire(CurTime() + 0.7)
+	self:SetNextPrimaryFire(CurTime() + 0.35)
 	ads = 0
 	self:GetOwner():SetFOV(0, 0.25, self)
 	if SERVER then
@@ -259,7 +262,7 @@ function SWEP:Think()
 
     if self:GetOwner():KeyReleased(IN_SPEED) then
 	self:SetHoldType("ar2")
-	self:SetNextPrimaryFire(CurTime() + 0.65)
+	self:SetNextPrimaryFire(CurTime() + 0.4)
     end
 
     if self:GetOwner():KeyReleased(IN_ATTACK) then

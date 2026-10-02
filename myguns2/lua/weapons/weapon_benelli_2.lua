@@ -1,8 +1,10 @@
 AddCSLuaFile()
 
 CreateConVar("sv_myguns2_enabled", 1)
-local canchamber = 0
-local timerRunning = 0
+
+local timeleft = 0
+local reloading = 0
+local AccuracyMeter = 0.015
 
 local moveside = 0
 
@@ -10,43 +12,45 @@ local movevertical = 0
 
 local turn = 0
 
+local turnhorizontal = 0
+
 local AccuracyMeter = 0
 
 local ads = 0
 
 local canads = 1
 
-local auto = 1
+local sprinton = 1
 
-local shot = 0
-
-local canceled = 0
+local candothing = 1
 
 -- spawnmenu
 
 SWEP.Spawnable = true
-SWEP.PrintName = "AK-47"
-SWEP.Purpose = "Avtomat Kalashnikova Obrazets 1947\nSecondary attack to ADS.\n Secondary attack while sprinting toggles between full-auto and semi-auto."
+SWEP.PrintName = "Benelli M4"
+SWEP.Purpose = "Benelli M4 Super 90\nSecondary Attack to ADS"
 SWEP.Base = "weapon_base"
-SWEP.Category = "my guns 2 - Assault Rifles"
+SWEP.Category = "my guns 2 - Shotguns"
 
 -- viewmodel
 
-SWEP.ViewModel = "models/weapons/cstrike/c_rif_ak47.mdl"
-SWEP.WorldModel = "models/weapons/w_rif_ak47.mdl"
+SWEP.ViewModel = "models/weapons/cstrike/c_shot_xm1014.mdl"
+SWEP.WorldModel = "models/weapons/w_shot_xm1014.mdl"
 SWEP.UseHands = true
 SWEP.ViewModelFov = 50
+
 -- slots
 
-SWEP.SlotPos = 3
-SWEP.Slot = 2
+SWEP.SlotPos = 1
+SWEP.Slot = 3
 
 -- stats
+
 SWEP.AccurateCrossHair = true
-SWEP.Primary.Ammo = "SMG1"
-SWEP.Primary.ClipSize = 30
-SWEP.Primary.DefaultClip = 30
-SWEP.Primary.Automatic = true
+SWEP.Primary.Ammo = "Buckshot"
+SWEP.Primary.ClipSize = 7
+SWEP.Primary.DefaultClip = 7
+SWEP.Primary.Automatic = false
 
 -- secondary
 
@@ -59,139 +63,147 @@ SWEP.Secondary.Ammo        = "none"
 
 -- anim
 function SWEP:Initialize()
-    self:SetDeploySpeed(0.8)
     self:SetHoldType("ar2")
+    self:SetDeploySpeed(0.8)
 end
 
 
 -- shoot
 function SWEP:PrimaryAttack()
-
-
+    if reloading == 1 then
+	reloading = 0
+	self:SetNextPrimaryFire(CurTime() + 1.25)
+	return
+    end
     if ( !self:CanPrimaryAttack() ) then return end
-    if self:GetOwner():KeyDown(IN_SPEED) then return end
-
-    self:SetNextPrimaryFire(CurTime() + 0.1)
-
-    if auto == 0 and shot == 1 then return end
-    
     local bullet = {}
-	bullet.Damage = 104
 	bullet.Attacker = self:GetOwner()
 	bullet.Inflictor = self
+	bullet.Damage = 34
 	bullet.Tracer = 0
-	bullet.Num = 1
-	bullet.Force = 5
+	bullet.Num = 9
+	bullet.Force = 1
 	bullet.Dir = self:GetOwner():GetAimVector()
 	bullet.Src = self:GetOwner():GetShootPos()
 	bullet.Spread = Vector(AccuracyMeter, AccuracyMeter, AccuracyMeter)
-	AccuracyMeter = AccuracyMeter + 0.1075
+	AccuracyMeter = AccuracyMeter + 0.05
     self:FireBullets(bullet)
-    shot = 1
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     self:GetOwner():SetAnimation(PLAYER_ATTACK1)
-    self:EmitSound("weapons/ar2/fire1.wav", 140, 75, 1, CHAN_WEAPON)
+    self:EmitSound("weapons/shotgun/shotgun_fire6.wav", 140, 80, 1, CHAN_WEAPON)
     local extrasound = ents.Create("base_gmodentity")
     extrasound:Spawn()
     extrasound:SetPos(self:GetOwner():GetShootPos())
-    extrasound:EmitSound("weapons/shotgun/shotgun_fire6.wav", 140, 100, 1, CHAN_WEAPON)
+    extrasound:EmitSound("weapons/shotgun/shotgun_dbl_fire.wav", 140, 110, 1, CHAN_WEAPON)
     extrasound:Remove()
+    self:SetNextPrimaryFire(CurTime() + 0.3)
     self:TakePrimaryAmmo(1)
     if !self:GetOwner():IsNPC() then
-	if ads == 0 then
-            self:GetOwner():SetEyeAngles(self:GetOwner():EyeAngles() + Angle(math.Rand(-3, -2), math.Rand(-1, 1), 0))
+    	if ads == 1 then
+	    self:GetOwner():SetEyeAngles(self:GetOwner():EyeAngles() + Angle(math.Rand(-30, -5), math.Rand(-15, 15), 0))
 	else
-	    self:GetOwner():SetEyeAngles(self:GetOwner():EyeAngles() + Angle(math.Rand(-2, -1), math.Rand(-0.5, 0.5), 0))
+	    self:GetOwner():SetEyeAngles(self:GetOwner():EyeAngles() + Angle(math.Rand(-50, -35), math.Rand(-35, 35), 0))
 	end
     end
 end
 
 function SWEP:SecondaryAttack()
-    if self:GetOwner():KeyDown(IN_SPEED) then
-	if auto == 1 then
-	    self:EmitSound("weapons/ar2/ar2_empty.wav", 140, 100, 1, CHAN_WEAPON)
-	    self:GetOwner():PrintMessage(HUD_PRINTCENTER, "Semi-Auto")
-	    auto = 0
-	else
-	    self:EmitSound("weapons/shotgun/shotgun_empty.wav", 140, 100, 1, CHAN_WEAPON)
-	    self:GetOwner():PrintMessage(HUD_PRINTCENTER, "Full-Auto")
-	    auto = 1
-	end
-	self:SetNextSecondaryFire(CurTime() + 0.5)
-	self:SetNextPrimaryFire(CurTime() + 0.5)
-    end
+    return
 end
 
 -- reload the magazine to shoot more bullets
 local sprinton = 1
 function SWEP:Reload()
-    if CLIENT then return end
-    if self:GetOwner():KeyDown(IN_SPEED) then return end 
-    shot = 0
-    self:DefaultReload(ACT_VM_RELOAD)
-    if self:Clip1() < self:GetMaxClip1() then
-	if SERVER then
-	    self:GetOwner():CrosshairEnable()
-	    self:GetOwner():SprintDisable()
+    if self:Clip1() > self:GetMaxClip1() - 1 then
+	return
+    end
+    if self:GetOwner():KeyDown(IN_SPEED) then
+	return
+    end
+    if reloading == 1 then
+	return
+    else
+	if self:Ammo1() == 0 then
+	    return
 	end
-	self:SetHoldType("ar2")
-	sprinton = 0
-	self:GetOwner():SetFOV(0, 0, self)
     	movevertical = 0
     	moveside = 0
 	ads = 0
 	canads = 0
 	canceled = 0
 	turn = 0
-	self:SetNextPrimaryFire(CurTime() + 3)
-	timerRunning = timerRunning + 1
-	timer.Simple(1.95, function()
-	    if timerRunning < 2 then
-	    	canchamber = 1
-	    end
-	    timerRunning = timerRunning - 1
-	end)
-	timer.Simple(2.05, function()
-	    canchamber = 0
-	end)
-    	timer.Simple(2, function()
-	    if canchamber == 1 and canceled == 0 then
-	        self:SendWeaponAnim(ACT_VM_DRAW)
-		canads = 1
-		if SERVER then
-		    self:GetOwner():SprintEnable()
-		end
-		sprinton = 1
-	    end
-	end)
+	reloading = 1
+        self:SetHoldType("Shotgun")
+	self:SendWeaponAnim(ACT_SHOTGUN_RELOAD_START)
+	self:GetOwner():SetAnimation(PLAYER_RELOAD)
+	self:ReloadLoop()
     end
-    self:GetOwner():SetAnimation(ACT_RELOAD)
 end
+function SWEP:ReloadLoop()
+    timer.Simple(0.45, function()
+        canads = 0
+	if SERVER and IsValid(self) and IsValid(self:GetOwner()) then
+	    self:GetOwner():CrosshairEnable()
+	    self:GetOwner():SprintDisable()
+	end
+	if reloading == 0 and IsValid(self) and IsValid(self:GetOwner()) then
+	    canads = 1
+	    self:SetNextPrimaryFire(CurTime() + 0.4)
+	    self:SendWeaponAnim(ACT_SHOTGUN_RELOAD_FINISH)
+	    self:GetOwner():SprintEnable()
+	    self:SetHoldType("Shotgun")
+	    self:GetOwner():SetFOV(0, 0, self)
+	    return
+	end
+	    
+	if IsValid(self) and IsValid(self:GetOwner()) and self:Ammo1() == 1 then
+	    self:SetNextPrimaryFire(CurTime() + 1.25)
+	    reloading = 0
+	end
 
+	if IsValid(self) and IsValid(self:GetOwner()) and self:Clip1() > self:GetMaxClip1() - 2 then
+	    self:SetNextPrimaryFire(CurTime() + 1.25)
+	    reloading = 0
+	end
+
+    	
+	timer.Simple(0.3, function()
+	    local randsound = math.random(1, 3)
+	    if randsound == 1 and IsValid(self) and IsValid(self:GetOwner()) then
+	    	self:EmitSound("weapons/shotgun/shotgun_reload1.wav", 100, 110, 1, CHAN_WEAPON)
+	    end
+	    if randsound == 2 and IsValid(self) and IsValid(self:GetOwner()) then
+	    	self:EmitSound("weapons/shotgun/shotgun_reload2.wav", 100, 110, 1, CHAN_WEAPON)
+	    end
+	    if randsound == 3 and IsValid(self) and IsValid(self:GetOwner()) then
+	    	self:EmitSound("weapons/shotgun/shotgun_reload3.wav", 100, 110, 1, CHAN_WEAPON)
+	    end
+	    if IsValid(self) and IsValid(self:GetOwner()) then
+	    	self:SetClip1(self:Clip1() + 1)
+	    	self:GetOwner():RemoveAmmo(1, "Buckshot")
+	    	self:ReloadLoop()
+	    end
+	end)
+	if IsValid(self) and IsValid(self:GetOwner()) then
+	    self:SendWeaponAnim(ACT_VM_RELOAD)
+	end
+    end)
+end
 
 function SWEP:Holster()
-    shot = 0
-    if sprinton == 0 then
-	if SERVER then
-    	    self:GetOwner():SprintEnable()
-	end
+    self:SetHoldType("ar2")
+    if SERVER then
+    	self:GetOwner():SprintEnable()
     end
     self:GetOwner():SetFOV(0, 0, self)
-    canchamber = 0
+    canads = 1
     movevertical = 0
     moveside = 0
-    canceled = 1
     ads = 0
     turn = 0
-    if SERVER then
-    	self:GetOwner():CrosshairEnable()
-    end
+    reloading = 0
     return true
 end
-
-local timerRunning2 = 0
-
-local cansetads = 0
 
 function SWEP:Deploy()
     if GetConVar("sv_myguns2_enabled"):GetFloat() < 1 then
@@ -204,13 +216,16 @@ function SWEP:Deploy()
 end
 
 function SWEP:Think()
+    if self:Clip1() > self:GetMaxClip1() then
+	self:SetClip1(self:GetMaxClip1())
+    end
     if AccuracyMeter > 0.01 then
-	AccuracyMeter = math.max(0, AccuracyMeter - (1 * FrameTime()))
+	AccuracyMeter = math.max(0, AccuracyMeter - (0.11 * FrameTime()))
     end
 
     if self:GetOwner():KeyPressed(IN_ATTACK2) and canads == 1 and !self:GetOwner():KeyDown(IN_SPEED) then
 	ads = 1
-	self:SetNextPrimaryFire(CurTime() + 0.3)
+	self:SetNextPrimaryFire(CurTime() + 0.25)
 	self:EmitSound("player/footsteps/sand1.wav", 50, 100, 1, CHAN_BODY)
 	self:GetOwner():SetFOV(70, 0.35, self)
 	moveside = -4.25
@@ -222,7 +237,7 @@ function SWEP:Think()
     end
  
     if self:GetOwner():KeyReleased(IN_ATTACK2) or self:GetOwner():KeyPressed(IN_SPEED) then
-	self:SetNextPrimaryFire(CurTime() + 0.4)
+	self:SetNextPrimaryFire(CurTime() + 0.3)
 	ads = 0
 	self:GetOwner():SetFOV(0, 0.25, self)
 	if SERVER then
@@ -254,10 +269,10 @@ function SWEP:Think()
     end
 
     if self:GetOwner():KeyDown(IN_ATTACK2) and ads == 1 and !self:GetOwner():KeyDown(IN_SPEED) then
-	turn = math.Approach(turn, 2.25, 5 * FrameTime())
-	moveside = math.Approach(moveside, -6.62, 10 * FrameTime())
-	movevertical = math.Approach(movevertical, 2.25, 5 * FrameTime())
-	
+	turn = math.Approach(turn, 0, 5 * FrameTime())
+	moveside = math.Approach(moveside, -6.985, 10 * FrameTime())
+	movevertical = math.Approach(movevertical, 2.635, 5 * FrameTime())
+	turnhorizontal = math.Approach(turnhorizontal, -0.67, 10 * FrameTime())
 	
 	if self:GetOwner():Crouching() then
 	    self:SetHoldType("ar2")
@@ -269,11 +284,13 @@ function SWEP:Think()
 	    moveside = math.Approach(moveside, -1, 5 * FrameTime())
 	    movevertical = math.Approach(movevertical, 6, 5 * FrameTime())
 	    turn = math.Approach(turn, -10, 15 * FrameTime())
+	    turnhorizontal = math.Approach(turnhorizontal, 0, 10 * FrameTime())
 	else
 	    self:SetHoldType("ar2")
 	    turn = math.Approach(turn, 0, 10 * FrameTime())
-	    moveside = math.Approach(moveside, -4.25, 7.5 * FrameTime())
-	    movevertical = math.Approach(movevertical, 3, 3.5 * FrameTime())
+	    turnhorizontal = math.Approach(turnhorizontal, 0, 10 * FrameTime())
+	    moveside = math.Approach(moveside, -4.5, 7.5 * FrameTime())
+	    movevertical = math.Approach(movevertical, 2, 3.5 * FrameTime())
 	end
     end
 end
@@ -290,14 +307,16 @@ function SWEP:GetViewModelPosition(pos, ang)
 
 	ang:RotateAroundAxis(ang:Right(), turn)
 
+	ang:RotateAroundAxis(ang:Up(), turnhorizontal)
+
     	return pos, ang
     else
 	if self:GetOwner():KeyDown(IN_SPEED) then
 	    if spronetime == 1 then
 		if ads == 0 then
-	    	    moveside = -4.25
+	    	    moveside = -5
 		else
-		    moveside = -6.62
+		    moveside = -3.5
 		end
 		spronetime = 0
 	    end
@@ -308,6 +327,7 @@ function SWEP:GetViewModelPosition(pos, ang)
 
 	    ang:RotateAroundAxis(ang:Right(), turn)
 
+	    ang:RotateAroundAxis(ang:Up(), turnhorizontal)
     	    return pos, ang
 	end
 	spronetime = 1

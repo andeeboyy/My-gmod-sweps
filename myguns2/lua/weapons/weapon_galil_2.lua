@@ -213,7 +213,7 @@ function SWEP:Think()
 
     if self:GetOwner():KeyPressed(IN_ATTACK2) and canads == 1 and !self:GetOwner():KeyDown(IN_SPEED) then
 	ads = 1
-	self:SetNextPrimaryFire(CurTime() + 0.8)
+	self:SetNextPrimaryFire(CurTime() + 0.35)
 	self:EmitSound("player/footsteps/sand1.wav", 50, 100, 1, CHAN_BODY)
 	self:GetOwner():SetFOV(70, 0.35, self)
 	moveside = -4.25
@@ -225,7 +225,7 @@ function SWEP:Think()
     end
  
     if self:GetOwner():KeyReleased(IN_ATTACK2) or self:GetOwner():KeyPressed(IN_SPEED) then
-	self:SetNextPrimaryFire(CurTime() + 0.7)
+	self:SetNextPrimaryFire(CurTime() + 0.425)
 	ads = 0
 	self:GetOwner():SetFOV(0, 0.25, self)
 	if SERVER then
@@ -249,7 +249,7 @@ function SWEP:Think()
 
     if self:GetOwner():KeyReleased(IN_SPEED) then
 	self:SetHoldType("ar2")
-	self:SetNextPrimaryFire(CurTime() + 0.65)
+	self:SetNextPrimaryFire(CurTime() + 0.4)
     end
 
     if self:GetOwner():KeyReleased(IN_ATTACK) then

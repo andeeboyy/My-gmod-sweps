@@ -170,7 +170,7 @@ function SWEP:Think()
     end
 
     if self:GetOwner():KeyPressed(IN_ATTACK2) and canads == 1 and !self:GetOwner():KeyDown(IN_SPEED) then
-	self:SetNextPrimaryFire(CurTime() + 0.2)
+	self:SetNextPrimaryFire(CurTime() + 0.1)
 	ads = 1
 	self:EmitSound("player/footsteps/sand1.wav", 50, 100, 1, CHAN_BODY)
 	self:GetOwner():SetFOV(70, 0.35, self)

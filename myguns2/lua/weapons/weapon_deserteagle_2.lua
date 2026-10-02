@@ -155,7 +155,7 @@ function SWEP:Think()
 	AccuracyMeter = math.max(0, AccuracyMeter - (2 * FrameTime()))
     end
     if self:GetOwner():KeyPressed(IN_ATTACK2) and canads == 1 and !self:GetOwner():KeyDown(IN_SPEED) then
-	self:SetNextPrimaryFire(CurTime() + 0.425)
+	self:SetNextPrimaryFire(CurTime() + 0.375)
 	ads = 1
 	self:EmitSound("player/footsteps/sand1.wav", 50, 100, 1, CHAN_BODY)
 	self:GetOwner():SetFOV(70, 0.35, self)
@@ -168,7 +168,7 @@ function SWEP:Think()
     end
  
     if self:GetOwner():KeyReleased(IN_ATTACK2) or self:GetOwner():KeyPressed(IN_SPEED) then
-	self:SetNextPrimaryFire(CurTime() + 0.425)
+	self:SetNextPrimaryFire(CurTime() + 0.35)
 	ads = 0
 
 	self:GetOwner():SetFOV(0, 0.25, self)
