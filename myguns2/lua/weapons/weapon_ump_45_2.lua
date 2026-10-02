@@ -1,13 +1,14 @@
 AddCSLuaFile()
 
 CreateConVar("sv_myguns2_enabled", 1)
-
 local canchamber = 0
 local timerRunning = 0
 
 local moveside = 0
 
 local movevertical = 0
+
+local turnhorizontal = 0
 
 local turn = 0
 
@@ -25,17 +26,16 @@ local canceled = 0
 
 -- spawnmenu
 
-
 SWEP.Spawnable = true
-SWEP.PrintName = "Galil ARM"
-SWEP.Purpose = "Secondary attack to ADS.\n Secondary attack while sprinting toggles between full-auto and semi-auto."
+SWEP.PrintName = "UMP-45"
+SWEP.Purpose = "Heckler & Koch UMP45\nSecondary attack to ADS.\n Secondary attack while sprinting toggles between full-auto and semi-auto."
 SWEP.Base = "weapon_base"
-SWEP.Category = "my guns 2 - Assault Rifles"
+SWEP.Category = "my guns 2 - Submachine Guns"
 
 -- viewmodel
 
-SWEP.ViewModel = "models/weapons/cstrike/c_rif_galil.mdl"
-SWEP.WorldModel = "models/weapons/w_rif_galil.mdl"
+SWEP.ViewModel = "models/weapons/cstrike/c_smg_ump45.mdl"
+SWEP.WorldModel = "models/weapons/w_smg_ump45.mdl"
 SWEP.UseHands = true
 SWEP.ViewModelFov = 50
 -- slots
@@ -46,8 +46,8 @@ SWEP.Slot = 2
 -- stats
 SWEP.AccurateCrossHair = true
 SWEP.Primary.Ammo = "SMG1"
-SWEP.Primary.ClipSize = 35
-SWEP.Primary.DefaultClip = 35
+SWEP.Primary.ClipSize = 25
+SWEP.Primary.DefaultClip = 25
 SWEP.Primary.Automatic = true
 
 -- secondary
@@ -62,7 +62,7 @@ SWEP.Secondary.Ammo        = "none"
 -- anim
 function SWEP:Initialize()
     self:SetDeploySpeed(0.8)
-    self:SetHoldType("ar2")
+    self:SetHoldType("smg")
 end
 
 
@@ -73,39 +73,37 @@ function SWEP:PrimaryAttack()
     if ( !self:CanPrimaryAttack() ) then return end
     if self:GetOwner():KeyDown(IN_SPEED) then return end
 
-    self:SetNextPrimaryFire(CurTime() + 0.08)
+    self:SetNextPrimaryFire(CurTime() + 0.1)
 
     if auto == 0 and shot == 1 then return end
     
     local bullet = {}
-	bullet.Damage = 115
 	bullet.Attacker = self:GetOwner()
 	bullet.Inflictor = self
-	bullet.Tracer = 0
+	bullet.Damage = 70
 	bullet.Num = 1
-	bullet.Force = 5
+	bullet.Tracer = 0
+	bullet.Force = 3
 	bullet.Dir = self:GetOwner():GetAimVector()
 	bullet.Src = self:GetOwner():GetShootPos()
 	bullet.Spread = Vector(AccuracyMeter, AccuracyMeter, AccuracyMeter)
-	AccuracyMeter = AccuracyMeter + 0.01
+	AccuracyMeter = AccuracyMeter + 0.065
     self:FireBullets(bullet)
     shot = 1
+    self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     self:GetOwner():SetAnimation(PLAYER_ATTACK1)
-    self:EmitSound("weapons/ar1/ar1_dist1.wav", 140, 75, 1, CHAN_WEAPON)
-
+    self:EmitSound("weapons/smg1/smg1_fire1.wav", 140, 80, 1, CHAN_WEAPON)
     local extrasound = ents.Create("base_gmodentity")
     extrasound:Spawn()
     extrasound:SetPos(self:GetOwner():GetShootPos())
-    extrasound:EmitSound("weapons/shotgun/shotgun_fire7.wav", 140, 100, 1, CHAN_WEAPON)
+    extrasound:EmitSound("weapons/shotgun/shotgun_fire6.wav", 140, 125, 1, CHAN_WEAPON)
     extrasound:Remove()
-
     self:TakePrimaryAmmo(1)
-    self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     if !self:GetOwner():IsNPC() then
 	if ads == 0 then
-            self:GetOwner():SetEyeAngles(self:GetOwner():EyeAngles() + Angle(math.Rand(-2.75, -2.25), math.Rand(-2.5, 2.5), 0))
+            self:GetOwner():SetEyeAngles(self:GetOwner():EyeAngles() + Angle(math.Rand(-4.35, -1.5), math.Rand(-1, 1), 0))
 	else
-	    self:GetOwner():SetEyeAngles(self:GetOwner():EyeAngles() + Angle(math.Rand(-2, -1.25), math.Rand(-1, 1), 0))
+	    self:GetOwner():SetEyeAngles(self:GetOwner():EyeAngles() + Angle(math.Rand(-1.5, -0.5), math.Rand(-1, 1), 0))
 	end
     end
 end
@@ -130,7 +128,7 @@ end
 local sprinton = 1
 function SWEP:Reload()
     if CLIENT then return end
-    if self:GetOwner():KeyDown(IN_SPEED) then return end
+    if self:GetOwner():KeyDown(IN_SPEED) then return end 
     shot = 0
     self:DefaultReload(ACT_VM_RELOAD)
     if self:Clip1() < self:GetMaxClip1() then
@@ -202,18 +200,18 @@ function SWEP:Deploy()
 	return
     end
     canceled = 1
-    self:SetHoldType("ar2")
+    self:SetHoldType("smg")
     return true
 end
 
 function SWEP:Think()
-    if AccuracyMeter > 0.0075 then
-	AccuracyMeter = math.max(0, AccuracyMeter - (0.075 * FrameTime()))
+    if AccuracyMeter > 0.01 then
+	AccuracyMeter = math.max(0, AccuracyMeter - (1 * FrameTime()))
     end
 
     if self:GetOwner():KeyPressed(IN_ATTACK2) and canads == 1 and !self:GetOwner():KeyDown(IN_SPEED) then
 	ads = 1
-	self:SetNextPrimaryFire(CurTime() + 0.35)
+	self:SetNextPrimaryFire(CurTime() + 0.3)
 	self:EmitSound("player/footsteps/sand1.wav", 50, 100, 1, CHAN_BODY)
 	self:GetOwner():SetFOV(70, 0.35, self)
 	moveside = -4.25
@@ -225,7 +223,7 @@ function SWEP:Think()
     end
  
     if self:GetOwner():KeyReleased(IN_ATTACK2) or self:GetOwner():KeyPressed(IN_SPEED) then
-	self:SetNextPrimaryFire(CurTime() + 0.425)
+	self:SetNextPrimaryFire(CurTime() + 0.4)
 	ads = 0
 	self:GetOwner():SetFOV(0, 0.25, self)
 	if SERVER then
@@ -248,7 +246,7 @@ function SWEP:Think()
     end
 
     if self:GetOwner():KeyReleased(IN_SPEED) then
-	self:SetHoldType("ar2")
+	self:SetHoldType("smg")
 	self:SetNextPrimaryFire(CurTime() + 0.4)
     end
 
@@ -257,13 +255,13 @@ function SWEP:Think()
     end
 
     if self:GetOwner():KeyDown(IN_ATTACK2) and ads == 1 and !self:GetOwner():KeyDown(IN_SPEED) then
-	turn = math.Approach(turn, 0, 5 * FrameTime())
-	moveside = math.Approach(moveside, -6.35, 10 * FrameTime())
-	movevertical = math.Approach(movevertical, 2.5, 5 * FrameTime())
-	
+	turn = math.Approach(turn, -1.6, 5 * FrameTime())
+	moveside = math.Approach(moveside, -8.85, 12 * FrameTime())
+	movevertical = math.Approach(movevertical, 4.5, 5 * FrameTime())
+	turnhorizontal = math.Approach(turnhorizontal, -0.35, 10 * FrameTime())
 	
 	if self:GetOwner():Crouching() then
-	    self:SetHoldType("ar2")
+	    self:SetHoldType("smg")
 	else
 	    self:SetHoldType("rpg")
 	end
@@ -271,11 +269,13 @@ function SWEP:Think()
 	if self:GetOwner():KeyDown(IN_SPEED) then
 	    moveside = math.Approach(moveside, -1, 5 * FrameTime())
 	    movevertical = math.Approach(movevertical, 6, 5 * FrameTime())
+	    turnhorizontal = math.Approach(turnhorizontal, 0, 10 * FrameTime())
 	    turn = math.Approach(turn, -10, 15 * FrameTime())
 	else
-	    self:SetHoldType("ar2")
+	    self:SetHoldType("smg")
 	    turn = math.Approach(turn, 0, 10 * FrameTime())
-	    moveside = math.Approach(moveside, -4, 7.5 * FrameTime())
+	    turnhorizontal = math.Approach(turnhorizontal, 0, 10 * FrameTime())
+	    moveside = math.Approach(moveside, -5, 7.5 * FrameTime())
 	    movevertical = math.Approach(movevertical, 3, 3.5 * FrameTime())
 	end
     end
@@ -289,10 +289,10 @@ function SWEP:GetViewModelPosition(pos, ang)
 
 	
 
-    	pos = pos + ang:Right() * moveside + ang:Up() * movevertical + ang:Forward() * -10
+    	pos = pos + ang:Right() * moveside + ang:Up() * movevertical + ang:Forward() * -8
 
 	ang:RotateAroundAxis(ang:Right(), turn)
-
+	ang:RotateAroundAxis(ang:Up(), turnhorizontal)
     	return pos, ang
     else
 	if self:GetOwner():KeyDown(IN_SPEED) then
@@ -307,20 +307,20 @@ function SWEP:GetViewModelPosition(pos, ang)
 
 	    
 
-    	    pos = pos + ang:Right() * moveside + ang:Up() * movevertical + ang:Forward() * -10
+    	    pos = pos + ang:Right() * moveside + ang:Up() * movevertical + ang:Forward() * -8
 
 	    ang:RotateAroundAxis(ang:Right(), turn)
-
+	    ang:RotateAroundAxis(ang:Up(), turnhorizontal)
     	    return pos, ang
 	end
 	spronetime = 1
 
 	
 
-    	pos = pos + ang:Right() * moveside + ang:Up() * movevertical + ang:Forward() * -10
+    	pos = pos + ang:Right() * moveside + ang:Up() * movevertical + ang:Forward() * -8
 
 	ang:RotateAroundAxis(ang:Right(), turn)
-
+	ang:RotateAroundAxis(ang:Up(), turnhorizontal)
     	return pos, ang
     end
 end
