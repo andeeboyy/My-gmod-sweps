@@ -271,8 +271,8 @@ function SWEP:Think()
     if self:GetOwner():KeyDown(IN_ATTACK2) and ads == 1 and !self:GetOwner():KeyDown(IN_SPEED) then
 	turn = math.Approach(turn, 0, 5 * FrameTime())
 	moveside = math.Approach(moveside, -6.985, 10 * FrameTime())
-	movevertical = math.Approach(movevertical, 2.635, 5 * FrameTime())
-	turnhorizontal = math.Approach(turnhorizontal, -0.67, 10 * FrameTime())
+	movevertical = math.Approach(movevertical, 2.625, 5 * FrameTime())
+	turnhorizontal = math.Approach(turnhorizontal, -0.7265, 10 * FrameTime())
 	
 	if self:GetOwner():Crouching() then
 	    self:SetHoldType("ar2")
