@@ -129,6 +129,7 @@ local sprinton = 1
 function SWEP:Reload()
     if CLIENT then return end
     if self:GetOwner():KeyDown(IN_SPEED) then return end 
+    if self:Ammo1() == 0 then return end
     shot = 0
     self:DefaultReload(ACT_VM_RELOAD)
     if self:Clip1() < self:GetMaxClip1() then
