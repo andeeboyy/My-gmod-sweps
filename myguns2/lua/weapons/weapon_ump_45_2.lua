@@ -133,7 +133,7 @@ function SWEP:Reload()
     self:DefaultReload(ACT_VM_RELOAD)
     if self:Clip1() < self:GetMaxClip1() then
 	if SERVER then
-	    self:GetOwner():CrosshairEnable()
+	    self:GetOwner():CrosshairDisable()
 	    self:GetOwner():SprintDisable()
 	end
 	self:SetHoldType("ar2")
@@ -161,6 +161,7 @@ function SWEP:Reload()
 		canads = 1
 		if SERVER then
 		    self:GetOwner():SprintEnable()
+		    self:GetOwner():CrosshairEnable()
 		end
 		sprinton = 1
 	    end

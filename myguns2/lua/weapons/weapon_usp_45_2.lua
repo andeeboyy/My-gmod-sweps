@@ -117,7 +117,7 @@ function SWEP:Reload()
     if self:Clip1() < self:GetMaxClip1() then
 	if SERVER then
 	    self:GetOwner():SprintDisable()
-	    self:GetOwner():CrosshairEnable()
+	    self:GetOwner():CrosshairDisable()
 	end
 	self:SetHoldType("revolver")
 	sprinton = 0
@@ -142,6 +142,7 @@ function SWEP:Reload()
 		canads = 1
 		if SERVER then
 		    self:GetOwner():SprintEnable()
+		    self:GetOwner():CrosshairEnable()
 		end
 		sprinton = 1
 	    end

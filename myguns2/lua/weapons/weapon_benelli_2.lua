@@ -143,7 +143,7 @@ function SWEP:ReloadLoop()
     timer.Simple(0.45, function()
         canads = 0
 	if SERVER and IsValid(self) and IsValid(self:GetOwner()) then
-	    self:GetOwner():CrosshairEnable()
+	    self:GetOwner():CrosshairDisable()
 	    self:GetOwner():SprintDisable()
 	end
 	if reloading == 0 and IsValid(self) and IsValid(self:GetOwner()) then
@@ -151,6 +151,9 @@ function SWEP:ReloadLoop()
 	    self:SetNextPrimaryFire(CurTime() + 0.4)
 	    self:SendWeaponAnim(ACT_SHOTGUN_RELOAD_FINISH)
 	    self:GetOwner():SprintEnable()
+	    if SERVER then
+	    	self:GetOwner():CrosshairEnable()
+	    end
 	    self:SetHoldType("Shotgun")
 	    self:GetOwner():SetFOV(0, 0, self)
 	    return

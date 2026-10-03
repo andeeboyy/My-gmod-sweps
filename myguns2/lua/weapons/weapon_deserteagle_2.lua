@@ -94,7 +94,7 @@ function SWEP:PrimaryAttack()
 
     self:SetNextPrimaryFire(CurTime() + 0.2)
     self:TakePrimaryAmmo(1)
-   if !self:GetOwner():IsNPC() then
+    if !self:GetOwner():IsNPC() then
 	if ads == 0 then
     	    self:GetOwner():SetEyeAngles(self:GetOwner():EyeAngles() + Angle(math.Rand(-50, -35), math.Rand(-25, 25), 0))
 	else
@@ -117,7 +117,7 @@ function SWEP:Reload()
     if self:Clip1() < self:GetMaxClip1() then
 	if SERVER then
 	    self:GetOwner():SprintDisable()
-	    self:GetOwner():CrosshairEnable()
+	    self:GetOwner():CrosshairDisable()
 	end
 	self:SetHoldType("revolver")
 	sprinton = 0
@@ -141,6 +141,7 @@ function SWEP:Reload()
 	    if candothing == 1 then
 		canads = 1
 		if SERVER then
+		    self:GetOwner():CrosshairEnable()
 		    self:GetOwner():SprintEnable()
 		end
 		sprinton = 1

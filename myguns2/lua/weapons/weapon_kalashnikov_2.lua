@@ -131,7 +131,7 @@ function SWEP:Reload()
     self:DefaultReload(ACT_VM_RELOAD)
     if self:Clip1() < self:GetMaxClip1() then
 	if SERVER then
-	    self:GetOwner():CrosshairEnable()
+	    self:GetOwner():CrosshairDisable()
 	    self:GetOwner():SprintDisable()
 	end
 	self:SetHoldType("ar2")
@@ -159,6 +159,7 @@ function SWEP:Reload()
 	        self:SendWeaponAnim(ACT_VM_DRAW)
 		canads = 1
 		if SERVER then
+		    self:GetOwner():CrosshairEnable()
 		    self:GetOwner():SprintEnable()
 		end
 		sprinton = 1

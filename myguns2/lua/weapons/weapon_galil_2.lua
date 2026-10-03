@@ -103,9 +103,9 @@ function SWEP:PrimaryAttack()
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     if !self:GetOwner():IsNPC() then
 	if ads == 0 then
-            self:GetOwner():SetEyeAngles(self:GetOwner():EyeAngles() + Angle(math.Rand(-2.75, -2.25), math.Rand(-2.5, 2.5), 0))
+            self:GetOwner():SetEyeAngles(self:GetOwner():EyeAngles() + Angle(math.Rand(-3, -2.5), math.Rand(-1, 1), 0))
 	else
-	    self:GetOwner():SetEyeAngles(self:GetOwner():EyeAngles() + Angle(math.Rand(-2, -1.25), math.Rand(-1, 1), 0))
+	    self:GetOwner():SetEyeAngles(self:GetOwner():EyeAngles() + Angle(math.Rand(-1.65, -1.4), math.Rand(-0.5, 0.5), 0))
 	end
     end
 end
@@ -135,7 +135,7 @@ function SWEP:Reload()
     self:DefaultReload(ACT_VM_RELOAD)
     if self:Clip1() < self:GetMaxClip1() then
 	if SERVER then
-	    self:GetOwner():CrosshairEnable()
+	    self:GetOwner():CrosshairDisable()
 	    self:GetOwner():SprintDisable()
 	end
 	self:SetHoldType("ar2")
@@ -162,6 +162,7 @@ function SWEP:Reload()
 	    if canchamber == 1 and canceled == 0 then
 		canads = 1
 		if SERVER then
+	    	    self:GetOwner():CrosshairEnable()
 		    self:GetOwner():SprintEnable()
 		end
 		sprinton = 1
@@ -258,8 +259,8 @@ function SWEP:Think()
 
     if self:GetOwner():KeyDown(IN_ATTACK2) and ads == 1 and !self:GetOwner():KeyDown(IN_SPEED) then
 	turn = math.Approach(turn, 0, 5 * FrameTime())
-	moveside = math.Approach(moveside, -6.35, 10 * FrameTime())
-	movevertical = math.Approach(movevertical, 2.5, 5 * FrameTime())
+	moveside = math.Approach(moveside, -6.36, 10 * FrameTime())
+	movevertical = math.Approach(movevertical, 2.54, 5 * FrameTime())
 	
 	
 	if self:GetOwner():Crouching() then
