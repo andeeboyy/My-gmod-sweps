@@ -55,8 +55,8 @@ function SWEP:PrimaryAttack()
     self:SetNextSecondaryFire(CurTime() + 1.3)
     local prop = ents.Create("prop_physics_override")
     if !IsValid(prop) then return end
-    prop:SetKeyValue("ExplodeDamage", "2000")
-    prop:SetKeyValue("ExplodeRadius", "750")
+    prop:SetKeyValue("ExplodeDamage", "3500")
+    prop:SetKeyValue("ExplodeRadius", "500")
     prop:SetKeyValue("health", "25")
     prop:SetKeyValue("physdamagescale", "0.5")
     prop:SetKeyValue("massScale", "7")
@@ -81,7 +81,26 @@ function SWEP:PrimaryAttack()
     end)
     prop:CallOnRemove("Explode", function(ent)
 	if CLIENT then return end
-	for i = 1, math.random(50, 100) do
+	for i = 1, 2500 do
+    	    local bullet = {}
+	    local tracepara = {}
+	    local bulletdir = Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)):Forward()
+	    tracepara.start = prop:WorldSpaceCenter()
+	    tracepara.endpos = bulletdir * 50000
+	    tracepara.mask = MASK_SHOT
+	    local trace = util.TraceLine(tracepara)
+	    local dist = trace.HitPos:Distance(prop:WorldSpaceCenter())
+	    bullet.Damage = 650 / math.Clamp(dist * 0.0025, 1, math.huge)
+	    bullet.Attacker = prop
+	    bullet.Inflictor = prop
+	    bullet.Num = 1
+	    bullet.Force = 1
+	    bullet.Tracer = 0
+	    bullet.Dir = bulletdir
+	    bullet.Src = prop:WorldSpaceCenter()
+	    prop:FireBullets(bullet)
+	end
+	for i = 1, math.random(25, 50) do
 	    local randscale = math.Rand(0.1, 1)
 	    local randmass = randscale * 10
 	    local debrisoffset = Vector(math.Rand(-50, 50), math.Rand(-50, 50), math.Rand(0, 50))
@@ -151,21 +170,18 @@ function SWEP:PrimaryAttack()
 	cloud:EmitSound("phx/explode00.wav", 140, math.Rand(50, 75), 1, CHAN_AUTO)
 	local boom = ents.Create("env_explosion")
 	boom:SetPos(prop:GetPos())
-	boom:SetKeyValue("iMagnitude", 650)
-	boom:SetKeyValue("iRadiusOverride", 1750)
+	boom:SetKeyValue("iMagnitude", 250)
+	boom:SetKeyValue("iRadiusOverride", 1250)
 	boom:SetKeyValue("DamageForce", 0)
 	boom:Fire("Explode")
 
 	boom:EmitSound("ambient/explosions/exp2.wav", 150, 100, 1, CHAN_AUTO)
-	
-	local boom2 = ents.Create("env_explosion")
-	boom2:SetPos(prop:GetPos())
-	boom2:SetKeyValue("iMagnitude", 125)
-	boom2:SetKeyValue("iRadiusOverride", 4000)
-	boom2:SetKeyValue("DamageForce", 0)
-	boom2:Fire("Explode")
 
-	boom2:EmitSound("ambient/explosions/explode_4.wav", 150, 75, 1, CHAN_AUTO)
+    	local extrasound = ents.Create("base_gmodentity")
+    	extrasound:Spawn()
+    	extrasound:SetPos(prop:GetPos())
+    	extrasound:EmitSound("ambient/explosions/explode_4.wav", 150, 75, 1, CHAN_AUTO)
+    	extrasound:Remove()
 
 	for _, obj in ipairs(ents.FindInSphere(prop:GetPos(), 5000)) do
 	    if IsValid(obj) and SERVER then
@@ -183,19 +199,24 @@ function SWEP:PrimaryAttack()
 	    end
 	end
 
-	for _, obj in ipairs(ents.FindInSphere(prop:GetPos(), 1500)) do
+	for _, obj in ipairs(ents.FindInSphere(prop:GetPos(), 3500)) do
 	    if IsValid(obj) then
 	    	local dist = obj:GetPos():Distance(prop:GetPos())
-		if IsValid(obj) then
+		if IsValid(obj) and obj:VisibleVec(prop:WorldSpaceCenter()) then
 	    	    local dmg = DamageInfo()
-	    	    dmg:SetDamage(650 / ((dist * 0.02) + 1))
+		    if obj:IsNPC() or obj:IsPlayer() or obj:IsNextBot() then
+	    	    	dmg:SetDamage(500 / ((dist * 0.01) + 1))
+		    else
+			dmg:SetDamage(150 / ((dist * 0.01) + 1))
+		    end
 		    dmg:SetAttacker(prop)
 	    	    dmg:SetInflictor(prop)
-	    	    dmg:SetDamageType(DMG_BLAST)
+	    	    dmg:SetDamageType(DMG_BULLET)
 	    	    obj:TakeDamageInfo(dmg)
 		end
 	    end
 	end
+
     end)
 
 

@@ -83,8 +83,8 @@ function SWEP:PrimaryAttack()
 	prop:SetKeyValue("physdamagescale", 1)
 	prop:SetPos(self:GetOwner():GetShootPos())
 	prop:SetAngles(self:GetOwner():GetAimVector():Angle())
-	prop:SetKeyValue("ExplodeDamage", "5000")
-	prop:SetKeyValue("ExplodeRadius", "300")
+	prop:SetKeyValue("ExplodeDamage", "1000")
+	prop:SetKeyValue("ExplodeRadius", "500")
 	prop:SetKeyValue("massScale", 1.65)
 	prop:SetNoDraw(true)
     	rocket:Spawn()
@@ -92,7 +92,26 @@ function SWEP:PrimaryAttack()
 	rocket:SetParent(prop)
 	
 	prop:CallOnRemove("Explode", function()
-	for i = 1, math.random(75, 125) do
+	for i = 1, 2500 do
+    	    local bullet = {}
+	    local tracepara = {}
+	    local bulletdir = Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)):Forward()
+	    tracepara.start = prop:WorldSpaceCenter()
+	    tracepara.endpos = bulletdir * 50000
+	    tracepara.mask = MASK_SHOT
+	    local trace = util.TraceLine(tracepara)
+	    local dist = trace.HitPos:Distance(prop:WorldSpaceCenter())
+	    bullet.Damage = 375 / math.Clamp(dist * 0.0025, 1, math.huge)
+	    bullet.Attacker = prop
+	    bullet.Inflictor = prop
+	    bullet.Num = 1
+	    bullet.Force = 1
+	    bullet.Tracer = 0
+	    bullet.Dir = bulletdir
+	    bullet.Src = prop:WorldSpaceCenter()
+	    prop:FireBullets(bullet)
+	end
+	for i = 1, math.random(25, 50) do
 	    	local randscale = math.Rand(0.1, 1)
 	    	local randmass = randscale * 10
 	    	local debrisoffset = Vector(math.Rand(-50, 50), math.Rand(-50, 50), math.Rand(0, 50))
@@ -166,25 +185,28 @@ function SWEP:PrimaryAttack()
 	    boom:Fire("Explode")
 
 	    local boom2 = ents.Create("env_explosion")
-	    boom2:SetPos(prop:GetPos())
+	    boom2:SetPos(prop:GetPos() + prop:GetAngles():Forward() * 100)
 	    boom2:SetKeyValue("DamageForce", 2147483647)
-	    boom2:SetKeyValue("iMagnitude", 350)
-	    boom2:SetKeyValue("iRadiusOverride", 1250)
+	    boom2:SetKeyValue("iMagnitude", 5000)
+	    boom2:SetKeyValue("iRadiusOverride", 250)
 	    boom2:Fire("Explode")
-
-	    local boom3 = ents.Create("env_physexplosion")
-	    boom3:SetPos(prop:GetPos())
-	    boom3:SetKeyValue("Magnitude", 100)
-	    boom3:SetKeyValue("radius", 2500)
-	    boom3:Fire("Explode")
-	    boom3:Remove()
-
-	    local boom4 = ents.Create("env_explosion")
-	    boom4:SetPos(prop:GetPos() + prop:GetAngles():Forward() * 100)
-	    boom4:SetKeyValue("DamageForce", 2147483647)
-	    boom4:SetKeyValue("iMagnitude", 5000)
-	    boom4:SetKeyValue("iRadiusOverride", 250)
-	    boom4:Fire("Explode")
+	    for _, obj in ipairs(ents.FindInSphere(prop:GetPos(), 3500)) do
+	    	if IsValid(obj) then
+	    	    local dist = obj:GetPos():Distance(prop:GetPos())
+		    if IsValid(obj) and obj:VisibleVec(prop:WorldSpaceCenter()) then
+	    	    	local dmg = DamageInfo()
+		    	if obj:IsNPC() or obj:IsPlayer() or obj:IsNextBot() then
+	    	    	    dmg:SetDamage(325 / ((dist * 0.01) + 1))
+		    	else
+			    dmg:SetDamage(125 / ((dist * 0.01) + 1))
+		    	end
+		    	dmg:SetAttacker(prop)
+	    	    	dmg:SetInflictor(prop)
+	    	    	dmg:SetDamageType(DMG_BULLET)
+	    	    	obj:TakeDamageInfo(dmg)
+		    end
+	    	end
+	    end
 	end)
 
 	local velocity = self:GetOwner():GetVelocity()

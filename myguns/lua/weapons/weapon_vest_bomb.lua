@@ -46,7 +46,26 @@ function SWEP:PrimaryAttack()
     timer.Simple(0.5, function()
 	if canfire == 0 then return end
 	if !IsValid(plr) or !plr:Alive() then return end
-    	for i = 1, math.random(75, 125) do
+	for i = 1, 2500 do
+    	    local bullet = {}
+	    local tracepara = {}
+	    local bulletdir = Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)):Forward()
+	    tracepara.start = self:WorldSpaceCenter()
+	    tracepara.endpos = bulletdir * 50000
+	    tracepara.mask = MASK_SHOT
+	    local trace = util.TraceLine(tracepara)
+	    local dist = trace.HitPos:Distance(self:WorldSpaceCenter())
+	    bullet.Damage = 650 / math.Clamp(dist * 0.0025, 1, math.huge)
+	    bullet.Attacker = prop
+	    bullet.Inflictor = prop
+	    bullet.Num = 1
+	    bullet.Force = 1
+	    bullet.Tracer = 0
+	    bullet.Dir = bulletdir
+	    bullet.Src = self:WorldSpaceCenter()
+	    self:FireBullets(bullet)
+	end
+    	for i = 1, math.random(25, 50) do
 	    local randscale = math.Rand(0.1, 1)
 	    local randmass = randscale * 5
 	    local debrisoffset = Vector(math.Rand(-50, 50), math.Rand(-50, 50), math.Rand(0, 100))
@@ -118,19 +137,6 @@ function SWEP:PrimaryAttack()
         boom:SetKeyValue("iRadiusOverride", 1000)
         boom:Fire("Explode")
 
-        local boom2 = ents.Create("env_explosion")
-        boom2:SetPos(plr:GetShootPos())
-        boom2:SetKeyValue("iMagnitude", 350)
-        boom2:SetKeyValue("iRadiusOverride", 5000)
-        boom2:Fire("Explode")
-
-        local boom3 = ents.Create("env_physexplosion")
-        boom3:SetPos(plr:GetShootPos())
-        boom3:SetKeyValue("Magnitude", 100)
-        boom3:SetKeyValue("radius", 10000)
-        boom3:Fire("Explode")
-        boom3:Remove()
-
 	local propboom = ents.Create("prop_physics")
 	propboom:SetModel("models/props_phx/ww2bomb.mdl")
 	propboom:SetPos(plr:GetShootPos())
@@ -148,6 +154,24 @@ function SWEP:PrimaryAttack()
 	    end
 	end)
 
+	for _, obj in ipairs(ents.FindInSphere(self:GetPos(), 3500)) do
+	    if IsValid(obj) then
+	    	local dist = obj:GetPos():Distance(self:GetPos())
+		if IsValid(obj) and obj:VisibleVec(self:WorldSpaceCenter()) then
+	    	    local dmg = DamageInfo()
+		    if obj:IsNPC() or obj:IsPlayer() or obj:IsNextBot() then
+	    	    	dmg:SetDamage(500 / ((dist * 0.01) + 1))
+		    else
+			dmg:SetDamage(150 / ((dist * 0.01) + 1))
+		    end
+		    dmg:SetAttacker(self:GetOwner())
+	    	    dmg:SetInflictor(self)
+	    	    dmg:SetDamageType(DMG_BULLET)
+	    	    obj:TakeDamageInfo(dmg)
+		end
+	    end
+	end
+	self:GetOwner():StripWeapon("weapon_vest_bomb")
     end)
 end
 

@@ -133,7 +133,26 @@ local function throw(time, ent, toss, deathgrenade)
 	canswitch = 1
     end)
     prop:CallOnRemove("Explode", function(ent)
-	for i = 1, math.random(50, 100) do
+	for i = 1, 2500 do
+    	    local bullet = {}
+	    local tracepara = {}
+	    local bulletdir = Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)):Forward()
+	    tracepara.start = prop:WorldSpaceCenter()
+	    tracepara.endpos = bulletdir * 50000
+	    tracepara.mask = MASK_SHOT
+	    local trace = util.TraceLine(tracepara)
+	    local dist = trace.HitPos:Distance(prop:WorldSpaceCenter())
+	    bullet.Damage = 200 / math.Clamp(dist * 0.0025, 1, math.huge)
+	    bullet.Attacker = prop
+	    bullet.Inflictor = prop
+	    bullet.Num = 1
+	    bullet.Force = 1
+	    bullet.Tracer = 0
+	    bullet.Dir = bulletdir
+	    bullet.Src = prop:WorldSpaceCenter()
+	    prop:FireBullets(bullet)
+	end
+	for i = 1, math.random(25, 50) do
 	    local randscale = math.Rand(0.1, 1)
 	    local randmass = randscale * 10
 	    local debrisoffset = Vector(math.Rand(-50, 50), math.Rand(-50, 50), math.Rand(0, 50))
@@ -206,8 +225,8 @@ local function throw(time, ent, toss, deathgrenade)
 	propboom:Spawn()
 	timer.Simple(0.015, function()
 	    if IsValid(propboom) then
-	    	propboom:SetKeyValue("ExplodeDamage", 500)
-	    	propboom:SetKeyValue("ExplodeRadius", 500)
+	    	propboom:SetKeyValue("ExplodeDamage", 350)
+	    	propboom:SetKeyValue("ExplodeRadius", 300)
 	    end
 	end)
 	timer.Simple(0.03, function()
@@ -217,24 +236,28 @@ local function throw(time, ent, toss, deathgrenade)
 	end)
 	local boom = ents.Create("env_explosion")
 	boom:SetPos(prop:GetPos())
-	boom:SetKeyValue("iMagnitude", 275)
-	boom:SetKeyValue("iRadiusOverride", 1250)
+	boom:SetKeyValue("iMagnitude", 75)
+	boom:SetKeyValue("iRadiusOverride", 1000)
 	boom:SetKeyValue("DamageForce", 0)
 	boom:Fire("Explode")
 
-	local boom2 = ents.Create("env_explosion")
-	boom2:SetPos(prop:GetPos())
-	boom2:SetKeyValue("iMagnitude", 125)
-	boom2:SetKeyValue("iRadiusOverride", 3000)
-	boom2:SetKeyValue("DamageForce", 0)
-	boom2:Fire("Explode")
-
-	local boom3 = ents.Create("env_physexplosion")
-	boom3:SetPos(prop:GetPos())
-	boom3:SetKeyValue("Magnitude", 100)
-	boom3:SetKeyValue("radius", 2000)
-	boom3:Fire("Explode")
-	boom3:Remove()
+	for _, obj in ipairs(ents.FindInSphere(prop:GetPos(), 2000)) do
+	    if IsValid(obj) then
+	    	local dist = obj:GetPos():Distance(prop:GetPos())
+		if IsValid(obj) and obj:VisibleVec(prop:WorldSpaceCenter()) then
+	    	    local dmg = DamageInfo()
+		    if obj:IsNPC() or obj:IsPlayer() or obj:IsNextBot() then
+	    	    	dmg:SetDamage(200 / ((dist * 0.01) + 1))
+		    else
+			dmg:SetDamage(50 / ((dist * 0.01) + 1))
+		    end
+		    dmg:SetAttacker(prop)
+	    	    dmg:SetInflictor(prop)
+	    	    dmg:SetDamageType(DMG_BULLET)
+	    	    obj:TakeDamageInfo(dmg)
+		end
+	    end
+	end
 
     end)
 
