@@ -37,7 +37,12 @@ SWEP.Secondary.Ammo        = "none"
 function SWEP:Initialize()
     self:SetHoldType("grenade")
 end
-
+local function propdmg(attacker, tr, dmginfo)
+    local victim = tr.Entity
+    if !victim:IsNPC() and !victim:IsNextBot() and !victim:IsPlayer() then
+	dmginfo:SetDamage(5)
+    end
+end
 -- shoot
 function SWEP:PrimaryAttack()
     local plr = self:GetOwner()
@@ -59,6 +64,7 @@ function SWEP:PrimaryAttack()
 	    bullet.Attacker = prop
 	    bullet.Inflictor = prop
 	    bullet.Num = 1
+	    bullet.Callback = propdmg
 	    bullet.Force = 1
 	    bullet.Tracer = 0
 	    bullet.Dir = bulletdir
@@ -160,7 +166,7 @@ function SWEP:PrimaryAttack()
 		if IsValid(obj) and obj:VisibleVec(self:WorldSpaceCenter()) then
 	    	    local dmg = DamageInfo()
 		    if obj:IsNPC() or obj:IsPlayer() or obj:IsNextBot() then
-	    	    	dmg:SetDamage(500 / ((dist * 0.01) + 1))
+	    	    	dmg:SetDamage(1250 / ((dist * 0.01) + 1))
 		    else
 			dmg:SetDamage(150 / ((dist * 0.01) + 1))
 		    end

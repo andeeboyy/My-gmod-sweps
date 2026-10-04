@@ -44,6 +44,13 @@ function SWEP:Initialize()
     self:SetHoldType("ar2")
 end
 
+local function propdmg(attacker, tr, dmginfo)
+    local victim = tr.Entity
+    if !victim:IsNPC() and !victim:IsNextBot() and !victim:IsPlayer() then
+	dmginfo:SetDamage(5)
+    end
+end
+
 -- shoot
 function SWEP:PrimaryAttack()
     if ( !self:CanPrimaryAttack() ) then return end
@@ -97,6 +104,7 @@ function SWEP:PrimaryAttack()
 	    bullet.Force = 1
 	    bullet.Tracer = 0
 	    bullet.Dir = bulletdir
+	    bullet.Callback = propdmg
 	    bullet.Src = prop:WorldSpaceCenter()
 	    prop:FireBullets(bullet)
 	end
@@ -194,7 +202,7 @@ function SWEP:PrimaryAttack()
 		if IsValid(obj) and obj:VisibleVec(prop:WorldSpaceCenter()) then
 	    	    local dmg = DamageInfo()
 		    if obj:IsNPC() or obj:IsPlayer() or obj:IsNextBot() then
-	    	    	dmg:SetDamage(200 / ((dist * 0.01) + 1))
+	    	    	dmg:SetDamage(400 / ((dist * 0.01) + 1))
 		    else
 			dmg:SetDamage(50 / ((dist * 0.01) + 1))
 		    end
