@@ -61,14 +61,14 @@ function SWEP:PrimaryAttack()
 	    local trace = util.TraceLine(tracepara)
 	    local dist = trace.HitPos:Distance(self:WorldSpaceCenter())
 	    bullet.Damage = 650 / math.Clamp(dist * 0.0025, 1, math.huge)
-	    bullet.Attacker = prop
-	    bullet.Inflictor = prop
+	    bullet.Attacker = plr
+	    bullet.Inflictor = self
 	    bullet.Num = 1
 	    bullet.Callback = propdmg
 	    bullet.Force = 1
 	    bullet.Tracer = 0
 	    bullet.Dir = bulletdir
-	    bullet.Src = self:WorldSpaceCenter()
+	    bullet.Src = plr:WorldSpaceCenter()
 	    self:FireBullets(bullet)
 	end
     	for i = 1, math.random(25, 50) do
@@ -111,17 +111,17 @@ function SWEP:PrimaryAttack()
 	    	end
 	     end
         end
-	
-        ParticleEffect("striderbuster_explode_smoke", self:GetPos(), Angle(0, 0, 0))
+	local offset = Vector(0, 0, 100)
+        ParticleEffect("striderbuster_explode_smoke", self:GetPos() + offset, Angle(0, 0, 0))
         for i = 1, 10 do
-   	    ParticleEffect("striderbuster_explode_dummy_parts", self:GetPos(), Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)))
+   	    ParticleEffect("striderbuster_explode_dummy_parts", self:GetPos() + offset, Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)))
         end
-        ParticleEffect("striderbuster_break_d", self:GetPos(), Angle(0, 0, 0))
-        ParticleEffect("striderbuster_break_e", self:GetPos(), Angle(0, 0, 0))
-        ParticleEffect("striderbuster_break_b", self:GetPos(), Angle(0, 0, 0))
-        ParticleEffect("striderbuster_break_explode", self:GetPos(), Angle(0, 0, 0))
+        ParticleEffect("striderbuster_break_d", self:GetPos() + offset, Angle(0, 0, 0))
+        ParticleEffect("striderbuster_break_e", self:GetPos() + offset, Angle(0, 0, 0))
+        ParticleEffect("striderbuster_break_b", self:GetPos() + offset, Angle(0, 0, 0))
+        ParticleEffect("striderbuster_break_explode", self:GetPos() + offset, Angle(0, 0, 0))
         local cloud = ents.Create("ar2explosion")
-        cloud:SetPos(self:GetPos())
+        cloud:SetPos(self:GetPos() + offset)
         cloud:Spawn()
         local randompicker = math.random(1, 4)
         if randompicker == 1 then
@@ -177,7 +177,16 @@ function SWEP:PrimaryAttack()
 		end
 	    end
 	end
-	self:GetOwner():StripWeapon("weapon_vest_bomb")
+	if IsValid(self) and IsValid(plr) then
+	    plr:StripWeapon("weapon_vest_bomb")
+	    if plr:Alive() and !plr:HasGodMode() then
+	    	plr:Kill()
+	    end
+	    local ragdoll = plr:GetRagdollEntity()
+	    if IsValid(ragdoll) then
+	    	ragdoll:Remove()
+	    end
+	end
     end)
 end
 

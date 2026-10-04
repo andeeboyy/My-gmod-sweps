@@ -85,7 +85,7 @@ function SWEP:PrimaryAttack()
 	local prop = ents.Create("prop_physics")
 	prop:SetModel("models/props_phx/construct/wood/wood_boardx1.mdl")
 	prop:SetKeyValue("modelscale", 0.35)
-	prop:SetKeyValue("physdamagescale", 1)
+	prop:SetKeyValue("physdamagescale", 10)
 	prop:SetPos(self:GetOwner():GetShootPos())
 	prop:SetAngles(self:GetOwner():GetAimVector():Angle())
 	prop:SetKeyValue("ExplodeDamage", "1000")
@@ -183,6 +183,22 @@ function SWEP:PrimaryAttack()
 	    if randompicker == 4 then
 	        prop:EmitSound("ambient/explosions/explode_5.wav", 120, math.Rand(66, 133), 1, CHAN_AUTO)
 	    end
+	    local propboom = ents.Create("prop_physics")
+	    propboom:SetModel("models/props_phx/ww2bomb.mdl")
+	    propboom:SetPos(prop:GetPos())
+	    propboom:SetNoDraw(true)
+	    propboom:Spawn()
+	    timer.Simple(0.015, function()
+	    	if IsValid(propboom) then
+	    	    propboom:SetKeyValue("ExplodeDamage", 5000)
+	    	    propboom:SetKeyValue("ExplodeRadius", 75)
+	    	end
+	    end)
+	    timer.Simple(0.03, function()
+	    	if IsValid(propboom) then
+		    propboom:TakeDamage(1)
+	    	end
+	    end)
 	    local boom = ents.Create("env_explosion")
 	    boom:SetPos(prop:GetPos())
 	    boom:SetKeyValue("iMagnitude", 10000)
