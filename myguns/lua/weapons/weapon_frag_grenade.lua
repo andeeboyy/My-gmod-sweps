@@ -52,12 +52,6 @@ end
 
 
 
-local function propdmg(attacker, tr, dmginfo)
-    local victim = tr.Entity
-    if !victim:IsNPC() and !victim:IsNextBot() and !victim:IsPlayer() then
-	dmginfo:SetDamage(5)
-    end
-end
 
 
 -- throw grenade
@@ -138,20 +132,27 @@ local function throw(time, ent, toss, deathgrenade)
 	canswitch = 1
     end)
     prop:CallOnRemove("Explode", function(ent)
+	local function propdmg(attacker, tr, dmginfo)
+    	    local victim = tr.Entity
+    	    if prop ~= nil and IsValid(prop) then
+    		local dist = tr.HitPos:Distance(prop:WorldSpaceCenter())
+		local damage = 275 / math.Clamp(dist * 0.0025, 1, math.huge)
+		dmginfo:SetDamage(damage)
+            end
+    	    if !victim:IsNPC() and !victim:IsNextBot() and !victim:IsPlayer() then
+	    	dmginfo:SetDamage(5)
+    	    end
+	end
 	for i = 1, 2500 do
     	    local bullet = {}
 	    local tracepara = {}
 	    local bulletdir = Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)):Forward()
-	    tracepara.start = prop:WorldSpaceCenter()
-	    tracepara.endpos = bulletdir * 50000
-	    tracepara.mask = MASK_SHOT
-	    local trace = util.TraceLine(tracepara)
-	    local dist = trace.HitPos:Distance(prop:WorldSpaceCenter())
-	    bullet.Damage = 200 / math.Clamp(dist * 0.0025, 1, math.huge)
+	    bullet.Damage = 275
 	    bullet.Attacker = prop
 	    bullet.Inflictor = prop
 	    bullet.Num = 1
 	    bullet.Force = 1
+	    bullet.HullSize = 25
 	    bullet.Tracer = 0
 	    bullet.Dir = bulletdir
 	    bullet.Src = prop:WorldSpaceCenter()

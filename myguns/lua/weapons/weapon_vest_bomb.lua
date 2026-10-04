@@ -37,12 +37,6 @@ SWEP.Secondary.Ammo        = "none"
 function SWEP:Initialize()
     self:SetHoldType("grenade")
 end
-local function propdmg(attacker, tr, dmginfo)
-    local victim = tr.Entity
-    if !victim:IsNPC() and !victim:IsNextBot() and !victim:IsPlayer() then
-	dmginfo:SetDamage(5)
-    end
-end
 -- shoot
 function SWEP:PrimaryAttack()
     local plr = self:GetOwner()
@@ -51,25 +45,32 @@ function SWEP:PrimaryAttack()
     timer.Simple(0.5, function()
 	if canfire == 0 then return end
 	if !IsValid(plr) or !plr:Alive() then return end
+	local function propdmg(attacker, tr, dmginfo)
+    	    local victim = tr.Entity
+    	    if prop ~= nil and IsValid(prop) then
+    		local dist = tr.HitPos:Distance(prop:WorldSpaceCenter())
+		local damage = 1000 / math.Clamp(dist * 0.0025, 1, math.huge)
+		dmginfo:SetDamage(damage)
+            end
+    	    if !victim:IsNPC() and !victim:IsNextBot() and !victim:IsPlayer() then
+	    	dmginfo:SetDamage(5)
+    	    end
+	end
 	for i = 1, 2500 do
     	    local bullet = {}
 	    local tracepara = {}
 	    local bulletdir = Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)):Forward()
-	    tracepara.start = self:WorldSpaceCenter()
-	    tracepara.endpos = bulletdir * 50000
-	    tracepara.mask = MASK_SHOT
-	    local trace = util.TraceLine(tracepara)
-	    local dist = trace.HitPos:Distance(self:WorldSpaceCenter())
-	    bullet.Damage = 650 / math.Clamp(dist * 0.0025, 1, math.huge)
-	    bullet.Attacker = plr
-	    bullet.Inflictor = self
+	    bullet.Damage = 1000
+	    bullet.Attacker = prop
+	    bullet.Inflictor = prop
 	    bullet.Num = 1
-	    bullet.Callback = propdmg
 	    bullet.Force = 1
+	    bullet.HullSize = 40
 	    bullet.Tracer = 0
 	    bullet.Dir = bulletdir
-	    bullet.Src = plr:WorldSpaceCenter()
-	    self:FireBullets(bullet)
+	    bullet.Src = prop:WorldSpaceCenter()
+	    bullet.Callback = propdmg
+	    prop:FireBullets(bullet)
 	end
     	for i = 1, math.random(25, 50) do
 	    local randscale = math.Rand(0.1, 1)
