@@ -52,7 +52,7 @@ function SWEP:PrimaryAttack()
 		local damage = 1000 / math.Clamp(dist * 0.0025, 1, math.huge)
 		dmginfo:SetDamage(damage)
             end
-    	    if !victim:IsNPC() and !victim:IsNextBot() and !victim:IsPlayer() then
+    	    if !victim:IsNPC() and !victim:IsNextBot() and !victim:IsPlayer() and !victim:IsRagdoll() then
 	    	dmginfo:SetDamage(5)
     	    end
 	end
@@ -61,16 +61,16 @@ function SWEP:PrimaryAttack()
 	    local tracepara = {}
 	    local bulletdir = Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)):Forward()
 	    bullet.Damage = 1000
-	    bullet.Attacker = prop
-	    bullet.Inflictor = prop
+	    bullet.Attacker = plr
+	    bullet.Inflictor = self
 	    bullet.Num = 1
 	    bullet.Force = 1
-	    bullet.HullSize = 40
+	    bullet.HullSize = 60
 	    bullet.Tracer = 0
 	    bullet.Dir = bulletdir
-	    bullet.Src = prop:WorldSpaceCenter()
+	    bullet.Src = plr:WorldSpaceCenter()
 	    bullet.Callback = propdmg
-	    prop:FireBullets(bullet)
+	    self:FireBullets(bullet)
 	end
     	for i = 1, math.random(25, 50) do
 	    local randscale = math.Rand(0.1, 1)
@@ -166,7 +166,7 @@ function SWEP:PrimaryAttack()
 	    	local dist = obj:GetPos():Distance(self:GetPos())
 		if IsValid(obj) and obj:VisibleVec(self:WorldSpaceCenter()) then
 	    	    local dmg = DamageInfo()
-		    if obj:IsNPC() or obj:IsPlayer() or obj:IsNextBot() then
+		    if obj:IsNPC() or obj:IsPlayer() or obj:IsNextBot() or obj:IsRagdoll() then
 	    	    	dmg:SetDamage(1250 / ((dist * 0.01) + 1))
 		    else
 			dmg:SetDamage(150 / ((dist * 0.01) + 1))
