@@ -86,7 +86,7 @@ function SWEP:PrimaryAttack()
 	bullet.Dir = self:GetOwner():GetAimVector()
 	bullet.Src = self:GetOwner():GetShootPos()
 	bullet.Spread = Vector(AccuracyMeter, AccuracyMeter, AccuracyMeter)
-	AccuracyMeter = AccuracyMeter + 0.05
+	AccuracyMeter = math.Clamp(AccuracyMeter + 0.1, 0, 0.3)
     self:FireBullets(bullet)
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     self:GetOwner():SetAnimation(PLAYER_ATTACK1)
@@ -223,7 +223,7 @@ function SWEP:Think()
 	self:SetClip1(self:GetMaxClip1())
     end
     if AccuracyMeter > 0.01 then
-	AccuracyMeter = math.max(0, AccuracyMeter - (0.11 * FrameTime()))
+	AccuracyMeter = math.max(0, AccuracyMeter - (0.03 * FrameTime()))
     end
 
     if self:GetOwner():KeyPressed(IN_ATTACK2) and canads == 1 and !self:GetOwner():KeyDown(IN_SPEED) then
