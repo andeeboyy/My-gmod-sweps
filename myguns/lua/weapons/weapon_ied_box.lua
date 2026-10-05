@@ -54,6 +54,7 @@ end
 -- throw grenade
 function SWEP:PrimaryAttack()
     if CLIENT then return end
+    if IsValid(self) and IsValid(self:GetOwner():GetUseEntity()) and self:GetOwner():GetUseEntity():GetClass() == "prop_physics" then return end
     local bombname = "boxbomb" .. self:EntIndex()
     nextReload = CurTime() + 2
     if (self:Clip1() < 1) then return end
