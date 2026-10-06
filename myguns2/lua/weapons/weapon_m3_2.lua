@@ -4,7 +4,7 @@ CreateConVar("sv_myguns2_enabled", 1)
 
 local timeleft = 0
 local reloading = 0
-local AccuracyMeter = 0.015
+local AccuracyMeter = 0.1
 
 local moveside = 0
 
@@ -73,9 +73,14 @@ function SWEP:PrimaryAttack()
 	self:SetNextPrimaryFire(CurTime() + 1.25)
 	return
     end
-    if ( !self:CanPrimaryAttack() ) then return end
+    if self:Clip1() < 1 then
+	self:EmitSound("weapons/shotgun/shotgun_empty.wav", 50, 100, 1, CHAN_WEAPON)
+	self:SetNextPrimaryFire(CurTime() + 0.1)
+	self:SendWeaponAnim(ACT_VM_DRYFIRE)
+	return
+    end
     timer.Simple(0.5, function()
-	self:EmitSound("weapons/shotgun/shotgun_cock.wav", 140, 85, 1, CHAN_WEAPON)
+	self:EmitSound("weapons/shotgun/shotgun_cock.wav", 140, 100, 1, CHAN_WEAPON)
     end)
     local bullet = {}
 	bullet.Attacker = self:GetOwner()
@@ -87,8 +92,8 @@ function SWEP:PrimaryAttack()
 	bullet.Dir = self:GetOwner():GetAimVector()
 	bullet.Src = self:GetOwner():GetShootPos()
 	bullet.Spread = Vector(AccuracyMeter, AccuracyMeter, AccuracyMeter)
-	AccuracyMeter = math.Clamp(AccuracyMeter + 0.1, 0, 0.3)
     self:FireBullets(bullet)
+    AccuracyMeter = math.Clamp(AccuracyMeter + 0.065, 0, 0.03)
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     self:GetOwner():SetAnimation(PLAYER_ATTACK1)
     self:EmitSound("weapons/shotgun/shotgun_fire7.wav", 140, 80, 1, CHAN_WEAPON)
@@ -224,7 +229,7 @@ function SWEP:Think()
 	self:SetClip1(self:GetMaxClip1())
     end
     if AccuracyMeter > 0.01 then
-	AccuracyMeter = math.max(0, AccuracyMeter - (0.03 * FrameTime()))
+	AccuracyMeter = math.max(0, AccuracyMeter - (0.015 * FrameTime()))
     end
 
     if self:GetOwner():KeyPressed(IN_ATTACK2) and canads == 1 and !self:GetOwner():KeyDown(IN_SPEED) then

@@ -68,7 +68,12 @@ end
 
 -- shoot
 function SWEP:PrimaryAttack()
-    if ( !self:CanPrimaryAttack() ) then return end
+    if self:Clip1() < 1 then
+	self:EmitSound("weapons/pistol/pistol_empty.wav", 50, 100, 1, CHAN_WEAPON)
+	self:SetNextPrimaryFire(CurTime() + 0.1)
+	self:SendWeaponAnim(ACT_VM_DRYFIRE)
+	return
+    end
     if self:GetOwner():KeyDown(IN_SPEED) then return end
     local bullet = {}
 	bullet.Attacker = self:GetOwner()
