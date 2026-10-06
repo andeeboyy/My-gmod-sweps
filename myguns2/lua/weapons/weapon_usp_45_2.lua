@@ -202,7 +202,7 @@ function SWEP:Think()
 
     if self:GetOwner():KeyDown(IN_ATTACK2) and ads == 1 and !self:GetOwner():KeyDown(IN_SPEED) then
 	turn = math.Approach(turn, 0, 5 * FrameTime())
-	moveside = math.Approach(moveside, -5.855, 10 * FrameTime())
+	moveside = math.Approach(moveside, -5.93, 10 * FrameTime())
 	movevertical = math.Approach(movevertical, 2.675, 5 * FrameTime())
     else
 	if self:GetOwner():KeyDown(IN_SPEED) then
