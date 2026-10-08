@@ -53,129 +53,103 @@ local hitmaterials = {
 }
 -- shoot
 function SWEP:PrimaryAttack()
-    local bullet = {}
-	bullet.Attacker = self:GetOwner()
-	bullet.Inflictor = self
-	bullet.Damage = 30
-	bullet.Num = 1
-	bullet.Force = 1
-	bullet.Dir = self:GetOwner():GetAimVector()
-	bullet.Src = self:GetOwner():GetShootPos()
-	bullet.TracerName = "none"
-	bullet.Callback = callback
-	bullet.Tracer = 0
-	self:SetNextPrimaryFire(CurTime() + 1)
+    self:SetNextPrimaryFire(CurTime() + 0.65)
+    self:SetNextSecondaryFire(CurTime() + 0.8)
     timer.Simple(0.25, function()
         if canfire == 0 then return end
-	bullet.Distance = 65
-	bullet.Dir = self:GetOwner():GetAimVector()
-	bullet.Src = self:GetOwner():GetShootPos()
 	local tracepara = {}
 	tracepara.start = self:GetOwner():GetShootPos()
         tracepara.endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 65
 	tracepara.filter = self:GetOwner()
-	tracepara.mask = MASK_SHOT
+	tracepara.mask = MASK_SOLID
 	local trace = util.TraceLine(tracepara)
-    	if trace.Hit then
-	    self:SetNextPrimaryFire(CurTime() + 0.45)
-	    self:SetNextSecondaryFire(CurTime() + 1.15)
-	    self:FireBullets(bullet)
-	    local entity = trace.Entity
-	    if hitmaterials[trace.MatType] then
+    	if trace.Hit and IsValid(self) and IsValid(self:GetOwner()) then
 
-	    	randsound = math.random(1, 4)
-	    	if randsound == 1 then
-	    	    self:EmitSound("ambient/machines/slicer1.wav", 140, math.Rand(75, 125), 1, CHAN_AUTO)
-	    	end
-	    	if randsound == 2 then
-	    	    self:EmitSound("ambient/machines/slicer2.wav", 140, math.Rand(75, 125), 1, CHAN_AUTO)
-	    	end
-	    	if randsound == 3 then
-	    	    self:EmitSound("ambient/machines/slicer3.wav", 140, math.Rand(75, 125), 1, CHAN_AUTO)
-	    	end
-	    	if randsound == 4 then
-	    	    self:EmitSound("ambient/machines/slicer4.wav", 140, math.Rand(75, 125), 1, CHAN_AUTO)
-	    	end
+	    local entity = trace.Entity
+	    local dmg = DamageInfo()
+	    local dmgvalue = 30
+	    dmg:SetDamage(dmgvalue)
+	    if trace.HitGroup == HITGROUP_HEAD then
+		dmg:SetDamage(dmgvalue * 2)
 	    else
+		if trace.HitGroup > 3 then
+		    dmg:SetDamage(dmgvalue * 0.25)
+		else
+		    if trace.HitGroup == 10 then
+			dmg:SetDamage(dmgvalue * 0.01)
+		    end
+		end
+	    end
+	    dmg:SetDamageForce(self:GetOwner():GetAimVector() * 500)
+	    dmg:SetDamagePosition(trace.HitPos)
+	    dmg:SetAttacker(self:GetOwner())
+	    dmg:SetInflictor(self)
+	    dmg:SetDamageType(DMG_SLASH)
+	    entity:TakeDamageInfo(dmg)
+	    if hitmaterials[trace.MatType] then
 	    	randsound = math.random(1, 2)
 	    	if randsound == 1 then
-	    	    self:EmitSound("physics/metal/metal_sheet_impact_bullet1.wav", 140, math.Rand(125, 150), 1, CHAN_AUTO)
+	    	    self:EmitSound("weapons/crossbow/hitbod1.wav", 50, 100, 1, CHAN_AUTO)
 	    	end
 	    	if randsound == 2 then
-	    	    self:EmitSound("physics/metal/metal_sheet_impact_bullet2.wav", 140, math.Rand(125, 150), 1, CHAN_AUTO)
+	    	    self:EmitSound("weapons/crossbow/hitbod2.wav", 50, 100, 1, CHAN_AUTO)
 	    	end
+	    else
+	        self:EmitSound("weapons/crossbow/hit1.wav", 50, 100, 1, CHAN_AUTO)
 	    end
-	else
-	    self:SetNextPrimaryFire(CurTime() + 0.6)
-	    self:SetNextSecondaryFire(CurTime() + 1.15)
 	end
     end)
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     self:GetOwner():SetAnimation(PLAYER_ATTACK1)
-    self:EmitSound("npc/vort/claw_swing2.wav", 120, 100, 1, CHAN_AUTO)
+    self:EmitSound("npc/vort/claw_swing2.wav", 50, 100, 1, CHAN_AUTO)
     self:SetNextSecondaryFire(CurTime() + 1)
 end
 
 function SWEP:SecondaryAttack()
-    local bullet = {}
-	bullet.Attacker = self:GetOwner()
-	bullet.Inflictor = self
-	bullet.Damage = 55
-	bullet.Num = 1
-	bullet.Force = 2
-	bullet.Dir = self:GetOwner():GetAimVector()
-	bullet.Src = self:GetOwner():GetShootPos()
-	bullet.TracerName = "none"
-	bullet.Tracer = 0
-	bullet.Callback = callback
-
-	self:SetNextPrimaryFire(CurTime() + 1)
-	self:SetNextSecondaryFire(CurTime() + 1)
-
+    self:SetNextPrimaryFire(CurTime() + 0.65)
+    self:SetNextSecondaryFire(CurTime() + 0.8)
     timer.Simple(0.1, function()
-	bullet.Distance = 75
-	bullet.Dir = self:GetOwner():GetAimVector()
-	bullet.Src = self:GetOwner():GetShootPos()
 	local tracepara = {}
 	tracepara.mask = MASK_SHOT
 	tracepara.filter = self:GetOwner()
 	tracepara.start = self:GetOwner():GetShootPos()
-        tracepara.endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 75
+        tracepara.endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 45
 
 	local trace = util.TraceLine(tracepara)
-    	if trace.Hit then
+    	if trace.Hit and IsValid(self) and IsValid(self:GetOwner()) then
 
-    	    self:SetNextSecondaryFire(CurTime() + 0.9)
-    	    self:SetNextPrimaryFire(CurTime() + 0.9)
-
-	    self:FireBullets(bullet)
 	    local entity = trace.Entity
-	    if hitmaterials[trace.MatType] then
-	    	randsound = math.random(1, 4)
-	    	if randsound == 1 then
-	    	    self:EmitSound("ambient/machines/slicer1.wav", 140, math.Rand(50, 100), 1, CHAN_AUTO)
-	    	end
-	    	if randsound == 2 then
-	    	    self:EmitSound("ambient/machines/slicer2.wav", 140, math.Rand(50, 100), 1, CHAN_AUTO)
-	    	end
-	    	if randsound == 3 then
-	    	    self:EmitSound("ambient/machines/slicer3.wav", 140, math.Rand(50, 100), 1, CHAN_AUTO)
-	    	end
-	    	if randsound == 4 then
-	    	    self:EmitSound("ambient/machines/slicer4.wav", 140, math.Rand(50, 100), 1, CHAN_AUTO)
-	    	end
+	    local dmg = DamageInfo()
+	    local dmgvalue = 50
+	    dmg:SetDamage(dmgvalue)
+	    if trace.HitGroup == HITGROUP_HEAD then
+		dmg:SetDamage(dmgvalue * 2)
 	    else
+		if trace.HitGroup > 3 then
+		    dmg:SetDamage(dmgvalue * 0.25)
+		else
+		    if trace.HitGroup == 10 then
+			dmg:SetDamage(dmgvalue * 0.01)
+		    end
+		end
+	    end
+	    dmg:SetDamageForce(self:GetOwner():GetAimVector() * 1250)
+	    dmg:SetDamagePosition(trace.HitPos)
+	    dmg:SetAttacker(self:GetOwner())
+	    dmg:SetInflictor(self)
+	    dmg:SetDamageType(DMG_SLASH)
+	    entity:TakeDamageInfo(dmg)
+	    if hitmaterials[trace.MatType] then
 	    	randsound = math.random(1, 2)
 	    	if randsound == 1 then
-	    	    self:EmitSound("physics/metal/metal_sheet_impact_bullet1.wav", 140, math.Rand(100, 125), 1, CHAN_AUTO)
+	    	    self:EmitSound("weapons/crossbow/hitbod1.wav", 50, 125, 1, CHAN_AUTO)
 	    	end
 	    	if randsound == 2 then
-	    	    self:EmitSound("physics/metal/metal_sheet_impact_bullet2.wav", 140, math.Rand(100, 125), 1, CHAN_AUTO)
+	    	    self:EmitSound("weapons/crossbow/hitbod2.wav", 50, 125, 1, CHAN_AUTO)
 	    	end
+	    else
+	        self:EmitSound("weapons/crossbow/hit1.wav", 50, 125, 1, CHAN_AUTO)
 	    end
-	else
-	    self:SetNextPrimaryFire(CurTime() + 1.15)
-	    self:SetNextSecondaryFire(CurTime() + 1.15)
 	end
     end)
     self:SendWeaponAnim(ACT_VM_SECONDARYATTACK)

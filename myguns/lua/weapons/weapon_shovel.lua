@@ -40,27 +40,37 @@ end
 
 -- shoot
 function SWEP:PrimaryAttack()
-    local bullet = {}
-	bullet.Attacker = self:GetOwner()
-	bullet.Inflictor = self
-	bullet.Damage = 100
-	bullet.Num = 1
-	bullet.Force = 6
-	bullet.Spread = Vector(0, 0, 0)
-	bullet.TracerName = "none"
-	bullet.Tracer = 0
-    timer.Simple(0.4, function()
+    timer.Simple(0.25, function()
 	if canfire == 0 then return end
-	bullet.Dir = self:GetOwner():GetAimVector()
-	bullet.Src = self:GetOwner():GetShootPos()
 	local tracepara = {}
 	tracepara.start = self:GetOwner():GetShootPos()
         tracepara.endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 85
 	tracepara.filter = self:GetOwner()
 	tracepara.mask = MASK_SHOT
 	local trace = util.TraceLine(tracepara)
-    	if trace.Hit then
-	    self:FireBullets(bullet)
+    	if trace.Hit and IsValid(self) and IsValid(self:GetOwner()) then
+
+	    local entity = trace.Entity
+	    local dmg = DamageInfo()
+	    local dmgvalue = 40
+	    dmg:SetDamage(dmgvalue)
+	    if trace.HitGroup == HITGROUP_HEAD then
+		dmg:SetDamage(dmgvalue * 1.25)
+	    else
+		if trace.HitGroup > 3 then
+		    dmg:SetDamage(dmgvalue * 0.75)
+		else
+		    if trace.HitGroup == 10 then
+			dmg:SetDamage(dmgvalue * 0.01)
+		    end
+		end
+	    end
+	    dmg:SetDamageForce(self:GetOwner():GetAimVector() * 500)
+	    dmg:SetDamagePosition(trace.HitPos)
+	    dmg:SetAttacker(self:GetOwner())
+	    dmg:SetInflictor(self)
+	    dmg:SetDamageType(DMG_CLUB)
+	    entity:TakeDamageInfo(dmg)
 	    randsound = math.random(1, 2)
 	    if randsound == 1 then
 	    	self:EmitSound("physics/metal/metal_sheet_impact_bullet2.wav", 140, math.Rand(75, 125), 1, CHAN_AUTO)
@@ -71,8 +81,8 @@ function SWEP:PrimaryAttack()
     	end	
     end)
     self:GetOwner():SetAnimation(PLAYER_ATTACK1)
-    self:EmitSound("weapons/iceaxe/iceaxe_swing1.wav", 120, 50, 1, CHAN_AUTO)
-    self:SetNextPrimaryFire(CurTime() + 1.75)
+    self:EmitSound("weapons/iceaxe/iceaxe_swing1.wav", 50, 75, 1, CHAN_AUTO)
+    self:SetNextPrimaryFire(CurTime() + 2.15)
 end
 
 function SWEP:SecondaryAttack()
