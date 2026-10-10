@@ -385,6 +385,7 @@ function SWEP:Holster()
 end
 
 function SWEP:Think()
+    plr = self:GetOwner()
     if plr:KeyReleased(IN_RELOAD) then
 	reloaded = 0
     end
