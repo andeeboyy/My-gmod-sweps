@@ -10,6 +10,11 @@ local ammoneeded = 0
 local shot = 0
 local regen = 0
 local regenwait = CurTime()
+local regencount = 0
+local firstregen = 1
+local lastholster = CurTime()
+local lasttimer = CurTime()
+
 -- spawnmenu
 
 SWEP.Spawnable = true
@@ -31,7 +36,7 @@ SWEP.Slot = 0
 SWEP.AccurateCrossHair = true
 SWEP.Primary.Ammo = "Battery"
 SWEP.Primary.ClipSize = -1
-SWEP.Primary.DefaultClip = 100
+SWEP.Primary.DefaultClip = 0
 SWEP.Primary.Automatic = true
 
 
@@ -386,7 +391,10 @@ function SWEP:Deploy()
     plr = self:GetOwner()
     shot = 0
     regen = 1
-    self:RegenAmmo()
+    if CurTime() - lasttimer > 1 then
+    	self:RegenAmmo()
+    end
+    firstregen = 1
     return true
 end
 function SWEP:RegenAmmo()
@@ -394,7 +402,11 @@ function SWEP:RegenAmmo()
     if regen == 0 then return end
     if (regen == 1 and self:Ammo1() < 100) and regenwait < CurTime() then
     	plr:SetAmmo(self:Ammo1() + 5, "Battery")
+	if self:Ammo1() > 100 then
+	    plr:SetAmmo(100, "Battery")
+	end
     end
+    lasttimer = CurTime()
     timer.Simple(1, function()
 	if IsValid(self) and IsValid(plr) and regen == 1 then
 	    self:RegenAmmo()
@@ -402,6 +414,7 @@ function SWEP:RegenAmmo()
     end)
 end
 function SWEP:Holster()
+    lastholster = CurTime()
     shot = 0
     regen = 0
     return true
