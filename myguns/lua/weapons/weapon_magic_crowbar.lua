@@ -108,6 +108,14 @@ function SWEP:PrimaryAttack()
 	    if entity:IsRagdoll() or entity:GetClass() == "prop_physics" then
 		entity:Dissolve()
 		dissolving = 1
+	    	local keyvalues = trace.Entity:GetKeyValues()
+	    	if keyvalues["ExplodeDamage"] then 
+	    	    local explodedamage = keyvalues["ExplodeDamage"]
+	    	    if keyvalues["ExplodeDamage"] > 0 then
+		   	dissolving = 0
+			entity:TakeDamage(10000)
+		    end
+	    	end
 	    end
 	    local dmg = DamageInfo()
 	    local dmgvalue = 100
@@ -258,9 +266,17 @@ function SWEP:SecondaryAttack()
 	    local dmg = DamageInfo()
 	    local dissolving = 0
 	    local dmgvalue = 25
-	    if entity:GetClass() == "prop_physics" and entity:GetMaxHealth() > 0 and !entity:GetMaxHealth() == 0 and entity:Health() < dmgvalue or entity:Health() == dmgvalue then
+	    if (entity:GetClass() == "prop_physics" and entity:GetMaxHealth() > 0 and !entity:GetMaxHealth() == 0) or entity:Health() < dmgvalue or entity:Health() == dmgvalue then
 		entity:Dissolve()
 		dissolving = 1
+	    	local keyvalues = trace.Entity:GetKeyValues()
+	    	if keyvalues["ExplodeDamage"] then 
+	    	    local explodedamage = keyvalues["ExplodeDamage"]
+	    	    if keyvalues["ExplodeDamage"] > 0 then
+		   	dissolving = 0
+			entity:TakeDamage(10000)
+		    end
+	    	end
 	    end
 	    dmg:SetDamage(dmgvalue)
 	    if trace.HitGroup == HITGROUP_HEAD then
