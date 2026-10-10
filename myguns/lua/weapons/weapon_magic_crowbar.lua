@@ -211,8 +211,8 @@ function SWEP:PrimaryAttack()
                 end
             end)
         end
-    	self:SetNextSecondaryFire(CurTime() + 1)
-    	self:SetNextPrimaryFire(CurTime() + 1)
+    	self:SetNextSecondaryFire(CurTime() + 1.75)
+    	self:SetNextPrimaryFire(CurTime() + 1.75)
     	self:SendWeaponAnim(ACT_VM_MISSCENTER)
     	plr:RemoveAmmo(ammoneeded, "Battery")
     end
@@ -314,7 +314,6 @@ function SWEP:SecondaryAttack()
 	if checkammo(self, ammoneeded) == false then
 	    return
 	end
-	if regenwait > CurTime() then return end
 	regenwait = CurTime() + 2
 	self:EmitSound("ambient/fire/gascan_ignite1.wav", 140, 100, 1, CHAN_WEAPON)
 	local tracepara = {}
@@ -347,6 +346,15 @@ function SWEP:SecondaryAttack()
 	    boom:SetKeyValue("DamageForce", 0)
 	    boom:Fire("Explode")
 	    boom:Remove()
+	    local randnumber = math.random(1, 3)
+	    local sound = "weapons/mortar/mortar_explode1.wav"
+	    if randnumber == 2 then
+		sound = "weapons/mortar/mortar_explode2.wav"
+	    end
+	    if randnumber == 3 then
+		sound = "weapons/mortar/mortar_explode3.wav"
+	    end
+	    firephys:EmitSound(sound, 140, 100, 1, CHAN_WEAPON)
 	end)
         constraint.Keepupright(firephys, Angle(0,0,0), 0, 999999)
         local fire = ents.Create("env_fire")
@@ -370,8 +378,8 @@ function SWEP:SecondaryAttack()
                 end
             end)
         end
-    	self:SetNextSecondaryFire(CurTime() + 1)
-    	self:SetNextPrimaryFire(CurTime() + 1)
+    	self:SetNextSecondaryFire(CurTime() + 0.75)
+    	self:SetNextPrimaryFire(CurTime() + 0.75)
     	self:SendWeaponAnim(ACT_VM_MISSCENTER)
     	plr:RemoveAmmo(ammoneeded, "Battery")
     end
