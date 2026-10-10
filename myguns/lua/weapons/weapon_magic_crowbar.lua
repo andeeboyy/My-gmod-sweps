@@ -8,6 +8,8 @@ local reloaded = 0
 local plr = Entity(1)
 local ammoneeded = 0
 local shot = 0
+local regen = 0
+local regenwait = CurTime()
 -- spawnmenu
 
 SWEP.Spawnable = true
@@ -27,7 +29,7 @@ SWEP.Slot = 0
 
 
 SWEP.AccurateCrossHair = true
-SWEP.Primary.Ammo = "AR2AltFire"
+SWEP.Primary.Ammo = "Battery"
 SWEP.Primary.ClipSize = -1
 SWEP.Primary.DefaultClip = 100
 SWEP.Primary.Automatic = true
@@ -58,6 +60,7 @@ function SWEP:PrimaryAttack()
 	if checkammo(self, ammoneeded) == false then
 	    return
 	end
+	regenwait = CurTime() + 2
 	self:EmitSound("weapons/physcannon/superphys_launch1.wav", 140, 100, 1, CHAN_WEAPON)
 	local prop = ents.Create("prop_physics")
 	prop:SetModel("models/props_c17/oildrum001_explosive.mdl")
@@ -79,13 +82,14 @@ function SWEP:PrimaryAttack()
 	self:SetNextSecondaryFire(CurTime() + 1)
 	self:SetNextPrimaryFire(CurTime() + 1)
 	self:SendWeaponAnim(ACT_VM_MISSCENTER)
-	plr:RemoveAmmo(ammoneeded, "AR2AltFire")
+	plr:RemoveAmmo(ammoneeded, "Battery")
     end
     if spell == 2 and shot == 0 then
 	ammoneeded = 5
 	if checkammo(self, ammoneeded) == false then
 	    return
 	end
+	regenwait = CurTime() + 2
 	self:EmitSound("friends/friend_join.wav", 140, 100, 1, CHAN_WEAPON)
 	local tracepara = {}
 	tracepara.start = self:GetOwner():GetShootPos()
@@ -131,13 +135,14 @@ function SWEP:PrimaryAttack()
 	self:SetNextSecondaryFire(CurTime() + 1)
 	self:SetNextPrimaryFire(CurTime() + 1)
 	self:SendWeaponAnim(ACT_VM_MISSCENTER)
-	plr:RemoveAmmo(ammoneeded, "AR2AltFire")
+	plr:RemoveAmmo(ammoneeded, "Battery")
     end
     if spell == 3 and shot == 0 then
 	ammoneeded = 10
 	if checkammo(self, ammoneeded) == false then
 	    return
 	end
+	regenwait = CurTime() + 2
 	self:EmitSound("ambient/fire/ignite.wav", 140, 100, 1, CHAN_WEAPON)
 	local tracepara = {}
     	tracepara.start = self:GetOwner():GetShootPos()
@@ -196,7 +201,7 @@ function SWEP:PrimaryAttack()
     	self:SetNextSecondaryFire(CurTime() + 1)
     	self:SetNextPrimaryFire(CurTime() + 1)
     	self:SendWeaponAnim(ACT_VM_MISSCENTER)
-    	plr:RemoveAmmo(ammoneeded, "AR2AltFire")
+    	plr:RemoveAmmo(ammoneeded, "Battery")
     end
     shot = 1
 end
@@ -206,6 +211,7 @@ function SWEP:SecondaryAttack()
 	if checkammo(self, ammoneeded) == false then
 	    return
 	end
+	regenwait = CurTime() + 2
 	self:EmitSound("ambient/energy/zap1.wav", 140, 100, 1, CHAN_WEAPON)
 	local prop = ents.Create("prop_physics")
 	prop:SetModel("models/props_junk/gascan001a.mdl")
@@ -227,13 +233,14 @@ function SWEP:SecondaryAttack()
 	self:SetNextSecondaryFire(CurTime() + 0.5)
 	self:SetNextPrimaryFire(CurTime() + 1)
 	self:SendWeaponAnim(ACT_VM_MISSCENTER)
-	plr:RemoveAmmo(ammoneeded, "AR2AltFire")
+	plr:RemoveAmmo(ammoneeded, "Battery")
     end
     if spell == 2 then
 	ammoneeded = 1
 	if checkammo(self, ammoneeded) == false then
 	    return
 	end
+	regenwait = CurTime() + 2
 	self:EmitSound("friends/message.wav", 140, 100, 1, CHAN_WEAPON)
 	local tracepara = {}
 	tracepara.start = self:GetOwner():GetShootPos()
@@ -279,13 +286,15 @@ function SWEP:SecondaryAttack()
 	self:SetNextSecondaryFire(CurTime() + 0.25)
 	self:SetNextPrimaryFire(CurTime() + 1)
 	self:SendWeaponAnim(ACT_VM_MISSCENTER)
-	plr:RemoveAmmo(ammoneeded, "AR2AltFire")
+	plr:RemoveAmmo(ammoneeded, "Battery")
     end
     if spell == 3 then
 	ammoneeded = 2
 	if checkammo(self, ammoneeded) == false then
 	    return
 	end
+	if regenwait > CurTime() then return end
+	regenwait = CurTime() + 2
 	self:EmitSound("ambient/fire/gascan_ignite1.wav", 140, 100, 1, CHAN_WEAPON)
 	local tracepara = {}
     	tracepara.start = self:GetOwner():GetShootPos()
@@ -343,7 +352,7 @@ function SWEP:SecondaryAttack()
     	self:SetNextSecondaryFire(CurTime() + 1)
     	self:SetNextPrimaryFire(CurTime() + 1)
     	self:SendWeaponAnim(ACT_VM_MISSCENTER)
-    	plr:RemoveAmmo(ammoneeded, "AR2AltFire")
+    	plr:RemoveAmmo(ammoneeded, "Battery")
     end
     shot = 1
 end
@@ -376,11 +385,25 @@ function SWEP:Deploy()
     end
     plr = self:GetOwner()
     shot = 0
+    regen = 1
+    self:RegenAmmo()
     return true
 end
-
+function SWEP:RegenAmmo()
+    plr = self:GetOwner()
+    if regen == 0 then return end
+    if (regen == 1 and self:Ammo1() < 100) and regenwait < CurTime() then
+    	plr:SetAmmo(self:Ammo1() + 5, "Battery")
+    end
+    timer.Simple(1, function()
+	if IsValid(self) and IsValid(plr) and regen == 1 then
+	    self:RegenAmmo()
+	end
+    end)
+end
 function SWEP:Holster()
     shot = 0
+    regen = 0
     return true
 end
 
@@ -392,4 +415,5 @@ function SWEP:Think()
     if plr:KeyReleased(IN_ATTACK) then
 	shot = 0
     end
+    
 end
