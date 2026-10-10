@@ -104,8 +104,9 @@ function SWEP:PrimaryAttack()
 	local trace = util.TraceLine(tracepara)
     	if trace.Hit and IsValid(self) and IsValid(self:GetOwner()) then
 	    local dissolving = 0
+	    local dmgvalue = 100
 	    local entity = trace.Entity
-	    if entity:IsRagdoll() or entity:GetClass() == "prop_physics" or entity:IsWeapon() then
+	    if ((entity:IsRagdoll() or entity:GetClass() == "prop_physics" or entity:IsWeapon()) and IsValid(entity:GetPhysicsObject()) and entity:GetPhysicsObject():GetVolume() < 1000000) then
 		entity:Dissolve()
 		dissolving = 1
 	    	local keyvalues = trace.Entity:GetKeyValues()
@@ -118,7 +119,6 @@ function SWEP:PrimaryAttack()
 	    	end
 	    end
 	    local dmg = DamageInfo()
-	    local dmgvalue = 100
 	    dmg:SetDamage(dmgvalue)
 	    if trace.HitGroup == HITGROUP_HEAD then
 		dmg:SetDamage(dmgvalue * 2)
@@ -416,11 +416,8 @@ end
 function SWEP:RegenAmmo()
     plr = self:GetOwner()
     if regen == 0 then return end
-    if (regen == 1 and self:Ammo1() < 100) and regenwait < CurTime() then
+    if (regen == 1 and self:Ammo1() < 30) and regenwait < CurTime() then
     	plr:SetAmmo(self:Ammo1() + 5, "Battery")
-	if self:Ammo1() > 100 then
-	    plr:SetAmmo(100, "Battery")
-	end
     end
     lasttimer = CurTime()
     timer.Simple(1, function()
@@ -444,5 +441,7 @@ function SWEP:Think()
     if plr:KeyReleased(IN_ATTACK) then
 	shot = 0
     end
-    
+    if self:Ammo1() > 30 then
+	plr:SetAmmo(30, "Battery")
+    end
 end
