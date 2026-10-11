@@ -106,8 +106,8 @@ function SWEP:PrimaryAttack()
 	    local dissolving = 0
 	    local dmgvalue = 100
 	    local entity = trace.Entity
-	    if ((entity:IsRagdoll() or entity:GetClass() == "prop_physics" or entity:IsWeapon()) and IsValid(entity:GetPhysicsObject()) and entity:GetPhysicsObject():GetVolume() < 1000000) then
-		entity:Dissolve()
+	    if ((entity:IsRagdoll() or entity:GetClass() == "prop_physics" or entity:IsWeapon()) and IsValid(entity:GetPhysicsObject()) and entity:GetPhysicsObject():GetVolume() < 250000) then
+		entity:Dissolve(3, 100, nil, 0.5)
 		dissolving = 1
 	    	local keyvalues = trace.Entity:GetKeyValues()
 	    	if keyvalues["ExplodeDamage"] then 
@@ -131,7 +131,7 @@ function SWEP:PrimaryAttack()
 		    end
 		end
 	    end
-	    dmg:SetDamageForce(self:GetOwner():GetAimVector() * 500)
+	    dmg:SetDamageForce(self:GetOwner():GetAimVector() * 50000)
 	    dmg:SetDamagePosition(trace.HitPos)
 	    dmg:SetAttacker(self:GetOwner())
 	    dmg:SetInflictor(self)
@@ -266,8 +266,8 @@ function SWEP:SecondaryAttack()
 	    local dmg = DamageInfo()
 	    local dissolving = 0
 	    local dmgvalue = 25
-	    if !entity:IsNPC() and ((entity:GetClass() == "prop_physics" and entity:GetMaxHealth() > 0 or !entity:GetMaxHealth() == 0) and entity:Health() < dmgvalue or entity:Health() == dmgvalue) then
-		entity:Dissolve()
+	    if !entity:IsNPC() and ((entity:GetClass() == "prop_physics" and entity:GetMaxHealth() > 1) and entity:Health() < dmgvalue) then
+		entity:Dissolve(1)
 		dissolving = 1
 	    	local keyvalues = trace.Entity:GetKeyValues()
 	    	if keyvalues["ExplodeDamage"] then 
@@ -290,7 +290,7 @@ function SWEP:SecondaryAttack()
 		    end
 		end
 	    end
-	    dmg:SetDamageForce(self:GetOwner():GetAimVector() * 500)
+	    dmg:SetDamageForce(self:GetOwner():GetAimVector() * 5000)
 	    dmg:SetDamagePosition(trace.HitPos)
 	    dmg:SetAttacker(self:GetOwner())
 	    dmg:SetInflictor(self)
