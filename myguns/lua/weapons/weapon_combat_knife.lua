@@ -62,32 +62,30 @@ function SWEP:PrimaryAttack()
         tracepara.endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 65
 	tracepara.filter = self:GetOwner()
 	tracepara.mask = MASK_SOLID
-	tracepara.mins = Vector(-10, -10, -10)
-	tracepara.maxs = Vector(10, 10, 10)
-	local trace = util.TraceHull(tracepara)
+	local trace = util.TraceLine(tracepara)
     	if trace.Hit and IsValid(self) and IsValid(self:GetOwner()) then
 
 	    local entity = trace.Entity
 	    local dmg = DamageInfo()
 	    local dmgvalue = 30
 	    dmg:SetDamage(dmgvalue)
-	    if trace.HitGroup == HITGROUP_HEAD then
-		dmg:SetDamage(dmgvalue * 2)
-	    else
-		if trace.HitGroup > 3 then
-		    dmg:SetDamage(dmgvalue * 0.25)
-		else
-		    if trace.HitGroup == 10 then
-			dmg:SetDamage(dmgvalue * 0.01)
-		    end
-		end
-	    end
 	    if SERVER then
 	    	local keyvalues = trace.Entity:GetKeyValues()
 	    	if keyvalues["ExplodeDamage"] then 
 	    	    local explodedamage = keyvalues["ExplodeDamage"]
 	    	    if keyvalues["ExplodeDamage"] > 0 then
 		    	dmg:SetDamage(0)
+		    end
+	    	end
+	    	if trace.HitGroup == HITGROUP_HEAD then
+		    dmg:SetDamage(dmgvalue * 2)
+	        else
+		    if trace.HitGroup > 3 then
+		    	dmg:SetDamage(dmgvalue * 0.25)
+		    else
+		    	if trace.HitGroup == 10 then
+			    dmg:SetDamage(dmgvalue * 0.01)
+		    	end
 		    end
 	    	end
 	    	dmg:SetDamageForce(self:GetOwner():GetAimVector() * 500)
@@ -126,9 +124,7 @@ function SWEP:SecondaryAttack()
 	tracepara.start = self:GetOwner():GetShootPos()
         tracepara.endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 45
 
-	tracepara.mins = Vector(-10, -10, -10)
-	tracepara.maxs = Vector(10, 10, 10)
-	local trace = util.TraceHull(tracepara)
+	local trace = util.TraceLine(tracepara)
     	if trace.Hit and IsValid(self) and IsValid(self:GetOwner()) then
 
 	    local entity = trace.Entity

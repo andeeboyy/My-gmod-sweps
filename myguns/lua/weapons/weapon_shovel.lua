@@ -53,9 +53,7 @@ function SWEP:PrimaryAttack()
         tracepara.endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 85
 	tracepara.filter = self:GetOwner()
 	tracepara.mask = MASK_SOLID
-	tracepara.mins = Vector(-30, -30, -30)
-	tracepara.maxs = Vector(30, 30, 30)
-	local trace = util.TraceHull(tracepara)
+	local trace = util.TraceLine(tracepara)
     	if trace.Hit and IsValid(self) and IsValid(self:GetOwner()) then
 
 	    local entity = trace.Entity
@@ -63,10 +61,10 @@ function SWEP:PrimaryAttack()
 	    local dmgvalue = 40
 	    dmg:SetDamage(dmgvalue)
 	    if trace.HitGroup == HITGROUP_HEAD then
-		dmg:SetDamage(dmgvalue * 1.25)
+		dmg:SetDamage(dmgvalue * 2)
 	    else
 		if trace.HitGroup > 3 then
-		    dmg:SetDamage(dmgvalue * 0.75)
+		    dmg:SetDamage(dmgvalue * 0.25)
 		else
 		    if trace.HitGroup == 10 then
 			dmg:SetDamage(dmgvalue * 0.01)
