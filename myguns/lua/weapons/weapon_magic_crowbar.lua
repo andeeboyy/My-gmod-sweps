@@ -60,6 +60,7 @@ end
 
 -- shoot
 function SWEP:PrimaryAttack()
+    if CLIENT then return end
     if spell == 1 and shot == 0 then
 	ammoneeded = 5
 	if checkammo(self, ammoneeded) == false then
@@ -139,11 +140,16 @@ function SWEP:PrimaryAttack()
 	    if dissolving == 0 then
 	    	entity:TakeDamageInfo(dmg)
 	    end
-    	    local extrasound = ents.Create("base_gmodentity")
-    	    extrasound:Spawn()
-    	    extrasound:SetPos(trace.HitPos)
-    	    extrasound:EmitSound("weapons/physcannon/energy_disintegrate4.wav", 100, 135, 1, CHAN_WEAPON)
-    	    extrasound:Remove()
+
+    	    if SERVER then
+    		local extrasound = ents.Create("base_gmodentity")
+    		extrasound:Spawn()
+    		extrasound:SetPos(self:GetOwner():GetShootPos())
+		if IsFirstTimePredicted() then
+	    	    extrasound:EmitSound("weapons/physcannon/energy_disintegrate4.wav", 100, 135, 1, CHAN_WEAPON)
+		end
+    		extrasound:Remove()
+    	    end
     	end	
 	self:SetNextSecondaryFire(CurTime() + 1)
 	self:SetNextPrimaryFire(CurTime() + 1)
@@ -219,6 +225,7 @@ function SWEP:PrimaryAttack()
     shot = 1
 end
 function SWEP:SecondaryAttack()
+    if CLIENT then return end
     if spell == 1 then
 	ammoneeded = 1
 	if checkammo(self, ammoneeded) == false then
@@ -298,11 +305,15 @@ function SWEP:SecondaryAttack()
 	    if dissolving == 0 then
 	    	entity:TakeDamageInfo(dmg)
 	    end
-    	    local extrasound = ents.Create("base_gmodentity")
-    	    extrasound:Spawn()
-    	    extrasound:SetPos(trace.HitPos)
-    	    extrasound:EmitSound("weapons/stunstick/stunstick_impact1.wav", 100, 100, 1, CHAN_WEAPON)
-    	    extrasound:Remove()
+    	    if SERVER then
+    		local extrasound = ents.Create("base_gmodentity")
+    		extrasound:Spawn()
+    		extrasound:SetPos(self:GetOwner():GetShootPos())
+		if IsFirstTimePredicted() then
+	    	    extrasound:EmitSound("weapons/stunstick/stunstick_impact1.wav", 100, 100, 1, CHAN_WEAPON)
+		end
+    		extrasound:Remove()
+    	    end
     	end	
 	self:SetNextSecondaryFire(CurTime() + 0.25)
 	self:SetNextPrimaryFire(CurTime() + 1)

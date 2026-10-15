@@ -38,7 +38,13 @@ SWEP.Secondary.Ammo        = "none"
 function SWEP:Initialize()
     self:SetHoldType("melee")
 end
-
+local hitmaterials = {
+    [MAT_ANTLION] = true,
+    [MAT_BLOODYFLESH] = true,
+    [MAT_EGGSHELL] = true,
+    [MAT_FLESH] = true,
+    [MAT_ALIENFLESH] = true
+}
 -- shoot
 function SWEP:PrimaryAttack()
     self:SetNextPrimaryFire(CurTime() + 1.25)
@@ -49,7 +55,9 @@ function SWEP:PrimaryAttack()
         tracepara.endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 80
 	tracepara.filter = self:GetOwner()
 	tracepara.mask = MASK_SOLID
-	local trace = util.TraceLine(tracepara)
+	tracepara.mins = Vector(-20, -20, -20)
+	tracepara.maxs = Vector(20, 20, 20)
+	local trace = util.TraceHull(tracepara)
     	if trace.Hit and IsValid(self) and IsValid(self:GetOwner()) then
 
 	    self:SetNextSecondaryFire(CurTime() + 1.15)
@@ -68,34 +76,64 @@ function SWEP:PrimaryAttack()
 		    end
 		end
 	    end
-	    local keyvalues = trace.Entity:GetKeyValues()
-	    if keyvalues["ExplodeDamage"] then 
-	    	local explodedamage = keyvalues["ExplodeDamage"]
-	    	if keyvalues["ExplodeDamage"] > 0 then
-		    dmg:SetDamage(0)
-		end
+	    if SERVER then
+	    	local keyvalues = trace.Entity:GetKeyValues()
+	    	if keyvalues["ExplodeDamage"] then 
+	    	    local explodedamage = keyvalues["ExplodeDamage"]
+	    	    if keyvalues["ExplodeDamage"] > 0 then
+		    	dmg:SetDamage(0)
+		    end
+	    	end
+	    	dmg:SetDamageForce(self:GetOwner():GetAimVector() * 500)
+	    	dmg:SetDamagePosition(trace.HitPos)
+	    	dmg:SetAttacker(self:GetOwner())
+	    	dmg:SetInflictor(self)
+	    	dmg:SetDamageType(DMG_CLUB)
+	    	entity:TakeDamageInfo(dmg)
+	    	if hitmaterials[trace.MatType] then
+	    	    randsound = math.random(1, 6)
+	    	    if randsound == 1 then
+	    	    	self:EmitSound("physics/body/body_medium_impact_hard1.wav", 75, 100, 1, CHAN_AUTO)
+	    	    end
+	    	    if randsound == 2 then
+	    	    	self:EmitSound("physics/body/body_medium_impact_hard2.wav", 75, 100, 1, CHAN_AUTO)
+	    	    end
+	    	    if randsound == 3 then
+	    	    	self:EmitSound("physics/body/body_medium_impact_hard3.wav", 75, 100, 1, CHAN_AUTO)
+	    	    end
+	    	    if randsound == 4 then
+	    	    	self:EmitSound("physics/body/body_medium_impact_hard4.wav", 75, 100, 1, CHAN_AUTO)
+	    	    end
+	    	    if randsound == 5 then
+	    	    	self:EmitSound("physics/body/body_medium_impact_hard5.wav", 75, 100, 1, CHAN_AUTO)
+	    	    end
+	    	    if randsound == 6 then
+	    	    	self:EmitSound("physics/body/body_medium_impact_hard6.wav", 75, 100, 1, CHAN_AUTO)
+	    	    end
+	    	else
+	    	    randsound = math.random(1, 2)
+	    	    if randsound == 1 then
+	    		self:EmitSound("weapons/crowbar/crowbar_impact1.wav", 75, 100, 1, CHAN_AUTO)
+	    	    end
+	    	    if randsound == 2 then
+	    	    	self:EmitSound("weapons/crowbar/crowbar_impact2.wav", 75, 100, 1, CHAN_AUTO)
+	    	    end
+	    	end
 	    end
-	    dmg:SetDamageForce(self:GetOwner():GetAimVector() * 500)
-	    dmg:SetDamagePosition(trace.HitPos)
-	    dmg:SetAttacker(self:GetOwner())
-	    dmg:SetInflictor(self)
-	    dmg:SetDamageType(DMG_SLASH)
-	    entity:TakeDamageInfo(dmg)
-	    randsound = math.random(1, 2)
-	    if randsound == 1 then
-	    	self:EmitSound("weapons/crowbar/crowbar_impact1.wav", 75, 100, 1, CHAN_AUTO)
-	    end
-	    if randsound == 2 then
-	    	self:EmitSound("weapons/crowbar/crowbar_impact2.wav", 75, 100, 1, CHAN_AUTO)
-	    end
+
+
 	end
     end)
     self:GetOwner():SetAnimation(PLAYER_ATTACK1)
-    local extrasound = ents.Create("base_gmodentity")
-    extrasound:Spawn()
-    extrasound:SetPos(self:GetOwner():GetShootPos())
-    extrasound:EmitSound("weapons/iceaxe/iceaxe_swing1.wav", 65, 65, 1, CHAN_WEAPON)
-    extrasound:Remove()
+    if SERVER then
+    	local extrasound = ents.Create("base_gmodentity")
+    	extrasound:Spawn()
+    	extrasound:SetPos(self:GetOwner():GetShootPos())
+	if IsFirstTimePredicted() then
+	    extrasound:EmitSound("weapons/iceaxe/iceaxe_swing1.wav", 65, 65, 1, CHAN_WEAPON)
+	end
+    	extrasound:Remove()
+    end
     self:EmitSound("weapons/slam/throw.wav", 65, 110, 1, CHAN_AUTO)
 end
 

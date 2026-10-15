@@ -62,7 +62,9 @@ function SWEP:PrimaryAttack()
         tracepara.endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 65
 	tracepara.filter = self:GetOwner()
 	tracepara.mask = MASK_SOLID
-	local trace = util.TraceLine(tracepara)
+	tracepara.mins = Vector(-10, -10, -10)
+	tracepara.maxs = Vector(10, 10, 10)
+	local trace = util.TraceHull(tracepara)
     	if trace.Hit and IsValid(self) and IsValid(self:GetOwner()) then
 
 	    local entity = trace.Entity
@@ -80,29 +82,31 @@ function SWEP:PrimaryAttack()
 		    end
 		end
 	    end
-	    local keyvalues = trace.Entity:GetKeyValues()
-	    if keyvalues["ExplodeDamage"] then 
-	    	local explodedamage = keyvalues["ExplodeDamage"]
-	    	if keyvalues["ExplodeDamage"] > 0 then
-		    dmg:SetDamage(0)
-		end
-	    end
-	    dmg:SetDamageForce(self:GetOwner():GetAimVector() * 500)
-	    dmg:SetDamagePosition(trace.HitPos)
-	    dmg:SetAttacker(self:GetOwner())
-	    dmg:SetInflictor(self)
-	    dmg:SetDamageType(DMG_SLASH)
-	    entity:TakeDamageInfo(dmg)
-	    if hitmaterials[trace.MatType] then
-	    	randsound = math.random(1, 2)
-	    	if randsound == 1 then
-	    	    self:EmitSound("weapons/crossbow/hitbod1.wav", 50, 100, 1, CHAN_AUTO)
+	    if SERVER then
+	    	local keyvalues = trace.Entity:GetKeyValues()
+	    	if keyvalues["ExplodeDamage"] then 
+	    	    local explodedamage = keyvalues["ExplodeDamage"]
+	    	    if keyvalues["ExplodeDamage"] > 0 then
+		    	dmg:SetDamage(0)
+		    end
 	    	end
-	    	if randsound == 2 then
-	    	    self:EmitSound("weapons/crossbow/hitbod2.wav", 50, 100, 1, CHAN_AUTO)
+	    	dmg:SetDamageForce(self:GetOwner():GetAimVector() * 500)
+	    	dmg:SetDamagePosition(trace.HitPos)
+	    	dmg:SetAttacker(self:GetOwner())
+	    	dmg:SetInflictor(self)
+	    	dmg:SetDamageType(DMG_SLASH)
+	    	entity:TakeDamageInfo(dmg)
+	    	if hitmaterials[trace.MatType] then
+	    	    randsound = math.random(1, 2)
+	    	    if randsound == 1 then
+	    	    	self:EmitSound("weapons/crossbow/hitbod1.wav", 50, 100, 1, CHAN_AUTO)
+	    	    end
+	    	    if randsound == 2 then
+	    	    	self:EmitSound("weapons/crossbow/hitbod2.wav", 50, 100, 1, CHAN_AUTO)
+	    	    end
+	    	else
+	            self:EmitSound("weapons/crossbow/hit1.wav", 60, 100, 1, CHAN_AUTO)
 	    	end
-	    else
-	        self:EmitSound("weapons/crossbow/hit1.wav", 60, 100, 1, CHAN_AUTO)
 	    end
 	end
     end)
@@ -122,7 +126,9 @@ function SWEP:SecondaryAttack()
 	tracepara.start = self:GetOwner():GetShootPos()
         tracepara.endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 45
 
-	local trace = util.TraceLine(tracepara)
+	tracepara.mins = Vector(-10, -10, -10)
+	tracepara.maxs = Vector(10, 10, 10)
+	local trace = util.TraceHull(tracepara)
     	if trace.Hit and IsValid(self) and IsValid(self:GetOwner()) then
 
 	    local entity = trace.Entity
@@ -140,29 +146,31 @@ function SWEP:SecondaryAttack()
 		    end
 		end
 	    end
-	    local keyvalues = trace.Entity:GetKeyValues()
-	    if keyvalues["ExplodeDamage"] then 
-	    	local explodedamage = keyvalues["ExplodeDamage"]
-	    	if keyvalues["ExplodeDamage"] > 0 then
-		    dmg:SetDamage(0)
-		end
-	    end
-	    dmg:SetDamageForce(self:GetOwner():GetAimVector() * 1250)
-	    dmg:SetDamagePosition(trace.HitPos)
-	    dmg:SetAttacker(self:GetOwner())
-	    dmg:SetInflictor(self)
-	    dmg:SetDamageType(DMG_SLASH)
-	    entity:TakeDamageInfo(dmg)
-	    if hitmaterials[trace.MatType] then
-	    	randsound = math.random(1, 2)
-	    	if randsound == 1 then
-	    	    self:EmitSound("weapons/crossbow/hitbod1.wav", 50, 125, 1, CHAN_AUTO)
+	    if SERVER then
+	    	local keyvalues = trace.Entity:GetKeyValues()
+	    	if keyvalues["ExplodeDamage"] then 
+	    	    local explodedamage = keyvalues["ExplodeDamage"]
+	    	    if keyvalues["ExplodeDamage"] > 0 then
+		    	dmg:SetDamage(0)
+		    end
 	    	end
-	    	if randsound == 2 then
-	    	    self:EmitSound("weapons/crossbow/hitbod2.wav", 50, 125, 1, CHAN_AUTO)
+	    	dmg:SetDamageForce(self:GetOwner():GetAimVector() * 500)
+	    	dmg:SetDamagePosition(trace.HitPos)
+	    	dmg:SetAttacker(self:GetOwner())
+	    	dmg:SetInflictor(self)
+	    	dmg:SetDamageType(DMG_SLASH)
+	    	entity:TakeDamageInfo(dmg)
+	    	if hitmaterials[trace.MatType] then
+	    	    randsound = math.random(1, 2)
+	    	    if randsound == 1 then
+	    	    	self:EmitSound("weapons/crossbow/hitbod1.wav", 50, 125, 1, CHAN_AUTO)
+	    	    end
+	    	    if randsound == 2 then
+	    	    	self:EmitSound("weapons/crossbow/hitbod2.wav", 50, 125, 1, CHAN_AUTO)
+	    	    end
+	    	else
+	            self:EmitSound("weapons/crossbow/hit1.wav", 60, 125, 1, CHAN_AUTO)
 	    	end
-	    else
-	        self:EmitSound("weapons/crossbow/hit1.wav", 60, 125, 1, CHAN_AUTO)
 	    end
 	end
     end)

@@ -37,7 +37,13 @@ SWEP.Secondary.Ammo        = "none"
 function SWEP:Initialize()
     self:SetHoldType("melee2")
 end
-
+local hitmaterials = {
+    [MAT_ANTLION] = true,
+    [MAT_BLOODYFLESH] = true,
+    [MAT_EGGSHELL] = true,
+    [MAT_FLESH] = true,
+    [MAT_ALIENFLESH] = true
+}
 -- shoot
 function SWEP:PrimaryAttack()
     timer.Simple(0.25, function()
@@ -47,7 +53,9 @@ function SWEP:PrimaryAttack()
         tracepara.endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 85
 	tracepara.filter = self:GetOwner()
 	tracepara.mask = MASK_SOLID
-	local trace = util.TraceLine(tracepara)
+	tracepara.mins = Vector(-30, -30, -30)
+	tracepara.maxs = Vector(30, 30, 30)
+	local trace = util.TraceHull(tracepara)
     	if trace.Hit and IsValid(self) and IsValid(self:GetOwner()) then
 
 	    local entity = trace.Entity
@@ -65,27 +73,125 @@ function SWEP:PrimaryAttack()
 		    end
 		end
 	    end
-	    local keyvalues = trace.Entity:GetKeyValues()
-	    if keyvalues["ExplodeDamage"] then 
-	    	local explodedamage = keyvalues["ExplodeDamage"]
-	    	if keyvalues["ExplodeDamage"] > 0 then
-		    dmg:SetDamage(0)
-		end
+
+
+	    if SERVER then
+	    	local keyvalues = trace.Entity:GetKeyValues()
+	    	if keyvalues["ExplodeDamage"] then 
+	    	    local explodedamage = keyvalues["ExplodeDamage"]
+	    	    if keyvalues["ExplodeDamage"] > 0 then
+		    	dmg:SetDamage(0)
+		    end
+	    	end
+	    	dmg:SetDamageForce(self:GetOwner():GetAimVector() * 500)
+	    	dmg:SetDamagePosition(trace.HitPos)
+	    	dmg:SetAttacker(self:GetOwner())
+	    	dmg:SetInflictor(self)
+	    	dmg:SetDamageType(DMG_CLUB)
+	    	entity:TakeDamageInfo(dmg)
+	    	if hitmaterials[trace.MatType] then
+	    	    randsound = math.random(1, 3)
+	    	    if randsound == 1 then
+	    	    	self:EmitSound("physics/flesh/flesh_strider_impact_bullet1.wav", 50, 100, 1, CHAN_AUTO)
+    			if SERVER then
+    			    local extrasound = ents.Create("base_gmodentity")
+    			    extrasound:Spawn()
+    			    extrasound:SetPos(self:GetOwner():GetShootPos())
+			    if IsFirstTimePredicted() then
+				randsound = math.random(1, 6)
+	    	    		if randsound == 1 then
+	    	    		    self:EmitSound("physics/body/body_medium_impact_hard1.wav", 75, 100, 1, CHAN_AUTO)
+	    	    		end
+	    	    		if randsound == 2 then
+	    	    		    self:EmitSound("physics/body/body_medium_impact_hard2.wav", 75, 100, 1, CHAN_AUTO)
+	    	    		end
+	    	    		if randsound == 3 then
+	    	    		    self:EmitSound("physics/body/body_medium_impact_hard3.wav", 75, 100, 1, CHAN_AUTO)
+	    	    		end
+	    	    		if randsound == 4 then
+	    	    		    self:EmitSound("physics/body/body_medium_impact_hard4.wav", 75, 100, 1, CHAN_AUTO)
+	    	    		end
+	    	    		if randsound == 5 then
+	    	    		    self:EmitSound("physics/body/body_medium_impact_hard5.wav", 75, 100, 1, CHAN_AUTO)
+	    	    		end
+	    	    		if randsound == 6 then
+	    	    		    self:EmitSound("physics/body/body_medium_impact_hard6.wav", 75, 100, 1, CHAN_AUTO)
+	    	    		end
+			    end
+    			    extrasound:Remove()
+    			end
+	    	    end
+	    	    if randsound == 2 then
+	    	    	self:EmitSound("physics/flesh/flesh_strider_impact_bullet2.wav", 50, 100, 1, CHAN_AUTO)
+    			if SERVER then
+    			    local extrasound = ents.Create("base_gmodentity")
+    			    extrasound:Spawn()
+    			    extrasound:SetPos(self:GetOwner():GetShootPos())
+			    if IsFirstTimePredicted() then
+				randsound = math.random(1, 6)
+	    	    		if randsound == 1 then
+	    	    		    self:EmitSound("physics/body/body_medium_impact_hard1.wav", 75, 100, 1, CHAN_AUTO)
+	    	    		end
+	    	    		if randsound == 2 then
+	    	    		    self:EmitSound("physics/body/body_medium_impact_hard2.wav", 75, 100, 1, CHAN_AUTO)
+	    	    		end
+	    	    		if randsound == 3 then
+	    	    		    self:EmitSound("physics/body/body_medium_impact_hard3.wav", 75, 100, 1, CHAN_AUTO)
+	    	    		end
+	    	    		if randsound == 4 then
+	    	    		    self:EmitSound("physics/body/body_medium_impact_hard4.wav", 75, 100, 1, CHAN_AUTO)
+	    	    		end
+	    	    		if randsound == 5 then
+	    	    		    self:EmitSound("physics/body/body_medium_impact_hard5.wav", 75, 100, 1, CHAN_AUTO)
+	    	    		end
+	    	    		if randsound == 6 then
+	    	    		    self:EmitSound("physics/body/body_medium_impact_hard6.wav", 75, 100, 1, CHAN_AUTO)
+	    	    		end
+			    end
+    			    extrasound:Remove()
+    			end
+	    	    end
+	    	    if randsound == 3 then
+	    	    	self:EmitSound("physics/flesh/flesh_strider_impact_bullet3.wav", 50, 100, 1, CHAN_AUTO)
+    			if SERVER then
+    			    local extrasound = ents.Create("base_gmodentity")
+    			    extrasound:Spawn()
+    			    extrasound:SetPos(self:GetOwner():GetShootPos())
+			    if IsFirstTimePredicted() then
+				randsound = math.random(1, 6)
+	    	    		if randsound == 1 then
+	    	    		    self:EmitSound("physics/body/body_medium_impact_hard1.wav", 75, 100, 1, CHAN_AUTO)
+	    	    		end
+	    	    		if randsound == 2 then
+	    	    		    self:EmitSound("physics/body/body_medium_impact_hard2.wav", 75, 100, 1, CHAN_AUTO)
+	    	    		end
+	    	    		if randsound == 3 then
+	    	    		    self:EmitSound("physics/body/body_medium_impact_hard3.wav", 75, 100, 1, CHAN_AUTO)
+	    	    		end
+	    	    		if randsound == 4 then
+	    	    		    self:EmitSound("physics/body/body_medium_impact_hard4.wav", 75, 100, 1, CHAN_AUTO)
+	    	    		end
+	    	    		if randsound == 5 then
+	    	    		    self:EmitSound("physics/body/body_medium_impact_hard5.wav", 75, 100, 1, CHAN_AUTO)
+	    	    		end
+	    	    		if randsound == 6 then
+	    	    		    self:EmitSound("physics/body/body_medium_impact_hard6.wav", 75, 100, 1, CHAN_AUTO)
+	    	    		end
+			    end
+    			    extrasound:Remove()
+    			end
+	    	    end
+	    	else
+	    	    randsound = math.random(1, 2)
+	    	    if randsound == 1 then
+	    		self:EmitSound("physics/metal/metal_sheet_impact_bullet2.wav", 70, math.Rand(75, 125), 1, CHAN_AUTO)
+	    	    end
+	    	    if randsound == 2 then
+	    		self:EmitSound("physics/metal/metal_sheet_impact_bullet2.wav", 70, math.Rand(75, 125), 1, CHAN_AUTO)
+	    	    end
+	    	end
 	    end
-	    dmg:SetDamageForce(self:GetOwner():GetAimVector() * 500)
-	    dmg:SetDamagePosition(trace.HitPos)
-	    dmg:SetAttacker(self:GetOwner())
-	    dmg:SetInflictor(self)
-	    dmg:SetDamageType(DMG_CLUB)
-	    entity:TakeDamageInfo(dmg)
-	    randsound = math.random(1, 2)
-	    if randsound == 1 then
-	    	self:EmitSound("physics/metal/metal_sheet_impact_bullet2.wav", 70, math.Rand(75, 125), 1, CHAN_AUTO)
-	    end
-	    if randsound == 2 then
-	    	self:EmitSound("physics/metal/metal_sheet_impact_bullet2.wav", 70, math.Rand(75, 125), 1, CHAN_AUTO)
-	    end
-    	end	
+	end	
     end)
     self:GetOwner():SetAnimation(PLAYER_ATTACK1)
     self:EmitSound("weapons/iceaxe/iceaxe_swing1.wav", 70, 80, 1, CHAN_AUTO)
