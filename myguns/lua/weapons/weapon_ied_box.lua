@@ -203,10 +203,10 @@ function SWEP:PrimaryAttack()
 		if obj:VisibleVec(prop:GetPos()) then
 		
 		    if IsValid(physobj) and obj:GetMoveType() == MOVETYPE_VPHYSICS then
-		    	physobj:ApplyForceCenter((prop:GetPos() - obj:GetPos()):Angle():Forward() * (250000 / (dist * 0.01) * -1))
+		    	physobj:ApplyForceCenter((prop:GetPos() - obj:GetPos()):Angle():Forward() * (250000 / (dist * 0.1) * -1))
 		    end
 		    if obj:IsPlayer() then
-			obj:SetVelocity((prop:GetPos() - obj:GetPos()):Angle():Forward() * (25000 / (dist * 0.01) * -1))
+			obj:SetVelocity((prop:GetPos() - obj:GetPos()):Angle():Forward() * (25000 / (dist * 0.1) * -1))
 		    end
 		end
 	    end

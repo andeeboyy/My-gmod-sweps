@@ -162,6 +162,22 @@ function SWEP:PrimaryAttack()
 	end
     end)
 
+    for _, obj in ipairs(ents.FindInSphere(plr:WorldSpaceCenter(), 5000)) do
+	if IsValid(obj) and SERVER then
+	    local dist = obj:GetPos():Distance(plr:WorldSpaceCenter())
+	    local physobj = obj:GetPhysicsObject()
+	    if obj:VisibleVec(plr:WorldSpaceCenter()) then
+		
+		if IsValid(physobj) and obj:GetMoveType() == MOVETYPE_VPHYSICS then
+		    physobj:ApplyForceCenter((plr:WorldSpaceCenter() - obj:GetPos()):Angle():Forward() * (250000 / (dist * 0.1) * -1))
+	        end
+	        if obj:IsPlayer() then
+		    obj:SetVelocity((plr:WorldSpaceCenter() - obj:GetPos()):Angle():Forward() * (25000 / (dist * 0.1) * -1))
+	        end
+	    end
+        end
+    end
+
     for _, obj in ipairs(ents.FindInSphere(self:GetPos(), 3500)) do
 	if IsValid(obj) then
 	    local dist = obj:GetPos():Distance(self:GetPos())
