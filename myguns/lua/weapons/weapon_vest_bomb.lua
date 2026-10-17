@@ -117,12 +117,35 @@ function SWEP:PrimaryAttack()
    	ParticleEffect("striderbuster_explode_dummy_parts", self:GetPos() + offset, Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)))
     end
     ParticleEffect("striderbuster_break_d", self:GetPos() + offset, Angle(0, 0, 0))
+    ParticleEffect("building_explosion", self:GetPos(), Angle(90, 0, 0))
     ParticleEffect("striderbuster_break_e", self:GetPos() + offset, Angle(0, 0, 0))
     ParticleEffect("striderbuster_break_b", self:GetPos() + offset, Angle(0, 0, 0))
     ParticleEffect("striderbuster_break_explode", self:GetPos() + offset, Angle(0, 0, 0))
     local cloud = ents.Create("ar2explosion")
     cloud:SetPos(self:GetPos() + offset)
     cloud:Spawn()
+    for i = 1, 100 do
+        local proptracepara = {}
+        proptracepara.start = plr:WorldSpaceCenter()
+        proptracepara.endpos = plr:GetPos() + Vector(0, 0, -500)
+        proptracepara.mask = MASK_SOLID
+        proptracepara.filter = plr
+        local proptrace = util.TraceLine(proptracepara)
+
+        local angle = Angle(proptrace.Normal, math.Rand(0, 360), proptrace.Normal)
+        local vector = angle:Forward() * math.Rand(100, 750) + plr:GetPos()
+
+        local tracepara = {}
+        tracepara.start = vector + Vector(0, 0, 250)
+        tracepara.endpos = vector + Vector(0, 0, -500)
+        tracepara.mask = MASK_SOLID
+        local trace = util.TraceLine(tracepara)
+
+        local surfpos = trace.HitPos
+        if trace.Hit then
+            ParticleEffect("striderbuster_break_d", surfpos, Angle(0, 0, 0))
+        end
+    end
     local randompicker = math.random(1, 4)
     if randompicker == 1 and IsFirstTimePredicted() then
 	self:EmitSound("ambient/explosions/explode_2.wav", 120, math.Rand(66, 133), 1, CHAN_AUTO)
