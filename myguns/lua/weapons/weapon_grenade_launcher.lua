@@ -166,19 +166,20 @@ function SWEP:PrimaryAttack()
 	dust:SetScale(750)
 	util.Effect("ThumperDust", dust)
 
-	local proptracepara = {}
-	proptracepara.start = prop:WorldSpaceCenter()
-        proptracepara.endpos = prop:GetPos() + Vector(0, 0, -500)
-	proptracepara.mask = MASK_SOLID
-	proptracepara.filter = prop
-	local proptrace = util.TraceLine(proptracepara)
+	local postracepara = {}
+	postracepara.start = prop:WorldSpaceCenter()
+        postracepara.endpos = prop:GetPos() + Vector(0, 0, 210)
+	postracepara.mask = MASK_SOLID
+	postracepara.filter = prop
+	local postrace = util.TraceLine(postracepara)
     	for i = 1, 50 do
 
-	    local angle = Angle(proptrace.Normal, math.Rand(0, 360), proptrace.Normal)
-	    local vector = angle:Forward() * math.Rand(100, 400) + prop:GetPos()
+	    local angle = Angle(0, math.Rand(0, 360), 0)
+
+	    local vector = angle:Forward() * math.Rand(100, 500) + prop:GetPos()
 
 	    local tracepara = {}
-	    tracepara.start = vector + Vector(0, 0, 250)
+	    tracepara.start = Vector(vector.x, vector.y, postrace.HitPos.z - 10)
             tracepara.endpos = vector + Vector(0, 0, -500)
 	    tracepara.mask = MASK_SOLID
 	    local trace = util.TraceLine(tracepara)

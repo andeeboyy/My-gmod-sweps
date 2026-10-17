@@ -170,23 +170,22 @@ function SWEP:PrimaryAttack()
 	    ParticleEffect("striderbuster_break_b", prop:GetPos() + offset, Angle(0, 0, 0))
 	    ParticleEffect("striderbuster_break_explode", prop:GetPos() + offset, Angle(0, 0, 0))
 	    ParticleEffect("building_explosion", prop:GetPos(), Angle(90, 0, 0))
-	    local proptracepara = {}
-	    proptracepara.start = prop:WorldSpaceCenter()
-            proptracepara.endpos = prop:GetPos() + Vector(0, 0, -500)
-	    proptracepara.mask = MASK_SOLID
-	    local filter = {}
-	    filter.ent1 = prop
-	    filter.ent2 = rocket
-	
-	    proptracepara.filter = filter
-	    local proptrace = util.TraceLine(proptracepara)
+
+	    local postracepara = {}
+	    postracepara.start = prop:WorldSpaceCenter()
+            postracepara.endpos = prop:GetPos() + Vector(0, 0, 310)
+	    postracepara.mask = MASK_SOLID
+	    postracepara.filter = prop
+	    local postrace = util.TraceLine(postracepara)
+
     	    for i = 1, 100 do
 
-	        local angle = Angle(proptrace.Normal, math.Rand(0, 360), proptrace.Normal)
-	        local vector = angle:Forward() * math.Rand(100, 500) + prop:GetPos()
+	        local angle = Angle(0, math.Rand(0, 360), 0)
+
+	        local vector = angle:Forward() * math.Rand(100, 750) + prop:GetPos()
 
 	        local tracepara = {}
-	        tracepara.start = vector + Vector(0, 0, 250)
+	        tracepara.start = Vector(vector.x, vector.y, postrace.HitPos.z - 10)
                 tracepara.endpos = vector + Vector(0, 0, -500)
 	        tracepara.mask = MASK_SOLID
 	        local trace = util.TraceLine(tracepara)
@@ -196,6 +195,7 @@ function SWEP:PrimaryAttack()
 	    	    ParticleEffect("striderbuster_break_d", surfpos, Angle(0, 0, 0))
 	        end
     	    end
+
 	    local randompicker = math.random(1, 4)
 	    if randompicker == 1 and IsFirstTimePredicted() then
 	        prop:EmitSound("ambient/explosions/explode_2.wav", 120, math.Rand(66, 133), 1, CHAN_AUTO)
