@@ -166,13 +166,13 @@ function SWEP:PrimaryAttack()
 	local cloud = ents.Create("ar2explosion")
 	cloud:SetPos(prop:GetPos() + offset)
 	cloud:Spawn()
+	local proptracepara = {}
+	proptracepara.start = prop:WorldSpaceCenter()
+        proptracepara.endpos = prop:GetPos() + Vector(0, 0, -500)
+	proptracepara.mask = MASK_SOLID
+	proptracepara.filter = prop
+	local proptrace = util.TraceLine(proptracepara)
     	for i = 1, 100 do
-	    local proptracepara = {}
-	    proptracepara.start = prop:WorldSpaceCenter()
-            proptracepara.endpos = prop:GetPos() + Vector(0, 0, -500)
-	    proptracepara.mask = MASK_SOLID
-	    proptracepara.filter = prop
-	    local proptrace = util.TraceLine(proptracepara)
 
 	    local angle = Angle(proptrace.Normal, math.Rand(0, 360), proptrace.Normal)
 	    local vector = angle:Forward() * math.Rand(100, 750) + prop:GetPos()

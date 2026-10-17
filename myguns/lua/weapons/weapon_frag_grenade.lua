@@ -218,6 +218,28 @@ local function throw(time, ent, toss, deathgrenade)
 	if IsFirstTimePredicted() then
 	    prop:EmitSound("npc/env_headcrabcanister/explosion.wav", 140, 100, 1, CHAN_AUTO)
 	end
+	local proptracepara = {}
+	proptracepara.start = prop:WorldSpaceCenter()
+        proptracepara.endpos = prop:GetPos() + Vector(0, 0, -500)
+	proptracepara.mask = MASK_SOLID
+	proptracepara.filter = prop
+	local proptrace = util.TraceLine(proptracepara)
+    	for i = 1, 50 do
+
+	    local angle = Angle(proptrace.Normal, math.Rand(0, 360), proptrace.Normal)
+	    local vector = angle:Forward() * math.Rand(100, 400) + prop:GetPos()
+
+	    local tracepara = {}
+	    tracepara.start = vector + Vector(0, 0, 250)
+            tracepara.endpos = vector + Vector(0, 0, -500)
+	    tracepara.mask = MASK_SOLID
+	    local trace = util.TraceLine(tracepara)
+
+	    local surfpos = trace.HitPos
+	    if trace.Hit then
+	    	ParticleEffect("striderbuster_break_d", surfpos, Angle(0, 0, 0))
+	    end
+    	end
 
 	local propboom = ents.Create("prop_physics")
 	propboom:SetModel("models/props_phx/ww2bomb.mdl")
