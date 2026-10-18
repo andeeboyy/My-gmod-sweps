@@ -10,6 +10,8 @@ local movevertical = 0
 
 local turn = 0
 
+local turnhorizontal = 0
+
 local AccuracyMeter = 0
 
 local ads = 0
@@ -21,6 +23,8 @@ local auto = 1
 local shot = 0
 
 local canceled = 0
+
+local aimangles = Angle(0, 0, 0)
 
 -- spawnmenu
 
@@ -209,6 +213,7 @@ function SWEP:Deploy()
 	self:Remove()
 	return
     end
+    aimangles = self:GetOwner():EyeAngles()
     canceled = 1
     self:SetHoldType("ar2")
     return true
@@ -246,7 +251,6 @@ function SWEP:Think()
 	    turn = 2.25
 	end
     end
-
     if self:GetOwner():KeyDown(IN_SPEED) then
 	if self:GetOwner():Crouching() then
 	    self:SetHoldType("shotgun")
@@ -301,6 +305,8 @@ function SWEP:GetViewModelPosition(pos, ang)
 
 	ang:RotateAroundAxis(ang:Right(), turn)
 
+	ang:RotateAroundAxis(ang:Up(), turnhorizontal)
+
     	return pos, ang
     else
 	if self:GetOwner():KeyDown(IN_SPEED) then
@@ -319,6 +325,8 @@ function SWEP:GetViewModelPosition(pos, ang)
 
 	    ang:RotateAroundAxis(ang:Right(), turn)
 
+	    ang:RotateAroundAxis(ang:Up(), turnhorizontal)
+
     	    return pos, ang
 	end
 	spronetime = 1
@@ -328,6 +336,8 @@ function SWEP:GetViewModelPosition(pos, ang)
     	pos = pos + ang:Right() * moveside + ang:Up() * movevertical + ang:Forward() * -13.5
 
 	ang:RotateAroundAxis(ang:Right(), turn)
+
+	ang:RotateAroundAxis(ang:Up(), turnhorizontal)
 
     	return pos, ang
     end
