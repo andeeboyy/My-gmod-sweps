@@ -308,10 +308,10 @@ function SWEP:Reload()
 end
 
 function SWEP:Deploy()
-    
+    print("deploy")
+    self:SetNextPrimaryFire(CurTime() + 0.1)
     self:SetNextSecondaryFire(CurTime() + 1.3)
     if self:Clip1() < 1 then
-	self:SetNextPrimaryFire(CurTime() + 5)
 	if self:Ammo1() < 1 then
 	    self:GetOwner():DrawViewModel(false, 0)
 	    return
@@ -331,6 +331,7 @@ end
 
 function SWEP:Holster()
     CanFire = 0
+    print("holster")
     return true
 end
 
