@@ -70,7 +70,7 @@ function SWEP:PrimaryAttack()
     timer.Simple(0.5, function()
 	self:GetOwner():DrawViewModel(false, 0)
 	if CanFire == 0 then return end
-	self:EmitSound("weapons/slam/throw.wav", 100, 75, 1, CHAN_WEAPON)
+	self:EmitSound("buttons/button14.wav", 60, 50, 1, CHAN_WEAPON)
 	self:TakePrimaryAmmo(1)
     	prop:SetModel("models/props_junk/cardboard_box004a.mdl")
 	prop:SetPos(self:GetOwner():GetShootPos())
@@ -284,6 +284,7 @@ function SWEP:SecondaryAttack()
     self:SetNextSecondaryFire(CurTime() + 1)
     self:EmitSound("buttons/blip1.wav", 40, 100, 1, CHAN_AUTO)
     for _, bombdet in ipairs(ents.FindByName(bombname)) do
+	bombdet:EmitSound("buttons/blip1.wav", 40, 100, 1, CHAN_WEAPON)
 	timer.Simple(0.25, function()
 	    if IsValid(bombdet) then
 	    	bombdet:TakeDamage(100)
