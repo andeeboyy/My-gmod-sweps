@@ -308,8 +308,7 @@ function SWEP:Reload()
 end
 
 function SWEP:Deploy()
-    print("deploy")
-    self:SetNextPrimaryFire(CurTime() + 0.1)
+    
     self:SetNextSecondaryFire(CurTime() + 1.3)
     if self:Clip1() < 1 then
 	if self:Ammo1() < 1 then
@@ -319,11 +318,13 @@ function SWEP:Deploy()
 	self:GetOwner():DrawViewModel(true, 0)
 	self:DefaultReload(ACT_VM_DRAW)
 	if nextReload > CurTime() then
-   	    self:SetNextPrimaryFire(nextReload + 2 / GetConVar("sv_defaultdeployspeed"):GetFloat())
+   	    self:SetNextPrimaryFire(nextReload + 0.5 / GetConVar("sv_defaultdeployspeed"):GetFloat())
 	else
-	    self:SetNextPrimaryFire(CurTime() + 2 / GetConVar("sv_defaultdeployspeed"):GetFloat())
+	    self:SetNextPrimaryFire(CurTime() + 0.5 / GetConVar("sv_defaultdeployspeed"):GetFloat())
 	end
-	self:SetNextSecondaryFire(CurTime() + 1)
+	self:SetNextSecondaryFire(CurTime() + 0.5)
+    else
+	self:SetNextPrimaryFire(CurTime() + 0.5 / GetConVar("sv_defaultdeployspeed"):GetFloat())
     end
     CanFire = 1
     return true
@@ -331,7 +332,6 @@ end
 
 function SWEP:Holster()
     CanFire = 0
-    print("holster")
     return true
 end
 
