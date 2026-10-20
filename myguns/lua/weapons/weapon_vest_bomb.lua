@@ -64,7 +64,7 @@ function SWEP:PrimaryAttack()
 	bullet.Inflictor = self
 	bullet.Num = 1
 	bullet.Force = 1
-	bullet.HullSize = 60
+	bullet.HullSize = 90
 	bullet.Tracer = 0
 	bullet.Dir = bulletdir
 	bullet.Src = plr:WorldSpaceCenter()
@@ -166,8 +166,8 @@ function SWEP:PrimaryAttack()
     end
     local boom = ents.Create("env_explosion")
     boom:SetPos(plr:GetShootPos())
-    boom:SetKeyValue("iMagnitude", 1000)
-    boom:SetKeyValue("iRadiusOverride", 1000)
+    boom:SetKeyValue("iMagnitude", 250)
+    boom:SetKeyValue("iRadiusOverride", 1500)
     boom:Fire("Explode")
 
     local propboom = ents.Create("prop_physics")
@@ -177,8 +177,8 @@ function SWEP:PrimaryAttack()
     propboom:Spawn()
     timer.Simple(0.015, function()
 	if IsValid(propboom) then
-	    propboom:SetKeyValue("ExplodeDamage", 2500)
-	    propboom:SetKeyValue("ExplodeRadius", 350)
+	    propboom:SetKeyValue("ExplodeDamage", 4500)
+	    propboom:SetKeyValue("ExplodeRadius", 650)
 	end
     end)
     timer.Simple(0.03, function()
@@ -203,23 +203,23 @@ function SWEP:PrimaryAttack()
         end
     end
 
-    for _, obj in ipairs(ents.FindInSphere(self:GetPos(), 4000)) do
-	if IsValid(obj) then
-	    local dist = obj:GetPos():Distance(self:GetPos())
-	    if IsValid(obj) and obj:VisibleVec(self:WorldSpaceCenter()) then
-	    	local dmg = DamageInfo()
-		if obj:IsNPC() or obj:IsPlayer() or obj:IsNextBot() or obj:IsRagdoll() then
-	    	    dmg:SetDamage(1250 / ((dist * 0.01) + 1))
-		else
-		    dmg:SetDamage(150 / ((dist * 0.01) + 1))
-		end
-		dmg:SetAttacker(self:GetOwner())
-	    	dmg:SetInflictor(self)
-	    	dmg:SetDamageType(DMG_BULLET)
-		dmg:SetDamagePosition(obj:WorldSpaceCenter())
-	    	obj:TakeDamageInfo(dmg)
-	    end
-	end
+    for _, obj in ipairs(ents.FindInSphere(plr:WorldSpaceCenter(), 4000)) do
+        if IsValid(obj) then
+            local dist = obj:GetPos():Distance(plr:WorldSpaceCenter())
+            if IsValid(obj) and obj:VisibleVec(plr:WorldSpaceCenter()) then
+                local dmg = DamageInfo()
+                if obj:IsNPC() or obj:IsPlayer() or obj:IsNextBot() or obj:IsRagdoll() then
+                    dmg:SetDamage(1250 / ((dist * 0.01) + 1))
+                else
+                    dmg:SetDamage(150 / ((dist * 0.01) + 1))
+                end
+                dmg:SetAttacker(plr)
+                dmg:SetInflictor(self)
+                dmg:SetDamageType(DMG_BULLET)
+                dmg:SetDamagePosition(obj:WorldSpaceCenter())
+                obj:TakeDamageInfo(dmg)
+            end
+        end
     end
     if IsValid(self) and IsValid(plr) and SERVER then
 	plr:StripWeapon("weapon_vest_bomb")
