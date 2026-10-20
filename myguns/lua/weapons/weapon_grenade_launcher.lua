@@ -226,6 +226,7 @@ function SWEP:PrimaryAttack()
 		    end
 		    dmg:SetAttacker(prop)
 	    	    dmg:SetInflictor(prop)
+		    dmg:SetDamagePosition(obj:WorldSpaceCenter())
 	    	    dmg:SetDamageType(DMG_BULLET)
 	    	    obj:TakeDamageInfo(dmg)
 		end

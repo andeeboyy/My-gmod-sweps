@@ -238,17 +238,18 @@ function SWEP:PrimaryAttack()
 	    boom2:SetKeyValue("iMagnitude", 5000)
 	    boom2:SetKeyValue("iRadiusOverride", 250)
 	    boom2:Fire("Explode")
-	    for _, obj in ipairs(ents.FindInSphere(prop:GetPos(), 3500)) do
+	    for _, obj in ipairs(ents.FindInSphere(prop:GetPos(), 2000)) do
 	    	if IsValid(obj) then
 	    	    local dist = obj:GetPos():Distance(prop:GetPos())
 		    if IsValid(obj) and obj:VisibleVec(prop:WorldSpaceCenter()) then
 	    	    	local dmg = DamageInfo()
 		    	if obj:IsNPC() or obj:IsPlayer() or obj:IsNextBot() or obj:IsRagdoll() then
-	    	    	    dmg:SetDamage(650 / ((dist * 0.01) + 1))
+	    	    	    dmg:SetDamage(650 / ((dist * 0.025) + 1))
 		    	else
-			    dmg:SetDamage(125 / ((dist * 0.01) + 1))
+			    dmg:SetDamage(125 / ((dist * 0.025) + 1))
 		    	end
 		    	dmg:SetAttacker(prop)
+			dmg:SetDamagePosition(obj:WorldSpaceCenter())
 	    	    	dmg:SetInflictor(prop)
 	    	    	dmg:SetDamageType(DMG_BULLET)
 	    	    	obj:TakeDamageInfo(dmg)

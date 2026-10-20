@@ -275,6 +275,7 @@ local function throw(time, ent, toss, deathgrenade)
 		    else
 			dmg:SetDamage(50 / ((dist * 0.01) + 1))
 		    end
+		    dmg:SetDamagePosition(obj:WorldSpaceCenter())
 		    dmg:SetAttacker(prop)
 	    	    dmg:SetInflictor(prop)
 	    	    dmg:SetDamageType(DMG_BULLET)

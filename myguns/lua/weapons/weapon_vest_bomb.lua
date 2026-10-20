@@ -203,7 +203,7 @@ function SWEP:PrimaryAttack()
         end
     end
 
-    for _, obj in ipairs(ents.FindInSphere(self:GetPos(), 3500)) do
+    for _, obj in ipairs(ents.FindInSphere(self:GetPos(), 4000)) do
 	if IsValid(obj) then
 	    local dist = obj:GetPos():Distance(self:GetPos())
 	    if IsValid(obj) and obj:VisibleVec(self:WorldSpaceCenter()) then
@@ -216,6 +216,7 @@ function SWEP:PrimaryAttack()
 		dmg:SetAttacker(self:GetOwner())
 	    	dmg:SetInflictor(self)
 	    	dmg:SetDamageType(DMG_BULLET)
+		dmg:SetDamagePosition(obj:WorldSpaceCenter())
 	    	obj:TakeDamageInfo(dmg)
 	    end
 	end
