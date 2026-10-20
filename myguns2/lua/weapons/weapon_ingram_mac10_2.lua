@@ -44,7 +44,7 @@ SWEP.Slot = 2
 
 -- stats
 SWEP.AccurateCrossHair = true
-SWEP.Primary.Ammo = "SMG1"
+SWEP.Primary.Ammo = "pistol"
 SWEP.Primary.ClipSize = 32
 SWEP.Primary.DefaultClip = 32
 SWEP.Primary.Automatic = true

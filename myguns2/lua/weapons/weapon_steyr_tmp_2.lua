@@ -28,7 +28,7 @@ local canceled = 0
 
 SWEP.Spawnable = true
 SWEP.PrintName = "Steyr TMP"
-SWEP.Purpose = "Heckler & Koch UMP45\nSecondary attack to ADS.\n Secondary attack while sprinting toggles between full-auto and semi-auto."
+SWEP.Purpose = "Secondary attack to ADS.\n Secondary attack while sprinting toggles between full-auto and semi-auto."
 SWEP.Base = "weapon_base"
 SWEP.Category = "my guns 2 - Submachine Guns"
 
@@ -45,7 +45,7 @@ SWEP.Slot = 2
 
 -- stats
 SWEP.AccurateCrossHair = true
-SWEP.Primary.Ammo = "SMG1"
+SWEP.Primary.Ammo = "pistol"
 SWEP.Primary.ClipSize = 30
 SWEP.Primary.DefaultClip = 30
 SWEP.Primary.Automatic = true
