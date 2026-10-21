@@ -194,25 +194,33 @@ function SWEP:PrimaryAttack()
 	    if obj:VisibleVec(plr:WorldSpaceCenter()) then
 		
 		if IsValid(physobj) and obj:GetMoveType() == MOVETYPE_VPHYSICS then
-		    physobj:ApplyForceCenter((plr:WorldSpaceCenter() - obj:GetPos()):Angle():Forward() * (250000 / (dist * 0.1) * -1))
+		    physobj:ApplyForceCenter((plr:WorldSpaceCenter() - obj:GetPos()):Angle():Forward() * (250000 / (dist * 0.2) * -1))
 	        end
 	        if obj:IsPlayer() then
-		    obj:SetVelocity((plr:WorldSpaceCenter() - obj:GetPos()):Angle():Forward() * (25000 / (dist * 0.1) * -1))
+		    obj:SetVelocity((plr:WorldSpaceCenter() - obj:GetPos()):Angle():Forward() * (25000 / (dist * 0.2) * -1))
 	        end
 	    end
         end
     end
 
-    for _, obj in ipairs(ents.FindInSphere(plr:WorldSpaceCenter(), 4000)) do
+    for _, obj in ipairs(ents.FindInSphere(plr:WorldSpaceCenter(), 6000)) do
         if IsValid(obj) then
             local dist = obj:GetPos():Distance(plr:WorldSpaceCenter())
             if IsValid(obj) and obj:VisibleVec(plr:WorldSpaceCenter()) then
                 local dmg = DamageInfo()
+		local dmgv = 0
                 if obj:IsNPC() or obj:IsPlayer() or obj:IsNextBot() or obj:IsRagdoll() then
-                    dmg:SetDamage(1250 / ((dist * 0.01) + 1))
+                    dmgv = math.Clamp(1500 / ((dist * 0.02) + 1), 0, math.huge)
+		    if dmgv < 10 then
+			dmgv = 0
+		    end
                 else
-                    dmg:SetDamage(150 / ((dist * 0.01) + 1))
+                    dmgv = math.Clamp(150 / ((dist * 0.02) + 1), 0, math.huge)
+		    if dmgv < 10 then
+			dmgv = 0
+		    end
                 end
+		dmg:SetDamage(dmgv)
                 dmg:SetAttacker(plr)
                 dmg:SetInflictor(self)
                 dmg:SetDamageType(DMG_BULLET)

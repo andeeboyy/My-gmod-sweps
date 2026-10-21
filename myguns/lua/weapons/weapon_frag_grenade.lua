@@ -265,19 +265,27 @@ local function throw(time, ent, toss, deathgrenade)
 	boom:SetKeyValue("DamageForce", 0)
 	boom:Fire("Explode")
 
-	for _, obj in ipairs(ents.FindInSphere(prop:GetPos(), 2000)) do
+	for _, obj in ipairs(ents.FindInSphere(prop:GetPos(), 4000)) do
 	    if IsValid(obj) then
 	    	local dist = obj:GetPos():Distance(prop:GetPos())
 		if IsValid(obj) and obj:VisibleVec(prop:WorldSpaceCenter()) then
 	    	    local dmg = DamageInfo()
+		    local dmgv = 0
 		    if obj:IsNPC() or obj:IsPlayer() or obj:IsNextBot() or obj:IsRagdoll() then
-	    	    	dmg:SetDamage(400 / ((dist * 0.01) + 1))
+	    	    	dmgv = math.Clamp(400 / ((dist * 0.025) + 1), 0, math.huge)
+			if dmgv < 10 then
+			    dmgv = 0
+			end
 		    else
-			dmg:SetDamage(50 / ((dist * 0.01) + 1))
+			dmgv = math.Clamp(50 / ((dist * 0.025) + 1), 0, math.huge)
+			if dmgv < 10 then
+			    dmgv = 0
+			end
 		    end
-		    dmg:SetDamagePosition(obj:WorldSpaceCenter())
+		    dmg:SetDamage(dmgv)
 		    dmg:SetAttacker(prop)
 	    	    dmg:SetInflictor(prop)
+		    dmg:SetDamagePosition(obj:WorldSpaceCenter())
 	    	    dmg:SetDamageType(DMG_BULLET)
 	    	    obj:TakeDamageInfo(dmg)
 		end

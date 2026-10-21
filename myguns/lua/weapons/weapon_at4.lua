@@ -96,7 +96,7 @@ function SWEP:PrimaryAttack()
     	    local victim = tr.Entity
     	    if prop ~= nil and IsValid(prop) then
     		local dist = tr.HitPos:Distance(prop:WorldSpaceCenter())
-		local damage = 650 / math.Clamp(dist * 0.0025, 1, math.huge)
+		local damage = 225 / math.Clamp(dist * 0.005, 1, math.huge)
 		dmginfo:SetDamage(damage)
             end
     	    if !victim:IsNPC() and !victim:IsNextBot() and !victim:IsPlayer() and !victim:IsRagdoll() then
@@ -107,12 +107,12 @@ function SWEP:PrimaryAttack()
     	    local bullet = {}
 	    local tracepara = {}
 	    local bulletdir = Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)):Forward()
-	    bullet.Damage = 650
+	    bullet.Damage = 225
 	    bullet.Attacker = prop
 	    bullet.Inflictor = prop
 	    bullet.Num = 1
 	    bullet.Force = 1
-	    bullet.HullSize = 40
+	    bullet.HullSize = 15
 	    bullet.Tracer = 0
 	    bullet.Dir = bulletdir
 	    bullet.Src = prop:WorldSpaceCenter()
@@ -243,11 +243,19 @@ function SWEP:PrimaryAttack()
 	    	    local dist = obj:GetPos():Distance(prop:GetPos())
 		    if IsValid(obj) and obj:VisibleVec(prop:WorldSpaceCenter()) then
 	    	    	local dmg = DamageInfo()
+		    	local dmgv = 0
 		    	if obj:IsNPC() or obj:IsPlayer() or obj:IsNextBot() or obj:IsRagdoll() then
-	    	    	    dmg:SetDamage(650 / ((dist * 0.025) + 1))
+	    	    	    dmgv = math.Clamp(650 / ((dist * 0.05) + 1), 0, math.huge)
+			    if dmgv < 10 then
+			    	dmgv = 0
+			    end
 		    	else
-			    dmg:SetDamage(125 / ((dist * 0.025) + 1))
+			dmgv = math.Clamp(125 / ((dist * 0.05) + 1), 0, math.huge)
+			    if dmgv < 10 then
+			    	dmgv = 0
+			    end
 		    	end
+		    	dmg:SetDamage(dmgv)
 		    	dmg:SetAttacker(prop)
 			dmg:SetDamagePosition(obj:WorldSpaceCenter())
 	    	    	dmg:SetInflictor(prop)

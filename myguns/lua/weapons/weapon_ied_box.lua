@@ -236,17 +236,24 @@ function SWEP:PrimaryAttack()
 	    end
 	end
 
-	for _, obj in ipairs(ents.FindInSphere(prop:GetPos(), 3500)) do
+	for _, obj in ipairs(ents.FindInSphere(prop:GetPos(), 5000)) do
 	    if IsValid(obj) then
 	    	local dist = obj:GetPos():Distance(prop:GetPos())
 		if IsValid(obj) and obj:VisibleVec(prop:WorldSpaceCenter()) then
 	    	    local dmg = DamageInfo()
+		    local dmgv = 0
 		    if obj:IsNPC() or obj:IsPlayer() or obj:IsNextBot() or obj:IsRagdoll() then
-	    	    	dmg:SetDamage(1000 / ((dist * 0.01) + 1))
+	    	    	dmgv = math.Clamp(1000 / ((dist * 0.02) + 1), 0, math.huge)
+			if dmgv < 10 then
+			    dmgv = 0
+			end
 		    else
-			dmg:SetDamage(150 / ((dist * 0.01) + 1))
+			dmgv = math.Clamp(150 / ((dist * 0.025) + 1), 0, math.huge)
+			if dmgv < 10 then
+			    dmgv = 0
+			end
 		    end
-		    dmg:SetAttacker(prop)
+		    dmg:SetDamage(dmgv)
 	    	    dmg:SetInflictor(prop)
 	    	    dmg:SetDamageType(DMG_BULLET)
 		    dmg:SetDamagePosition(obj:WorldSpaceCenter())
