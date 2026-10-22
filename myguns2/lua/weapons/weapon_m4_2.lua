@@ -26,6 +26,8 @@ local canceled = 0
 
 local aimangles = Angle(0, 0, 0)
 
+local idletime = 0
+
 -- spawnmenu
 
 SWEP.Spawnable = true
@@ -83,9 +85,7 @@ function SWEP:PrimaryAttack()
     if self:GetOwner():KeyDown(IN_SPEED) then return end
 
     self:SetNextPrimaryFire(CurTime() + 0.08)
-
     if auto == 0 and shot == 1 then return end
-    
     local bullet = {}
 	bullet.Damage = 110
 	bullet.Attacker = self:GetOwner()
@@ -99,7 +99,9 @@ function SWEP:PrimaryAttack()
 	AccuracyMeter = math.Clamp(AccuracyMeter + 0.0075, 0, 0.035)
     self:FireBullets(bullet)
     shot = 1
+    local vm = self:GetOwner():GetViewModel()
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+    idletime = CurTime() + 0.25
     self:GetOwner():SetAnimation(PLAYER_ATTACK1)
     self:EmitSound("weapons/pistol/pistol_fire2.wav", 140, 100, 1, CHAN_WEAPON)
     if SERVER then
@@ -276,11 +278,13 @@ function SWEP:Think()
 
     if self:GetOwner():KeyDown(IN_ATTACK2) and ads == 1 and !self:GetOwner():KeyDown(IN_SPEED) then
 	turn = math.Approach(turn, 2.5, 5 * FrameTime())
-	turnhorizontal = math.Approach(turnhorizontal, -3, 10 * FrameTime())
-	moveside = math.Approach(moveside, -8.25, 10 * FrameTime())
+	turnhorizontal = math.Approach(turnhorizontal, -1.75, 10 * FrameTime())
+	moveside = math.Approach(moveside, -8, 10 * FrameTime())
 	movevertical = math.Approach(movevertical, 0.35, 5 * FrameTime())
-	
-	
+	if idletime ~= 0 and CurTime() > idletime then
+	    self:SendWeaponAnim(ACT_VM_IDLE)
+	    idletime = 0
+	end 
 	if self:GetOwner():Crouching() then
 	    self:SetHoldType("ar2")
 	else
