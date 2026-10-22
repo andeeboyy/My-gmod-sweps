@@ -152,6 +152,7 @@ function SWEP:Reload()
     if self:Ammo1() == 0 or self:GetOwner():KeyDown(IN_SPEED) or CLIENT or ads == 1 or moveside < -5 or moveside > -3 or turn < 0 then return end
     shot = 0
     self:DefaultReload(ACT_VM_RELOAD)
+    idletime = CurTime() + 3
     if self:Clip1() < self:GetMaxClip1() then
 	if SERVER then
 	    self:GetOwner():CrosshairDisable()
@@ -221,6 +222,7 @@ function SWEP:Deploy()
 	self:Remove()
 	return
     end
+    idletime = CurTime() + 1
     aimangles = self:GetOwner():EyeAngles()
     canceled = 1
     self:SetHoldType("ar2")
@@ -278,8 +280,8 @@ function SWEP:Think()
 
     if self:GetOwner():KeyDown(IN_ATTACK2) and ads == 1 and !self:GetOwner():KeyDown(IN_SPEED) then
 	turn = math.Approach(turn, 2.5, 5 * FrameTime())
-	turnhorizontal = math.Approach(turnhorizontal, -1.75, 10 * FrameTime())
-	moveside = math.Approach(moveside, -8, 10 * FrameTime())
+	turnhorizontal = math.Approach(turnhorizontal, -1.5, 10 * FrameTime())
+	moveside = math.Approach(moveside, -7.87, 10 * FrameTime())
 	movevertical = math.Approach(movevertical, 0.35, 5 * FrameTime())
 	if idletime ~= 0 and CurTime() > idletime then
 	    self:SendWeaponAnim(ACT_VM_IDLE)
