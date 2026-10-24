@@ -18,9 +18,7 @@ local ads = 0
 
 local canads = 1
 
-local auto = 1
-
-local shot = 0
+local mode = 1
 
 local canceled = 0
 
@@ -28,7 +26,7 @@ local canceled = 0
 
 SWEP.Spawnable = true
 SWEP.PrintName = "UMP-45"
-SWEP.Purpose = "Heckler & Koch UMP45\nSecondary attack to ADS.\n Secondary attack while sprinting toggles between full-auto and semi-auto."
+SWEP.Purpose = "Heckler & Koch UMP45\nSecondary attack to ADS.\n Secondary attack while sprinting cycles through full-auto, semi-auto, and burst."
 SWEP.Base = "weapon_base"
 SWEP.Category = "my guns 2 - Submachine Guns"
 
@@ -70,65 +68,84 @@ end
 function SWEP:PrimaryAttack()
 
 
-    if self:Clip1() < 1 then
-	if shot == 0 then
-	    self:EmitSound("weapons/pistol/pistol_empty.wav", 50, 100, 1, CHAN_WEAPON)
-	    self:SetNextPrimaryFire(CurTime() + 0.1)
-	    shot = 1
-	end
-	return
-    end
     if self:GetOwner():KeyDown(IN_SPEED) then return end
 
-    self:SetNextPrimaryFire(CurTime() + 0.1)
+    if (mode == 2 or mode == 3) and shot == 1 then return end
 
-    if auto == 0 and shot == 1 then return end
-    
-    local bullet = {}
-	bullet.Attacker = self:GetOwner()
-	bullet.Inflictor = self
-	bullet.Damage = 70
-	bullet.Num = 1
-	bullet.Tracer = 0
-	bullet.Force = 3
-	bullet.Dir = self:GetOwner():GetAimVector()
-	bullet.Src = self:GetOwner():GetShootPos()
-	bullet.Spread = Vector(AccuracyMeter, AccuracyMeter, AccuracyMeter)
-	AccuracyMeter = math.Clamp(AccuracyMeter + 0.0085, 0, 0.0425)
-    self:FireBullets(bullet)
-    shot = 1
-    self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
-    self:GetOwner():SetAnimation(PLAYER_ATTACK1)
-    self:EmitSound("weapons/smg1/smg1_fire1.wav", 140, 80, 1, CHAN_WEAPON)
-    if SERVER then
-    	local extrasound = ents.Create("base_gmodentity")
-    	extrasound:Spawn()
-    	extrasound:SetPos(self:GetOwner():GetShootPos())
-	if IsFirstTimePredicted() then
-	    extrasound:EmitSound("weapons/shotgun/shotgun_fire6.wav", 140, 125, 1, CHAN_WEAPON)
-	end
-    	extrasound:Remove()
+    local function shoot()
+	if !IsValid(self) and !IsValid(self:GetOwner()) then return end
+    	if self:Clip1() < 1 then
+	    if shot == 0 and IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():KeyPressed(IN_ATTACK) then
+	    	self:EmitSound("weapons/pistol/pistol_empty.wav", 50, 100, 1, CHAN_WEAPON)
+	    	self:SetNextPrimaryFire(CurTime() + 0.1)
+	    	shot = 1
+	    end
+	    return
+    	end
+	shot = 1
+        local bullet = {}
+	    bullet.Damage = 70
+	    bullet.Attacker = self:GetOwner()
+	    bullet.Inflictor = self
+	    bullet.Tracer = 0
+	    bullet.Num = 1
+	    bullet.Force = 3
+	    bullet.Dir = self:GetOwner():GetAimVector()
+	    bullet.Src = self:GetOwner():GetShootPos()
+	    bullet.Spread = Vector(AccuracyMeter, AccuracyMeter, AccuracyMeter)
+	    AccuracyMeter = math.Clamp(AccuracyMeter + 0.0075, 0, 0.035)
+        self:FireBullets(bullet)
+        local vm = self:GetOwner():GetViewModel()
+        self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+        idletime = CurTime() + 0.25
+        self:GetOwner():SetAnimation(PLAYER_ATTACK1)
+        self:EmitSound("weapons/smg1/smg1_fire1.wav", 140, 80, 1, CHAN_WEAPON)
+        if SERVER then
+    	    local extrasound = ents.Create("base_gmodentity")
+    	    extrasound:Spawn()
+    	    extrasound:SetPos(self:GetOwner():GetShootPos())
+	    if IsFirstTimePredicted() then
+	        extrasound:EmitSound("weapons/shotgun/shotgun_fire6.wav", 140, 125, 1, CHAN_WEAPON)
+	    end
+    	    extrasound:Remove()
+        end
+        self:TakePrimaryAmmo(1)
+    	if !self:GetOwner():IsNPC() then
+	    if ads == 0 then
+            	self:GetOwner():SetEyeAngles(self:GetOwner():EyeAngles() + Angle(math.Rand(-4.35, -1.5), math.Rand(-1, 1), 0))
+	    else
+	    	self:GetOwner():SetEyeAngles(self:GetOwner():EyeAngles() + Angle(math.Rand(-1.5, -0.5), math.Rand(-1, 1), 0))
+	    end
+    	end
     end
-    self:TakePrimaryAmmo(1)
-    if !self:GetOwner():IsNPC() then
-	if ads == 0 then
-            self:GetOwner():SetEyeAngles(self:GetOwner():EyeAngles() + Angle(math.Rand(-4.35, -1.5), math.Rand(-1, 1), 0))
-	else
-	    self:GetOwner():SetEyeAngles(self:GetOwner():EyeAngles() + Angle(math.Rand(-1.5, -0.5), math.Rand(-1, 1), 0))
-	end
+    if mode == 3 then
+	shoot()
+	timer.Simple(0.1, shoot)
+	self:SetNextPrimaryFire(CurTime() + 0.3)
+    else
+	shoot()
+	self:SetNextPrimaryFire(CurTime() + 0.1)
     end
 end
 
 function SWEP:SecondaryAttack()
     if self:GetOwner():KeyDown(IN_SPEED) then
-	if auto == 1 then
+	mode = mode + 1
+	if mode > 3 then
+	    mode = 1
+	end
+
+	if mode == 1 then
+	    self:EmitSound("weapons/ar2/ar2_empty.wav", 50, 100, 1, CHAN_WEAPON)
+	    self:GetOwner():PrintMessage(HUD_PRINTCENTER, "Full-Auto")
+	end
+	if mode == 2 then
 	    self:EmitSound("weapons/ar2/ar2_empty.wav", 50, 100, 1, CHAN_WEAPON)
 	    self:GetOwner():PrintMessage(HUD_PRINTCENTER, "Semi-Auto")
-	    auto = 0
-	else
-	    self:EmitSound("weapons/shotgun/shotgun_empty.wav", 50, 100, 1, CHAN_WEAPON)
-	    self:GetOwner():PrintMessage(HUD_PRINTCENTER, "Full-Auto")
-	    auto = 1
+	end
+	if mode == 3 then
+	    self:EmitSound("weapons/ar2/ar2_empty.wav", 50, 100, 1, CHAN_WEAPON)
+	    self:GetOwner():PrintMessage(HUD_PRINTCENTER, "Burst")
 	end
 	self:SetNextSecondaryFire(CurTime() + 0.5)
 	self:SetNextPrimaryFire(CurTime() + 0.5)

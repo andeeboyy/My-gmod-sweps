@@ -103,22 +103,23 @@ function SWEP:PrimaryAttack()
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     idletime = CurTime() + 0.25
     self:GetOwner():SetAnimation(PLAYER_ATTACK1)
-    self:EmitSound("weapons/pistol/pistol_fire2.wav", 140, 100, 1, CHAN_WEAPON)
+    self:EmitSound("weapons/ar1/ar1_dist1.wav", 140, 100, 1, CHAN_WEAPON)
     if SERVER then
     	local extrasound = ents.Create("base_gmodentity")
     	extrasound:Spawn()
     	extrasound:SetPos(self:GetOwner():GetShootPos())
 	if IsFirstTimePredicted() then
-	    extrasound:EmitSound("weapons/ar2/fire1.wav", 140, 100, 1, CHAN_WEAPON)
-	end
-    	extrasound:Remove()
+	    extrasound:EmitSound("weapons/shotgun/shotgun_fire7.wav", 140, 100, 1, CHAN_WEAPON)
 
-    	extrasound:Spawn()
-    	extrasound:SetPos(self:GetOwner():GetShootPos())
-	if IsFirstTimePredicted() then
-	    extrasound:EmitSound("weapons/shotgun/shotgun_fire6.wav", 140, 100, 1, CHAN_WEAPON)
 	end
     	extrasound:Remove()
+	local extrasound2 = ents.Create("base_gmodentity")
+    	extrasound2:Spawn()
+    	extrasound2:SetPos(self:GetOwner():GetShootPos())
+	if IsFirstTimePredicted() then
+	    extrasound2:EmitSound("weapons/shotgun/shotgun_fire6.wav", 140, 100, 1, CHAN_WEAPON)
+	end
+    	extrasound2:Remove()
     end
     self:TakePrimaryAmmo(1)
     if !self:GetOwner():IsNPC() then
