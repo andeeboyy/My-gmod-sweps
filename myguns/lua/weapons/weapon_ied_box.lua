@@ -112,7 +112,9 @@ function SWEP:PrimaryAttack()
 	    extrasound:EmitSound("buttons/button14.wav", 70, 50, 1, CHAN_WEAPON)
 	end
 	timer.Simple(SoundDuration("buttons/button14.wav") + 0.1, function()
-    	    extrasound:Remove()
+	    if IsValid(extrasound) then
+    	    	extrasound:Remove()
+	    end
 	end)
     end
 

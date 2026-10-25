@@ -105,9 +105,22 @@ function SWEP:PrimaryAttack()
     	rocket:SetPos(self:GetOwner():GetShootPos())
     	rocket:SetAngles(self:GetOwner():GetAimVector():Angle())
 	local prop = ents.Create("prop_physics")
-	if IsFirstTimePredicted() then
-	    self:EmitSound("npc/waste_scanner/grenade_fire.wav", 120, math.Rand(90, 133), 1, CHAN_WEAPON)
-	end
+    	if SERVER then
+    	    local extrasound = ents.Create("base_gmodentity")
+    	    extrasound:Spawn()
+	    extrasound:SetNoDraw(true)
+	    extrasound:SetPos(self:WorldSpaceCenter())
+	    extrasound:SetParent(self)
+	    if IsFirstTimePredicted() then
+	    	extrasound:EmitSound("npc/waste_scanner/grenade_fire.wav", 120, math.Rand(90, 133), 1, CHAN_WEAPON)
+	    end
+	    timer.Simple(SoundDuration("npc/waste_scanner/grenade_fire.wav") + 0.1, function()
+		if IsValid(extrasound) then
+    	    	    extrasound:Remove()
+		end
+	    end)
+    	end
+
 	prop:SetModel("models/props_phx/construct/wood/wood_boardx1.mdl")
 	prop:SetKeyValue("modelscale", 0.35)
 	prop:SetKeyValue("physdamagescale", 10)

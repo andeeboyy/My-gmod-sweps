@@ -79,7 +79,23 @@ function SWEP:PrimaryAttack()
     local prop = ents.Create("prop_physics_override")
     if !IsValid(prop) then return end
     self:SetNextPrimaryFire(CurTime() + 1)
-    self:EmitSound("weapons/mortar/mortar_fire1.wav", 140, 100, 1, CHAN_WEAPON)
+
+    if SERVER then
+    	local extrasound = ents.Create("base_gmodentity")
+    	extrasound:Spawn()
+	extrasound:SetNoDraw(true)
+	extrasound:SetPos(self:WorldSpaceCenter())
+	extrasound:SetParent(self)
+	if IsFirstTimePredicted() then
+	    extrasound:EmitSound("weapons/mortar/mortar_fire1.wav", 140, 100, 1, CHAN_WEAPON)
+	end
+	timer.Simple(SoundDuration("weapons/mortar/mortar_fire1.wav") + 0.1, function()
+	    if IsValid(extrasound) then
+    	    	extrasound:Remove()
+	    end
+	end)
+    end
+
     self:TakePrimaryAmmo(1)
     prop:SetModel("models/props_junk/garbage_glassbottle003a.mdl")
     prop:SetPos(self:GetOwner():GetShootPos())
