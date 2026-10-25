@@ -7,6 +7,34 @@ SWEP.PrintName = "Bomb Vest"
 SWEP.Base = "weapon_base"
 SWEP.Category = "my guns - Explosives"
 
+if SERVER then
+    util.AddNetworkString("DoParticleNet")
+end
+local function ParticlePlayNet(particle, pos, ang)
+    if SERVER then
+    	
+    
+    
+	net.Start("DoParticleNet")
+	net.WriteString(particle)
+	net.WriteVector(pos)
+	net.WriteAngle(ang)
+	net.Broadcast()
+    end
+end
+
+if CLIENT then
+    net.Receive("DoParticleNet", function()
+	local particle = net.ReadString()
+	local pos = net.ReadVector()
+	local ang = net.ReadAngle()
+	local effect = CreateParticleSystemNoEntity(particle, pos, ang)
+	if IsValid(effect) then
+	    effect:StartEmission()
+	end
+    end)
+end
+
 -- viewmodel
 SWEP.ViewModel = "models/weapons/c_slam.mdl"
 SWEP.WorldModel = "models/weapons/w_slam.mdl"
@@ -112,15 +140,15 @@ function SWEP:PrimaryAttack()
         end
     end
     local offset = Vector(0, 0, 100)
-    ParticleEffect("striderbuster_explode_smoke", self:GetPos() + offset, Angle(0, 0, 0))
+    ParticlePlayNet("striderbuster_explode_smoke", self:GetPos() + offset, Angle(0, 0, 0))
     for i = 1, 10 do
-   	ParticleEffect("striderbuster_explode_dummy_parts", self:GetPos() + offset, Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)))
+   	ParticlePlayNet("striderbuster_explode_dummy_parts", self:GetPos() + offset, Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)))
     end
-    ParticleEffect("striderbuster_break_d", self:GetPos() + offset, Angle(0, 0, 0))
-    ParticleEffect("building_explosion", self:GetPos(), Angle(90, 0, 0))
-    ParticleEffect("striderbuster_break_e", self:GetPos() + offset, Angle(0, 0, 0))
-    ParticleEffect("striderbuster_break_b", self:GetPos() + offset, Angle(0, 0, 0))
-    ParticleEffect("striderbuster_break_explode", self:GetPos() + offset, Angle(0, 0, 0))
+    ParticlePlayNet("striderbuster_break_d", self:GetPos() + offset, Angle(0, 0, 0))
+    ParticlePlayNet("building_explosion", self:GetPos(), Angle(90, 0, 0))
+    ParticlePlayNet("striderbuster_break_e", self:GetPos() + offset, Angle(0, 0, 0))
+    ParticlePlayNet("striderbuster_break_b", self:GetPos() + offset, Angle(0, 0, 0))
+    ParticlePlayNet("striderbuster_break_explode", self:GetPos() + offset, Angle(0, 0, 0))
     local cloud = ents.Create("ar2explosion")
     cloud:SetPos(self:GetPos() + offset)
     cloud:Spawn()
@@ -145,7 +173,7 @@ function SWEP:PrimaryAttack()
 
         local surfpos = trace.HitPos
         if trace.Hit then
-            ParticleEffect("striderbuster_break_d", surfpos, Angle(0, 0, 0))
+            ParticlePlayNet("striderbuster_break_d", surfpos, Angle(0, 0, 0))
         end
     end
     local randompicker = math.random(1, 4)

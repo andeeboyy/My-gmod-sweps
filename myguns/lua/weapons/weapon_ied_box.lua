@@ -8,6 +8,34 @@ SWEP.Purpose = "IED in a box. \nSecondary Fire to detonate it. \nHold sprint key
 SWEP.Base = "weapon_base"
 SWEP.Category = "my guns - Explosives"
 
+
+if SERVER then
+    util.AddNetworkString("DoParticleNet")
+end
+local function ParticlePlayNet(particle, pos, ang)
+    if SERVER then
+    	
+    
+    
+	net.Start("DoParticleNet")
+	net.WriteString(particle)
+	net.WriteVector(pos)
+	net.WriteAngle(ang)
+	net.Broadcast()
+    end
+end
+
+if CLIENT then
+    net.Receive("DoParticleNet", function()
+	local particle = net.ReadString()
+	local pos = net.ReadVector()
+	local ang = net.ReadAngle()
+	local effect = CreateParticleSystemNoEntity(particle, pos, ang)
+	if IsValid(effect) then
+	    effect:StartEmission()
+	end
+    end)
+end
 -- viewmodel
 
 SWEP.ViewModel = "models/props_junk/cardboard_box004a.mdl"
@@ -73,7 +101,21 @@ function SWEP:PrimaryAttack()
     	self:GetOwner():DrawWorldModel(false)
     end
     if CanFire == 0 then return end
-    self:EmitSound("buttons/button14.wav", 60, 50, 1, CHAN_WEAPON)
+
+    if SERVER then
+    	local extrasound = ents.Create("base_gmodentity")
+    	extrasound:Spawn()
+	extrasound:SetNoDraw(true)
+	extrasound:SetPos(self:WorldSpaceCenter())
+	extrasound:SetParent(self)
+	if IsFirstTimePredicted() then
+	    extrasound:EmitSound("buttons/button14.wav", 70, 50, 1, CHAN_WEAPON)
+	end
+	timer.Simple(SoundDuration("buttons/button14.wav") + 0.1, function()
+    	    extrasound:Remove()
+	end)
+    end
+
     self:TakePrimaryAmmo(1)
     prop:SetModel("models/props_junk/cardboard_box004a.mdl")
     prop:SetPos(self:GetOwner():GetShootPos())
@@ -156,15 +198,16 @@ function SWEP:PrimaryAttack()
 	    end
 	end
 	local offset = Vector(0, 0, 100)
-	ParticleEffect("striderbuster_explode_smoke", prop:GetPos() + offset, Angle(0, 0, 0))
+	ParticlePlayNet("striderbuster_explode_smoke", prop:GetPos() + offset, Angle(0, 0, 0))
+
 	for i = 1, 10 do
-	    ParticleEffect("striderbuster_explode_dummy_parts", prop:GetPos() + offset, Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)))
+	    ParticlePlayNet("striderbuster_explode_dummy_parts", prop:GetPos() + offset, Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)))
 	end
-	ParticleEffect("striderbuster_break_d", prop:GetPos() + offset, Angle(0, 0, 0))
-	ParticleEffect("building_explosion", prop:GetPos(), Angle(90, 0, 0))
-	ParticleEffect("striderbuster_break_e", prop:GetPos() + offset, Angle(0, 0, 0))
-	ParticleEffect("striderbuster_break_b", prop:GetPos() + offset, Angle(0, 0, 0))
-	ParticleEffect("striderbuster_break_explode", prop:GetPos() + offset, Angle(0, 0, 0))
+	ParticlePlayNet("striderbuster_break_d", prop:GetPos() + offset, Angle(0, 0, 0))
+	ParticlePlayNet("building_explosion", prop:GetPos(), Angle(90, 0, 0))
+	ParticlePlayNet("striderbuster_break_e", prop:GetPos() + offset, Angle(0, 0, 0))
+	ParticlePlayNet("striderbuster_break_b", prop:GetPos() + offset, Angle(0, 0, 0))
+	ParticlePlayNet("striderbuster_break_explode", prop:GetPos() + offset, Angle(0, 0, 0))
 	local cloud = ents.Create("ar2explosion")
 	cloud:SetPos(prop:GetPos() + offset)
 	cloud:Spawn()
@@ -189,7 +232,7 @@ function SWEP:PrimaryAttack()
 
 	    local surfpos = trace.HitPos
 	    if trace.Hit then
-	    	ParticleEffect("striderbuster_break_d", surfpos, Angle(0, 0, 0))
+		ParticlePlayNet("striderbuster_break_d", surfpos, Angle(0, 0, 0))
 	    end
     	end
 

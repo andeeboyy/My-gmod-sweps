@@ -17,6 +17,34 @@ SWEP.Purpose = "M26 Hand, Fragmentation, Delay, Grenade\n\nPrimary Attack will p
 SWEP.Base = "weapon_base"
 SWEP.Category = "my guns - Explosives"
 
+if SERVER then
+    util.AddNetworkString("DoParticleNet")
+end
+local function ParticlePlayNet(particle, pos, ang)
+    if SERVER then
+    	
+    
+    
+	net.Start("DoParticleNet")
+	net.WriteString(particle)
+	net.WriteVector(pos)
+	net.WriteAngle(ang)
+	net.Broadcast()
+    end
+end
+
+if CLIENT then
+    net.Receive("DoParticleNet", function()
+	local particle = net.ReadString()
+	local pos = net.ReadVector()
+	local ang = net.ReadAngle()
+	local effect = CreateParticleSystemNoEntity(particle, pos, ang)
+	if IsValid(effect) then
+	    effect:StartEmission()
+	end
+    end)
+end
+
 -- viewmodel
 
 SWEP.ViewModel = "models/weapons/cstrike/c_eq_fraggrenade.mdl"
@@ -202,14 +230,14 @@ local function throw(time, ent, toss, deathgrenade)
 	end
 	
 	local offset = Vector(0, 0, 100)
-	ParticleEffect("striderbuster_explode_smoke", prop:GetPos() + offset, Angle(0, 0, 0))
+	ParticlePlayNet("striderbuster_explode_smoke", prop:GetPos() + offset, Angle(0, 0, 0))
 	for i = 1, 10 do
-	    ParticleEffect("striderbuster_explode_dummy_parts", prop:GetPos() + offset, Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)))
+	    ParticlePlayNet("striderbuster_explode_dummy_parts", prop:GetPos() + offset, Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)))
 	end
-	ParticleEffect("striderbuster_break_d", prop:GetPos() + offset, Angle(0, 0, 0))
-	ParticleEffect("striderbuster_break_e", prop:GetPos() + offset, Angle(0, 0, 0))
-	ParticleEffect("striderbuster_break_b", prop:GetPos() + offset, Angle(0, 0, 0))
-	ParticleEffect("striderbuster_break_explode", prop:GetPos() + offset, Angle(0, 0, 0))
+	ParticlePlayNet("striderbuster_break_d", prop:GetPos() + offset, Angle(0, 0, 0))
+	ParticlePlayNet("striderbuster_break_e", prop:GetPos() + offset, Angle(0, 0, 0))
+	ParticlePlayNet("striderbuster_break_b", prop:GetPos() + offset, Angle(0, 0, 0))
+	ParticlePlayNet("striderbuster_break_explode", prop:GetPos() + offset, Angle(0, 0, 0))
 	local dust = EffectData()
 	dust:SetOrigin(prop:GetPos())
 	dust:SetScale(750)
@@ -238,7 +266,7 @@ local function throw(time, ent, toss, deathgrenade)
 
 	    local surfpos = trace.HitPos
 	    if trace.Hit then
-	    	ParticleEffect("striderbuster_break_d", surfpos, Angle(0, 0, 0))
+	    	ParticlePlayNet("striderbuster_break_d", surfpos, Angle(0, 0, 0))
 	    end
     	end
 

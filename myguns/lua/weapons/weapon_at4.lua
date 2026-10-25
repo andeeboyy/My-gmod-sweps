@@ -9,6 +9,34 @@ SWEP.Purpose = "M136 AT4 \n Secondary Fire to shoulder the weapon."
 SWEP.Base = "weapon_base"
 SWEP.Category = "my guns - Explosives"
 
+if SERVER then
+    util.AddNetworkString("DoParticleNet")
+end
+local function ParticlePlayNet(particle, pos, ang)
+    if SERVER then
+    	
+    
+    
+	net.Start("DoParticleNet")
+	net.WriteString(particle)
+	net.WriteVector(pos)
+	net.WriteAngle(ang)
+	net.Broadcast()
+    end
+end
+
+if CLIENT then
+    net.Receive("DoParticleNet", function()
+	local particle = net.ReadString()
+	local pos = net.ReadVector()
+	local ang = net.ReadAngle()
+	local effect = CreateParticleSystemNoEntity(particle, pos, ang)
+	if IsValid(effect) then
+	    effect:StartEmission()
+	end
+    end)
+end
+
 -- viewmodel
 
 SWEP.ViewModel = "models/weapons/c_rpg.mdl"
@@ -71,13 +99,15 @@ function SWEP:PrimaryAttack()
 	self:TakePrimaryAmmo(1)
 	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
-        self:EmitSound("npc/waste_scanner/grenade_fire.wav", 120, math.Rand(90, 133), 1, CHAN_WEAPON)
         local rocket = ents.Create("prop_dynamic")
         if !IsValid(rocket) then return end
     	rocket:SetModel("models/weapons/w_missile.mdl")
     	rocket:SetPos(self:GetOwner():GetShootPos())
     	rocket:SetAngles(self:GetOwner():GetAimVector():Angle())
 	local prop = ents.Create("prop_physics")
+	if IsFirstTimePredicted() then
+	    self:EmitSound("npc/waste_scanner/grenade_fire.wav", 120, math.Rand(90, 133), 1, CHAN_WEAPON)
+	end
 	prop:SetModel("models/props_phx/construct/wood/wood_boardx1.mdl")
 	prop:SetKeyValue("modelscale", 0.35)
 	prop:SetKeyValue("physdamagescale", 10)
@@ -161,15 +191,15 @@ function SWEP:PrimaryAttack()
 	    	end
 	    end
 	    local offset = Vector(0, 0, 100)
-	    ParticleEffect("striderbuster_explode_smoke", prop:GetPos() + offset, Angle(0, 0, 0))
+	    ParticlePlayNet("striderbuster_explode_smoke", prop:GetPos() + offset, Angle(0, 0, 0))
 	    for i = 1, 10 do
-	    	ParticleEffect("striderbuster_explode_dummy_parts", prop:GetPos() + offset, Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)))
+	    	ParticlePlayNet("striderbuster_explode_dummy_parts", prop:GetPos() + offset, Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)))
 	    end
-	    ParticleEffect("striderbuster_break_d", prop:GetPos() + offset, Angle(0, 0, 0))
-	    ParticleEffect("striderbuster_break_e", prop:GetPos() + offset, Angle(0, 0, 0))
-	    ParticleEffect("striderbuster_break_b", prop:GetPos() + offset, Angle(0, 0, 0))
-	    ParticleEffect("striderbuster_break_explode", prop:GetPos() + offset, Angle(0, 0, 0))
-	    ParticleEffect("building_explosion", prop:GetPos(), Angle(90, 0, 0))
+	    ParticlePlayNet("striderbuster_break_d", prop:GetPos() + offset, Angle(0, 0, 0))
+	    ParticlePlayNet("striderbuster_break_e", prop:GetPos() + offset, Angle(0, 0, 0))
+	    ParticlePlayNet("striderbuster_break_b", prop:GetPos() + offset, Angle(0, 0, 0))
+	    ParticlePlayNet("striderbuster_break_explode", prop:GetPos() + offset, Angle(0, 0, 0))
+	    ParticlePlayNet("building_explosion", prop:GetPos(), Angle(90, 0, 0))
 
 	    local postracepara = {}
 	    postracepara.start = prop:WorldSpaceCenter()
@@ -192,7 +222,7 @@ function SWEP:PrimaryAttack()
 
 	        local surfpos = trace.HitPos
 	        if trace.Hit then
-	    	    ParticleEffect("striderbuster_break_d", surfpos, Angle(0, 0, 0))
+	    	    ParticlePlayNet("striderbuster_break_d", surfpos, Angle(0, 0, 0))
 	        end
     	    end
 
