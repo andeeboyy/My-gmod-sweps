@@ -57,7 +57,7 @@ function SWEP:PrimaryAttack()
     local bombname = "boxbomb" .. self:EntIndex()
     nextReload = CurTime() + 2
     if (self:Clip1() < 1) then return end
-    self:SetNextSecondaryFire(CurTime() + 1.3)
+    self:SetNextSecondaryFire(CurTime() + 1)
     local prop = ents.Create("prop_physics_override")
     if !IsValid(prop) then return end
     prop:SetKeyValue("ExplodeDamage", "3500")
@@ -67,23 +67,25 @@ function SWEP:PrimaryAttack()
     prop:SetKeyValue("massScale", "7")
     prop:SetName(bombname)
     self:SetNextPrimaryFire(CurTime() + 1)
-    timer.Simple(0.5, function()
-	self:GetOwner():DrawViewModel(false, 0)
-	if CanFire == 0 then return end
-	self:EmitSound("buttons/button14.wav", 60, 50, 1, CHAN_WEAPON)
-	self:TakePrimaryAmmo(1)
-    	prop:SetModel("models/props_junk/cardboard_box004a.mdl")
-	prop:SetPos(self:GetOwner():GetShootPos())
-    	prop:SetAngles(self:GetOwner():GetAimVector():Angle())
-	prop:SetCollisionGroup(COLLISION_GROUP_PASSABLE_DOOR)
-	timer.Simple(0.25, function()
-	    if IsValid(prop) then
-		prop:SetCollisionGroup(COLLISION_GROUP_NONE)
-	    end
-	end)
-   
-    	prop:Spawn()
+    self:GetOwner():DrawViewModel(false, 0)
+    self:SetHoldType("normal")
+    if SERVER then
+    	self:GetOwner():DrawWorldModel(false)
+    end
+    if CanFire == 0 then return end
+    self:EmitSound("buttons/button14.wav", 60, 50, 1, CHAN_WEAPON)
+    self:TakePrimaryAmmo(1)
+    prop:SetModel("models/props_junk/cardboard_box004a.mdl")
+    prop:SetPos(self:GetOwner():GetShootPos())
+    prop:SetAngles(self:GetOwner():GetAimVector():Angle())
+    prop:SetCollisionGroup(COLLISION_GROUP_PASSABLE_DOOR)
+    timer.Simple(0.25, function()
+	if IsValid(prop) then
+	    prop:SetCollisionGroup(COLLISION_GROUP_NONE)
+	end
     end)
+   
+    prop:Spawn()
     prop:CallOnRemove("Explode", function(ent)
 	if CLIENT then return end
 	local function propdmg(attacker, tr, dmginfo)
@@ -268,20 +270,18 @@ function SWEP:PrimaryAttack()
 
 
 
-    timer.Simple(0.5, function()
-    	local woosh = prop:GetPhysicsObject()
-    	if IsValid(woosh) then
-	    woosh:Wake()
-	    local throwVelocity = self:GetOwner():GetAimVector() * 250
-	    if self:GetOwner():IsSprinting() then
-		throwVelocity = self:GetOwner():GetAimVector() * 750
-	    end
-            local playerVelocity = self:GetOwner():GetVelocity()
-            woosh:SetVelocity(throwVelocity + playerVelocity)
-	    local spin = Vector(math.Rand(-150, 150), math.Rand(-200, 200), 0)
-            woosh:AddAngleVelocity(spin)
-    	end
-    end)
+    local woosh = prop:GetPhysicsObject()
+    if IsValid(woosh) then
+	woosh:Wake()
+	local throwVelocity = self:GetOwner():GetAimVector() * 250
+	if self:GetOwner():IsSprinting() then
+	    throwVelocity = self:GetOwner():GetAimVector() * 750
+	end
+        local playerVelocity = self:GetOwner():GetVelocity()
+        woosh:SetVelocity(throwVelocity + playerVelocity)
+	local spin = Vector(math.Rand(-150, 150), math.Rand(-200, 200), 0)
+        woosh:AddAngleVelocity(spin)
+    end
     self:SendWeaponAnim(ACT_VM_THROW)
     self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 end
@@ -292,14 +292,14 @@ function SWEP:SecondaryAttack()
     self:SetNextSecondaryFire(CurTime() + 1)
     self:EmitSound("buttons/blip1.wav", 40, 100, 1, CHAN_AUTO)
     for _, bombdet in ipairs(ents.FindByName(bombname)) do
-	bombdet:EmitSound("buttons/blip1.wav", 40, 100, 1, CHAN_WEAPON)
+	bombdet:EmitSound("buttons/blip1.wav", 40, 100, 1, CHAN_AUTO)
 	timer.Simple(0.25, function()
 	    if IsValid(bombdet) then
 	    	bombdet:TakeDamage(100)
 	    end
 	end)
     end
-    timer.Simple(0.65, function()
+    timer.Simple(1, function()
     	if IsValid(self) and self:Ammo1() + self:Clip1() < 1 and SERVER then
 	    self:GetOwner():StripWeapon("weapon_ied_box")
     	end
@@ -308,8 +308,13 @@ function SWEP:SecondaryAttack()
 end
 -- reload
 function SWEP:Reload()
-    if (nextReload > CurTime()) then return end
+    if (nextReload > CurTime()) or !self:HasAmmo() then return end
+    self:SetHoldType("slam")
     self:GetOwner():DrawViewModel(true, 0)
+    self:SetHoldType("slam")
+    if SERVER then
+     	self:GetOwner():DrawWorldModel(true)
+    end
     self:DefaultReload(ACT_VM_DRAW)
     self:SetNextPrimaryFire(CurTime() + 1)
     self:SetNextSecondaryFire(CurTime() + 1.3)
@@ -323,7 +328,14 @@ function SWEP:Deploy()
 	    self:GetOwner():DrawViewModel(false, 0)
 	    return
         end
-	self:GetOwner():DrawViewModel(true, 0)
+	if SERVER then
+	    self:GetOwner():DrawViewModel(true, 0)
+	end
+	self:SetHoldType("slam")
+
+	if SERVER then
+	    self:GetOwner():DrawWorldModel(true)
+	end
 	self:DefaultReload(ACT_VM_DRAW)
 	if nextReload > CurTime() then
    	    self:SetNextPrimaryFire(nextReload + 0.5 / GetConVar("sv_defaultdeployspeed"):GetFloat())
