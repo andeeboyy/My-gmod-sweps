@@ -86,20 +86,23 @@ function SWEP:Deploy()
 	if hit == ragdoll and IsValid(ragdoll) then
 	    
 	    local tracepara = {}
-	    tracepara.start = dmginfo:GetAttacker():WorldSpaceCenter()
-            tracepara.endpos = dmginfo:GetDamagePosition()
+	    local dmgangle = (dmginfo:GetDamagePosition() - dmginfo:GetAttacker():WorldSpaceCenter()):Angle()
+	    tracepara.start = dmginfo:GetDamagePosition() - dmgangle:Forward() * 5
+            tracepara.endpos = dmginfo:GetDamagePosition() + dmgangle:Forward() * 5
 	    tracepara.mask = MASK_SHOT
-	    tracepara.filter = dmginfo:GetInflictor()
+	    tracepara.filter = function(ent)
+		if ent == ragdoll then
+		    return true
+		else
+		    return false
+		end
+	    end
 	    local trace = util.TraceLine(tracepara)
-	    if trace.HitGroup == HITGROUP_HEAD then
+	    if trace.PhysicsBone == ragdoll:TranslateBoneToPhysBone(ragdoll:LookupBone("ValveBiped.Bip01_Head1")) then
 		dmginfo:SetDamage(dmginfo:GetDamage() * 2)
 	    else
-		if trace.HitGroup > 3 then
+		if trace.PhysicsBone > 1 and trace.PhysicsBone < 10 then
 		    dmginfo:SetDamage(dmginfo:GetDamage() * 0.25)
-		else
-		    if trace.HitGroup == 10 then
-			dmginfo:SetDamage(dmginfo:GetDamage() * 0.01)
-		    end
 		end
 	    end
 	    if dmginfo:GetDamageType() == DMG_CRUSH then
