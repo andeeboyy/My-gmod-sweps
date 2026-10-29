@@ -11,7 +11,7 @@ local function TransferBodygroups(source, target)
 	target:SetSkin(source:GetSkin())
     end
 end
-
+local viewmode = 1
 local candeploy = 1
 local timerRunning = 0
 
@@ -20,7 +20,7 @@ SWEP.Spawnable = true
 SWEP.PrintName = "Ragdoll"
 SWEP.Base = "weapon_base"
 SWEP.Category = "my guns - Other"
-SWEP.Purpose = "\nRagdoll!\n\nHold jump to bring your head up.\n\nHold sprint to move slightly.\n\nPrimary and Secondary attack lunge the corresponding arm on the side forward.\n\nUse left and right movement keys to grab things.\nNoclip works, and you can use run to move, and hold duck to slow down."
+SWEP.Purpose = "\nRagdoll!\n\nHold jump to bring your head up.\n\nHold sprint to move slightly.\n\nPrimary and Secondary attack lunge the corresponding arm on the side forward.\n\nUse left and right movement keys to grab things.\n\nUse no-clip flight,\nwith your no-clip key,\nyou can use run to move,\nand hold duck to slow down.\n\nUse the reload key to change view mode."
 -- viewmodel
 SWEP.ViewModel = "models/props_junk/PopCan01a.mdl"
 SWEP.WorldModel = "models/props_junk/PopCan01a.mdl"
@@ -64,7 +64,7 @@ function SWEP:Deploy()
 	    return true
     	end)
     end
-
+    
     
     self.camfollow = ents.Create("prop_physics")
     self.camfollow:SetModel("models/props_junk/PopCan01a.mdl")
@@ -84,6 +84,7 @@ function SWEP:Deploy()
     end
     hook.Add("EntityTakeDamage", self.hookname2, function(hit, dmginfo)
 	if hit == ragdoll and IsValid(ragdoll) then
+	    
 	    local tracepara = {}
 	    tracepara.start = dmginfo:GetAttacker():WorldSpaceCenter()
             tracepara.endpos = dmginfo:GetDamagePosition()
@@ -91,13 +92,13 @@ function SWEP:Deploy()
 	    tracepara.filter = dmginfo:GetInflictor()
 	    local trace = util.TraceLine(tracepara)
 	    if trace.HitGroup == HITGROUP_HEAD then
-		dmginfo:SetDamage(dmgvalue * 2)
+		dmginfo:SetDamage(dmginfo:GetDamage() * 2)
 	    else
 		if trace.HitGroup > 3 then
-		    dmginfo:SetDamage(dmgvalue * 0.25)
+		    dmginfo:SetDamage(dmginfo:GetDamage() * 0.25)
 		else
 		    if trace.HitGroup == 10 then
-			dmginfo:SetDamage(dmgvalue * 0.01)
+			dmginfo:SetDamage(dmginfo:GetDamage() * 0.01)
 		    end
 		end
 	    end
@@ -207,13 +208,26 @@ function SWEP:Deploy()
 
         plr:SetPos(ragdoll:GetPos())
 	plr:SetViewEntity(self.camfollow)
-	if IsValid(self) and IsValid(self.camfollow) then
-            self.camfollow:SetPos(ragdoll:GetBonePosition(head) + self.camfollow:GetForward() * 5)
-	end
 	headang:RotateAroundAxis(headang:Forward(), 180)
-	if IsValid(self) and IsValid(self.camfollow) then
-	    self.camfollow:SetAngles(headang)
+
+	if plr:KeyPressed(IN_RELOAD) then
+	    viewmode = viewmode + 1
+	    if viewmode > 2 then
+		viewmode = 1
+	    end
 	end
+
+	if IsValid(self) and IsValid(self.camfollow) then
+	    if IsValid(self) and IsValid(plr) and viewmode == 1 then
+	    	self.camfollow:SetAngles(Angle(plr:EyeAngles().pitch, plr:EyeAngles().yaw, headang.roll))
+		self.camfollow:SetPos(ragdoll:GetBonePosition(head) + plr:EyeAngles():Forward() * 5)
+	    else
+		self.camfollow:SetAngles(headang)
+		self.camfollow:SetPos(ragdoll:GetBonePosition(head) + self.camfollow:GetForward() * 5)
+	    end
+	end
+
+
 	local headphysobjnum = ragdoll:TranslateBoneToPhysBone(ragdoll:LookupBone("ValveBiped.Bip01_Head1"))
 	local headphysobj = ragdoll:GetPhysicsObjectNum(headphysobjnum)
 
