@@ -82,7 +82,7 @@ function SWEP:PrimaryAttack()
 		    	dmg:SetDamage(0)
 		    end
 	    	end
-	    	dmg:SetDamageForce(self:GetOwner():GetAimVector() * 500)
+	    	dmg:SetDamageForce(self:GetOwner():GetAimVector() * 2500)
 	    	dmg:SetDamagePosition(trace.HitPos)
 	    	dmg:SetAttacker(self:GetOwner())
 	    	dmg:SetInflictor(self)

@@ -84,7 +84,6 @@ function SWEP:Deploy()
     end
     hook.Add("EntityTakeDamage", self.hookname2, function(hit, dmginfo)
 	if hit == ragdoll and IsValid(ragdoll) then
-	    
 	    local tracepara = {}
 	    local dmgangle = (dmginfo:GetDamagePosition() - dmginfo:GetAttacker():WorldSpaceCenter()):Angle()
 	    tracepara.start = dmginfo:GetDamagePosition() - dmgangle:Forward() * 5
@@ -229,7 +228,6 @@ function SWEP:Deploy()
 		self.camfollow:SetPos(ragdoll:GetBonePosition(head) + self.camfollow:GetForward() * 5)
 	    end
 	end
-
 
 	local headphysobjnum = ragdoll:TranslateBoneToPhysBone(ragdoll:LookupBone("ValveBiped.Bip01_Head1"))
 	local headphysobj = ragdoll:GetPhysicsObjectNum(headphysobjnum)
