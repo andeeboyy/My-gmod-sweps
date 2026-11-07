@@ -242,6 +242,7 @@ function SWEP:PrimaryAttack()
 	    local time = vector:Distance(prop:GetPos()) / 5000
 	    timer.Simple(time, function()
 	    	ParticlePlayNet("striderbuster_explode_smoke", vector, Angle(0, 0, 0))
+		ParticlePlayNet("striderbuster_explode_dummy_parts", vector, Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)))
 	    	local dust = ents.Create("ar2explosion")
 	    	dust:SetPos(vector)
 	    	dust:Spawn()

@@ -158,11 +158,11 @@ function SWEP:PrimaryAttack()
     postracepara.mask = MASK_SOLID
     postracepara.filter = plr
     local postrace = util.TraceLine(postracepara)
-    for i = 1, 100 do
+    for i = 1, 300 do
 
         local angle = Angle(0, math.Rand(0, 360), 0)
 
-        local vector = angle:Forward() * math.Rand(100, 2500) + plr:GetPos()
+        local vector = angle:Forward() * math.Rand(100, 3000) + plr:GetPos()
 
         local tracepara = {}
         tracepara.start = Vector(vector.x, vector.y, postrace.HitPos.z - 10)
@@ -176,12 +176,13 @@ function SWEP:PrimaryAttack()
         end
     end
 
-    for i = 1, math.random(25, 50) do
+    for i = 1, math.random(40, 80) do
 	local angle = Angle(math.Rand(-180, 180), math.Rand(-180, 180), math.Rand(-180, 180))
-	local vector = angle:Forward() * math.Rand(100, 750) + self:GetPos()
+	local vector = angle:Forward() * math.Rand(100, 1250) + self:GetPos()
 	local time = vector:Distance(self:GetPos()) / 5000
 	timer.Simple(time, function()
 	    ParticlePlayNet("striderbuster_explode_smoke", vector, Angle(0, 0, 0))
+	    ParticlePlayNet("striderbuster_explode_dummy_parts", vector + offset, Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)))
 	    local dust = ents.Create("ar2explosion")
 	    dust:SetPos(vector)
 	    dust:Spawn()
