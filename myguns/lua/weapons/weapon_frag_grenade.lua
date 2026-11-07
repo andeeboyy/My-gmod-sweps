@@ -187,6 +187,25 @@ local function throw(time, ent, toss, deathgrenade)
 	    bullet.Callback = propdmg
 	    prop:FireBullets(bullet)
 	end
+	for i = 1, math.random(30, 60) do
+	    local entoffset = Vector(math.Rand(-50, 50), math.Rand(-50, 50), math.Rand(-50, 50))
+	    local ent = ents.Create("prop_physics")
+
+	    ent:SetPos(prop:GetPos() + entoffset)
+	    ent:SetModel("models/props_debris/physics_debris_rock1.mdl")
+	    util.SpriteTrail(ent, 0, Color(25, 25, 25), true, 10, 30, 2, 0.004, "materials/sprites/smoke")
+
+	    ent:Spawn()
+
+	    timer.Simple(math.Rand(10, 15), function()
+		if IsValid(ent) then
+		    ent:Remove()
+		end
+	    end)
+	    if !prop:VisibleVec(ent:GetPos()) then
+	    	ent:Remove()
+	    end
+	end
 	for i = 1, math.random(25, 50) do
 	    local randscale = math.Rand(0.1, 1)
 	    local randmass = randscale * 10

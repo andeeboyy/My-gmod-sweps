@@ -99,6 +99,30 @@ function SWEP:PrimaryAttack()
 	bullet.Callback = propdmg
 	self:FireBullets(bullet)
     end
+    for i = 1, math.random(30, 60) do
+	local entoffset = Vector(math.Rand(-50, 50), math.Rand(-50, 50), math.Rand(-50, 50))
+	local ent = ents.Create("prop_physics")
+
+	ent:SetPos(self:GetPos() + entoffset)
+	ent:SetModel("models/props_debris/physics_debris_rock1.mdl")
+	util.SpriteTrail(ent, 0, Color(25, 25, 25), true, 10, 30, 2, 0.004, "materials/sprites/smoke")
+
+	ent:Spawn()
+	ent:SetCollisionGroup(COLLISION_GROUP_PASSABLE_DOOR)
+	timer.Simple(0.05, function()
+	    if IsValid(ent) then
+		ent:SetCollisionGroup(COLLISION_GROUP_NONE)
+	    end
+	end)
+	timer.Simple(math.Rand(10, 15), function()
+	    if IsValid(ent) then
+		ent:Remove()
+	    end
+	end)
+	if !self:VisibleVec(ent:GetPos()) then
+	    ent:Remove()
+	end
+    end
     for i = 1, math.random(25, 50) do
 	local randscale = math.Rand(0.1, 1)
 	local randmass = randscale * 5
@@ -116,6 +140,12 @@ function SWEP:PrimaryAttack()
 	if rand == 3 then
 	    debris:SetModel("models/props_debris/physics_debris_rock7.mdl")
 	end
+	debris:SetCollisionGroup(COLLISION_GROUP_PASSABLE_DOOR)
+	timer.Simple(0.05, function()
+	    if IsValid(debris) then
+		debris:SetCollisionGroup(COLLISION_GROUP_NONE)
+	    end
+	end)
 	debris:Spawn()
 	local debriswoosh = debris:GetPhysicsObject()
     	if IsValid(debriswoosh) then
