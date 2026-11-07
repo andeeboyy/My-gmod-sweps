@@ -212,7 +212,10 @@ function SWEP:PrimaryAttack()
 	    ParticlePlayNet("striderbuster_break_e", prop:GetPos() + offset, Angle(0, 0, 0))
 	    ParticlePlayNet("striderbuster_break_b", prop:GetPos() + offset, Angle(0, 0, 0))
 	    ParticlePlayNet("striderbuster_break_explode", prop:GetPos() + offset, Angle(0, 0, 0))
-	    ParticlePlayNet("building_explosion", prop:GetPos(), Angle(90, 0, 0))
+
+	    local cloud = ents.Create("ar2explosion")
+	    cloud:SetPos(prop:GetPos())
+	    cloud:Spawn()
 
 	    local postracepara = {}
 	    postracepara.start = prop:WorldSpaceCenter()
@@ -225,7 +228,7 @@ function SWEP:PrimaryAttack()
 
 	        local angle = Angle(0, math.Rand(0, 360), 0)
 
-	        local vector = angle:Forward() * math.Rand(100, 750) + prop:GetPos()
+	        local vector = angle:Forward() * math.Rand(100, 1000) + prop:GetPos()
 
 	        local tracepara = {}
 	        tracepara.start = Vector(vector.x, vector.y, postrace.HitPos.z - 10)
@@ -238,6 +241,15 @@ function SWEP:PrimaryAttack()
 	    	    ParticlePlayNet("striderbuster_break_d", surfpos, Angle(0, 0, 0))
 	        end
     	    end
+
+	    for i = 1, math.random(15, 30) do
+	    	local angle = Angle(math.Rand(-180, 180), math.Rand(-180, 180), math.Rand(-180, 180))
+	    	local vector = angle:Forward() * math.Rand(100, 750) + prop:GetPos()
+	    	local time = vector:Distance(prop:GetPos()) / 5000
+	    	timer.Simple(time, function()
+	    	    ParticlePlayNet("striderbuster_explode_dummy_core", vector, Angle(0, 0, 0))
+	    	end)
+	    end
 
 	    local randompicker = math.random(1, 4)
 	    if randompicker == 1 and IsFirstTimePredicted() then

@@ -206,7 +206,6 @@ function SWEP:PrimaryAttack()
 	    ParticlePlayNet("striderbuster_explode_dummy_parts", prop:GetPos() + offset, Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)))
 	end
 	ParticlePlayNet("striderbuster_break_d", prop:GetPos() + offset, Angle(0, 0, 0))
-	ParticlePlayNet("building_explosion", prop:GetPos(), Angle(90, 0, 0))
 	ParticlePlayNet("striderbuster_break_e", prop:GetPos() + offset, Angle(0, 0, 0))
 	ParticlePlayNet("striderbuster_break_b", prop:GetPos() + offset, Angle(0, 0, 0))
 	ParticlePlayNet("striderbuster_break_explode", prop:GetPos() + offset, Angle(0, 0, 0))
@@ -220,11 +219,11 @@ function SWEP:PrimaryAttack()
 	postracepara.mask = MASK_SOLID
 	postracepara.filter = prop
 	local postrace = util.TraceLine(postracepara)
-    	for i = 1, 100 do
+    	for i = 1, 250 do
 
 	    local angle = Angle(0, math.Rand(0, 360), 0)
 
-	    local vector = angle:Forward() * math.Rand(100, 1250) + prop:GetPos()
+	    local vector = angle:Forward() * math.Rand(500, 2500) + prop:GetPos()
 
 	    local tracepara = {}
 	    tracepara.start = Vector(vector.x, vector.y, postrace.HitPos.z - 10)
@@ -237,7 +236,17 @@ function SWEP:PrimaryAttack()
 		ParticlePlayNet("striderbuster_break_d", surfpos, Angle(0, 0, 0))
 	    end
     	end
-
+	for i = 1, math.random(25, 50) do
+	    local angle = Angle(math.Rand(-180, 180), math.Rand(-180, 180), math.Rand(-180, 180))
+	    local vector = angle:Forward() * math.Rand(100, 750) + prop:GetPos()
+	    local time = vector:Distance(prop:GetPos()) / 5000
+	    timer.Simple(time, function()
+	    	ParticlePlayNet("striderbuster_explode_smoke", vector, Angle(0, 0, 0))
+	    	local dust = ents.Create("ar2explosion")
+	    	dust:SetPos(vector)
+	    	dust:Spawn()
+	    end)
+	end
 	local rand = math.random(1, 4)
 	if rand == 1 then
 	    prop:EmitSound("ambient/explosions/explode_2.wav", 120, math.Rand(66, 133), 1, CHAN_AUTO)
