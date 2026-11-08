@@ -223,7 +223,7 @@ function SWEP:PrimaryAttack()
     	plr:RemoveAmmo(ammoneeded, "Battery")
     end
     if spell == 4 and shot == 0 then
-	local randmodel = math.random(1, 26)
+	local randmodel = math.random(1, 30)
 	ammoneeded = 5
 	if checkammo(self, ammoneeded) == false then
 	    return
