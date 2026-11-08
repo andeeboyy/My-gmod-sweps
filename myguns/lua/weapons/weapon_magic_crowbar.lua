@@ -21,7 +21,7 @@ SWEP.Spawnable = true
 SWEP.PrintName = "Magic Crowbar"
 SWEP.Base = "weapon_base"
 SWEP.Category = "my guns - Other"
-SWEP.Purpose = "Use the reload key to cycle through spells.\n\nThere are 3 spells to use."
+SWEP.Purpose = "Use the reload key to cycle through spells."
 
 SWEP.ViewModel = "models/weapons/v_crowbar.mdl"
 SWEP.WorldModel = "models/weapons/c_crowbar.mdl"
