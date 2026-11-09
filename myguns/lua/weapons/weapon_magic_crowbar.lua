@@ -58,6 +58,23 @@ local function checkammo(ent, ammo)
     end
 end
 
+local function playsoundent(ent, soundname, sndlevel, pitch, vol, channel, dsp, filter)
+    if SERVER then
+    	local extrasound = ents.Create("base_gmodentity")
+    	extrasound:Spawn()
+	extrasound:SetNoDraw(true)
+	extrasound:SetPos(ent:WorldSpaceCenter())
+	extrasound:SetParent(ent)
+	if IsFirstTimePredicted() then
+	    extrasound:EmitSound(soundname, sndlevel, pitch, vol, dsp, filter)
+	end
+	timer.Simple(SoundDuration(soundname) + 1, function()
+	    if IsValid(extrasound) then
+    	    	extrasound:Remove()
+	    end
+	end)
+    end
+end
 -- shoot
 function SWEP:PrimaryAttack()
     if CLIENT then return end
@@ -67,18 +84,23 @@ function SWEP:PrimaryAttack()
 	    return
 	end
 	regenwait = CurTime() + 2
-	self:EmitSound("weapons/physcannon/superphys_launch1.wav", 140, 100, 1, CHAN_WEAPON)
 	local prop = ents.Create("prop_physics")
+	playsoundent(self, "weapons/physcannon/superphys_launch1.wav", 140, 100, 1, CHAN_WEAPON)
 	prop:SetPhysicsAttacker(plr, 1000)
 	prop:SetModel("models/props_c17/oildrum001_explosive.mdl")
-	prop:SetPos(plr:GetShootPos())
+	local tracepara = {}
+    	tracepara.start = self:GetOwner():GetShootPos()
+    	tracepara.endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 200
+    	tracepara.filter = self:GetOwner()
+    	tracepara.mask = MASK_SOLID
+    	local trace = util.TraceLine(tracepara)
+
+        if !trace.Hit then
+            prop:SetPos(self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 150)
+        else
+            prop:SetPos(self:GetOwner():GetShootPos())
+        end
 	prop:SetKeyValue("physdamagescale", 1)
-    	prop:SetCollisionGroup(COLLISION_GROUP_PASSABLE_DOOR)
-    	timer.Simple(0.05, function()
-	    if IsValid(prop) then
-	    	prop:SetCollisionGroup(COLLISION_GROUP_NONE)
-	    end
-    	end)
 	prop:Spawn()
 
 	local physobj = prop:GetPhysicsObject()
@@ -97,7 +119,7 @@ function SWEP:PrimaryAttack()
 	    return
 	end
 	regenwait = CurTime() + 2
-	self:EmitSound("friends/friend_join.wav", 140, 100, 1, CHAN_WEAPON)
+	playsoundent(self, "friends/friend_join.wav", 140, 100, 1, CHAN_WEAPON)
 	local tracepara = {}
 	tracepara.start = self:GetOwner():GetShootPos()
         tracepara.endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 100000
@@ -163,7 +185,7 @@ function SWEP:PrimaryAttack()
 	    return
 	end
 	regenwait = CurTime() + 2
-	self:EmitSound("ambient/fire/ignite.wav", 140, 100, 1, CHAN_WEAPON)
+	playsoundent(self, "ambient/fire/ignite.wav", 140, 100, 1, CHAN_WEAPON)
 	local tracepara = {}
     	tracepara.start = self:GetOwner():GetShootPos()
     	tracepara.endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 100
@@ -230,7 +252,7 @@ function SWEP:PrimaryAttack()
 	    return
 	end
 	regenwait = CurTime() + 2
-	self:EmitSound("weapons/gauss/fire1.wav", 140, 100, 1, CHAN_WEAPON)
+	playsoundent(self, "weapons/gauss/fire1.wav", 140, 100, 1, CHAN_WEAPON)
 	local prop = ents.Create("prop_physics")
 
 
@@ -329,9 +351,19 @@ function SWEP:PrimaryAttack()
 	end
 
 	prop:SetSkin(math.random(0, prop:SkinCount() - 1))
-	prop:SetPos(plr:GetShootPos())
+	local tracepara = {}
+    	tracepara.start = self:GetOwner():GetShootPos()
+    	tracepara.endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 200
+    	tracepara.filter = self:GetOwner()
+    	tracepara.mask = MASK_SOLID
+    	local trace = util.TraceLine(tracepara)
+
+        if !trace.Hit then
+            prop:SetPos(self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 150)
+        else
+            prop:SetPos(self:GetOwner():GetShootPos())
+        end
 	prop:SetAngles(plr:EyeAngles())
-    	prop:SetCollisionGroup(COLLISION_GROUP_PASSABLE_DOOR)
 	prop:AddSpawnFlags(1048576)
 	prop:SetPhysicsAttacker(plr, 10)
 
@@ -341,11 +373,6 @@ function SWEP:PrimaryAttack()
 		prop:Remove()
 	    end
 	end)
-    	timer.Simple(0.05, function()
-	    if IsValid(prop) then
-	    	prop:SetCollisionGroup(COLLISION_GROUP_NONE)
-	    end
-    	end)
 	prop:Spawn()
 
 	local physobj = prop:GetPhysicsObject()
@@ -370,18 +397,23 @@ function SWEP:SecondaryAttack()
 	    return
 	end
 	regenwait = CurTime() + 2
-	self:EmitSound("ambient/energy/zap1.wav", 140, 100, 1, CHAN_WEAPON)
+	playsoundent(self, "ambient/energy/zap1.wav", 140, 100, 1, CHAN_WEAPON, dsp, filter)
 	local prop = ents.Create("prop_physics")
 	prop:SetPhysicsAttacker(plr, 1000)
 	prop:SetModel("models/props_junk/gascan001a.mdl")
-	prop:SetPos(plr:GetShootPos())
+	local tracepara = {}
+    	tracepara.start = self:GetOwner():GetShootPos()
+    	tracepara.endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 200
+    	tracepara.filter = self:GetOwner()
+    	tracepara.mask = MASK_SOLID
+    	local trace = util.TraceLine(tracepara)
+
+        if !trace.Hit then
+            prop:SetPos(self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 150)
+        else
+            prop:SetPos(self:GetOwner():GetShootPos())
+        end
 	prop:SetKeyValue("physdamagescale", 1)
-    	prop:SetCollisionGroup(COLLISION_GROUP_PASSABLE_DOOR)
-    	timer.Simple(0.05, function()
-	    if IsValid(prop) then
-	    	prop:SetCollisionGroup(COLLISION_GROUP_NONE)
-	    end
-    	end)
 	prop:Spawn()
 
 	local physobj = prop:GetPhysicsObject()
@@ -400,7 +432,7 @@ function SWEP:SecondaryAttack()
 	    return
 	end
 	regenwait = CurTime() + 2
-	self:EmitSound("friends/message.wav", 140, 100, 1, CHAN_WEAPON)
+	playsoundent(self, "friends/message.wav", 140, 100, 1, CHAN_WEAPON)
 	local tracepara = {}
 	tracepara.start = self:GetOwner():GetShootPos()
         tracepara.endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 100000
@@ -465,7 +497,7 @@ function SWEP:SecondaryAttack()
 	    return
 	end
 	regenwait = CurTime() + 2
-	self:EmitSound("ambient/fire/gascan_ignite1.wav", 140, 100, 1, CHAN_WEAPON)
+	playsoundent(self, "ambient/fire/gascan_ignite1.wav", 140, 100, 1, CHAN_WEAPON)
 	local tracepara = {}
     	tracepara.start = self:GetOwner():GetShootPos()
     	tracepara.endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 100
@@ -540,7 +572,7 @@ function SWEP:SecondaryAttack()
 	    return
 	end
 	regenwait = CurTime() + 2
-	self:EmitSound("weapons/airboat/airboat_gun_energy1.wav", 140, 100, 1, CHAN_WEAPON)
+	playsoundent(self, "weapons/airboat/airboat_gun_energy1.wav", 140, 100, 1, CHAN_WEAPON)
 	local prop = ents.Create("prop_physics")
 
 
@@ -635,11 +667,21 @@ function SWEP:SecondaryAttack()
 	    prop:SetModel("models/props_wasteland/controlroom_chair001a.mdl")
 	end
 
+	local tracepara = {}
+    	tracepara.start = self:GetOwner():GetShootPos()
+    	tracepara.endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 200
+    	tracepara.filter = self:GetOwner()
+    	tracepara.mask = MASK_SOLID
+    	local trace = util.TraceLine(tracepara)
 
-	prop:SetPos(plr:GetShootPos())
+        if !trace.Hit then
+            prop:SetPos(self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 150)
+        else
+            prop:SetPos(self:GetOwner():GetShootPos())
+        end
+
 	prop:SetAngles(plr:EyeAngles())
 	prop:SetSkin(math.random(0, prop:SkinCount() - 1))
-    	prop:SetCollisionGroup(COLLISION_GROUP_PASSABLE_DOOR)
 	prop:AddSpawnFlags(1048576)
 	prop:SetPhysicsAttacker(plr, 10)
 
@@ -648,11 +690,6 @@ function SWEP:SecondaryAttack()
 		prop:Remove()
 	    end
 	end)
-    	timer.Simple(0.05, function()
-	    if IsValid(prop) then
-	    	prop:SetCollisionGroup(COLLISION_GROUP_NONE)
-	    end
-    	end)
 	prop:Spawn()
 
 	local physobj = prop:GetPhysicsObject()
