@@ -167,8 +167,8 @@ function SWEP:PrimaryAttack()
 	end
 	local minetracepara = {}
 	minetracepara.start = prop:WorldSpaceCenter()
-        minetracepara.endpos = prop:WorldSpaceCenter() + prop:GetAngles():Up() * 10
-	minetracepara.filter = prop
+        minetracepara.endpos = prop:WorldSpaceCenter() + Vector(0, 0, 10)
+	minetracepara.filter = {prop, dynprop}
 	minetracepara.mask = MASK_SOLID
 	minetracepara.mins = Vector(-10, -10, 0)
 	minetracepara.maxs = Vector(10, 10, 0)
