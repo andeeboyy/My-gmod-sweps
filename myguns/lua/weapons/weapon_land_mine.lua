@@ -83,6 +83,15 @@ end
 function SWEP:PrimaryAttack()
     if CLIENT then return end
     nextReload = CurTime() + 2
+    if self:IsValid() then
+    	if self:Ammo1() == 0 then
+	    timer.Simple(0.65, function()
+		if self:IsValid() and SERVER then
+	            self:GetOwner():StripWeapon("weapon_land_mine")
+		end
+	    end)
+	end
+    end
     if (self:Clip1() < 1) then return end
     self:SetNextSecondaryFire(CurTime() + 1)
     local prop = ents.Create("prop_physics_override")
@@ -90,7 +99,7 @@ function SWEP:PrimaryAttack()
     prop:SetKeyValue("ExplodeDamage", "175")
     prop:SetKeyValue("ExplodeRadius", "350")
     prop:SetKeyValue("health", "50")
-    prop:SetKeyValue("massScale", "0.6")
+    prop:SetKeyValue("massScale", "0.7")
     self:SetNextPrimaryFire(CurTime() + 1)
     if SERVER then
     	self:GetOwner():DrawWorldModel(false)
@@ -135,7 +144,7 @@ function SWEP:PrimaryAttack()
     local time = CurTime() + 2
     timer.Simple(2, function()
 	if IsValid(prop) then
-	    prop:Fire("physdamagescale", 2)
+	    prop:Fire("physdamagescale", 1)
 	end
     end)
     local function ragdollmass(ent)
@@ -445,7 +454,9 @@ end
 -- reload
 function SWEP:Reload()
     if (nextReload > CurTime()) or !self:HasAmmo() then return end
-    self:GetOwner():DrawViewModel(true, 0)
+    if SERVER then
+	self:GetOwner():DrawWorldModel(true, 0)
+    end
     self:DefaultReload(ACT_VM_DRAW)
     self:SetNextPrimaryFire(CurTime() + 1)
     self:SetNextSecondaryFire(CurTime() + 1.3)
@@ -458,13 +469,22 @@ function SWEP:Deploy()
     self:SetNextSecondaryFire(CurTime() + 1.3)
     if self:Clip1() < 1 then
 	if self:Ammo1() < 1 then
+    	    if SERVER then
+		self:GetOwner():DrawWorldModel(false, 0)
+    	    end
 	    return
         end
 
 	self:DefaultReload(ACT_VM_DRAW)
 	if nextReload > CurTime() then
+    	    if SERVER then
+		self:GetOwner():DrawWorldModel(true, 0)
+    	    end
    	    self:SetNextPrimaryFire(nextReload + 0.5 / GetConVar("sv_defaultdeployspeed"):GetFloat())
 	else
+    	    if SERVER then
+		self:GetOwner():DrawWorldModel(true, 0)
+    	    end
 	    self:SetNextPrimaryFire(CurTime() + 0.5 / GetConVar("sv_defaultdeployspeed"):GetFloat())
 	end
 	self:SetNextSecondaryFire(CurTime() + 0.5)
@@ -487,27 +507,48 @@ end
 
 if CLIENT then
     function SWEP:DrawWorldModel()
-	if !IsValid(self.worldmodel) then
-	    self.worldmodel = ClientsideModel("models/props_phx/games/chess/white_dama.mdl")
-	    self.worldmodel:SetNoDraw(True)
+	if self:GetNoDraw() then return end
+	if !IsValid(self.worldmodel) and self:GetNoDraw() == false then
+	    self.worldmodel = ClientsideModel(self.WorldModel)
+	    self.worldmodel2 = ClientsideModel("models/props_phx/wheels/magnetic_small_base.mdl")
+	    self.worldmodel:SetNoDraw(true)
+	    self.worldmodel2:SetNoDraw(true)
 	end
 	if IsValid(self.worldmodel) then
+	    local offset = (self.worldmodel2:WorldSpaceCenter() - self.worldmodel2:GetPos()) - self.worldmodel2:GetAngles():Up() * 1.5
+	    self.worldmodel2:SetPos(self.worldmodel:WorldSpaceCenter() - offset)
+	    self.worldmodel2:SetAngles(self.worldmodel:GetAngles())
+	    self.worldmodel2:SetParent(self.worldmodel)
+	    self.worldmodel2:SetModelScale(0.5, 0)
+	    self.worldmodel2:SetMaterial("models/props_canal/metalwall005b")
 	    if IsValid(self:GetOwner()) then
-	        if self:GetOwner():GetActiveWeapon() == self then
-	    	    self.worldmodel:DrawModel()
+	        if self:GetOwner():GetActiveWeapon() == self and self:GetNoDraw() == false then
+		    self:GetOwner():SetupBones()
 	    	    local handi = self:GetOwner():LookupBone("ValveBiped.Bip01_R_Hand")
 	    	    local handmatrix = self:GetOwner():GetBoneMatrix(handi)
+		    if !handmatrix then return end
 	    	    local ang = handmatrix:GetAngles()
 	    	    local pos = handmatrix:GetTranslation() + (handmatrix:GetAngles():Forward() * 10)
 	    	    ang:RotateAroundAxis(ang:Forward(), 90)
 	    	    self.worldmodel:SetMaterial("models/props_c17/metalladder001")
 	    	    self.worldmodel:SetPos(pos)
 	    	    self.worldmodel:SetAngles(ang)
-	        end
+		    self.worldmodel:DrawModel()
+		    self.worldmodel2:DrawModel()
+	        else
+		    if IsValid(self.worldmodel) then
+	    		self.worldmodel:Remove()
+		    end
+		    if IsValid(self.worldmodel2) then
+	    	    	self.worldmodel2:Remove()
+		    end
+		end
 	    else	
 		self.worldmodel:SetMaterial("models/props_c17/metalladder001")
 		self.worldmodel:SetPos(self:GetPos())
 		self.worldmodel:SetAngles(self:GetAngles())
+		self.worldmodel:DrawModel()
+		self.worldmodel2:DrawModel()
 	    end
 	end
     end
@@ -515,10 +556,16 @@ if CLIENT then
 	if IsValid(self.worldmodel) then
 	    self.worldmodel:Remove()
 	end
+	if IsValid(self.worldmodel2) then
+	    self.worldmodel2:Remove()
+	end
     end
     function SWEP:Holster()
 	if IsValid(self.worldmodel) then
 	    self.worldmodel:Remove()
+	end
+	if IsValid(self.worldmodel2) then
+	    self.worldmodel2:Remove()
 	end
     end
 end
