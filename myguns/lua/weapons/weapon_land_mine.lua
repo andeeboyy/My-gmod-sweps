@@ -39,7 +39,7 @@ end
 -- viewmodel
 
 SWEP.ViewModel = "models/props_junk/watermelon01_chunk02c.mdl"
-SWEP.WorldModel = "models/props_junk/cardboard_box004a.mdl"
+SWEP.WorldModel = "models/props_phx/games/chess/white_dama.mdl"
 SWEP.UseHands = true
 SWEP.ViewModelFov = 50
 
@@ -114,9 +114,13 @@ function SWEP:PrimaryAttack()
     end
 
     self:TakePrimaryAmmo(1)
+    local dynprop = ents.Create("prop_dynamic")
+    dynprop:SetModel("models/props_phx/wheels/magnetic_small_base.mdl")
+    dynprop:SetMaterial("models/props_canal/metalwall005b")
     prop:SetModel("models/props_phx/games/chess/white_dama.mdl")
     prop:SetMaterial("models/props_c17/metalladder001")
     prop:SetPos(self:GetOwner():GetShootPos())
+    dynprop:SetPos(prop:WorldSpaceCenter())
     prop:SetAngles(Angle(0, self:GetOwner():EyeAngles().yaw, self:GetOwner():EyeAngles().roll))
     prop:SetCollisionGroup(COLLISION_GROUP_PASSABLE_DOOR)
     timer.Simple(0.25, function()
@@ -124,8 +128,10 @@ function SWEP:PrimaryAttack()
 	    prop:SetCollisionGroup(COLLISION_GROUP_NONE)
 	end
     end)
-
+    dynprop:Spawn()
     prop:Spawn() 
+    dynprop:SetModelScale(0.5, 0)
+    dynprop:SetParent(prop)
     local time = CurTime() + 2
     timer.Simple(2, function()
 	if IsValid(prop) then
@@ -481,6 +487,38 @@ end
 
 if CLIENT then
     function SWEP:DrawWorldModel()
-	return
+	if !IsValid(self.worldmodel) then
+	    self.worldmodel = ClientsideModel("models/props_phx/games/chess/white_dama.mdl")
+	    self.worldmodel:SetNoDraw(True)
+	end
+	if IsValid(self.worldmodel) then
+	    if IsValid(self:GetOwner()) then
+	        if self:GetOwner():GetActiveWeapon() == self then
+	    	    self.worldmodel:DrawModel()
+	    	    local handi = self:GetOwner():LookupBone("ValveBiped.Bip01_R_Hand")
+	    	    local handmatrix = self:GetOwner():GetBoneMatrix(handi)
+	    	    local ang = handmatrix:GetAngles()
+	    	    local pos = handmatrix:GetTranslation() + (handmatrix:GetAngles():Forward() * 10)
+	    	    ang:RotateAroundAxis(ang:Forward(), 90)
+	    	    self.worldmodel:SetMaterial("models/props_c17/metalladder001")
+	    	    self.worldmodel:SetPos(pos)
+	    	    self.worldmodel:SetAngles(ang)
+	        end
+	    else	
+		self.worldmodel:SetMaterial("models/props_c17/metalladder001")
+		self.worldmodel:SetPos(self:GetPos())
+		self.worldmodel:SetAngles(self:GetAngles())
+	    end
+	end
+    end
+    function SWEP:OnRemove()
+	if IsValid(self.worldmodel) then
+	    self.worldmodel:Remove()
+	end
+    end
+    function SWEP:Holster()
+	if IsValid(self.worldmodel) then
+	    self.worldmodel:Remove()
+	end
     end
 end
