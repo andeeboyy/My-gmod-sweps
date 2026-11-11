@@ -501,7 +501,7 @@ function SWEP:Holster()
 end
 
 function SWEP:GetViewModelPosition(vpos, vang)
-    vpos = vpos + vang:Right() * 6 + vang:Up() * -8 + vang:Forward() * 14
+    vpos = vpos + vang:Right() * 0 + vang:Up() * 0 + vang:Forward() * -1000
     return vpos, vang
 end
 
