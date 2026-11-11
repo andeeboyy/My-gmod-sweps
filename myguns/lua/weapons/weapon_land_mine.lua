@@ -90,7 +90,7 @@ function SWEP:PrimaryAttack()
     prop:SetKeyValue("ExplodeDamage", "175")
     prop:SetKeyValue("ExplodeRadius", "350")
     prop:SetKeyValue("health", "50")
-    prop:SetKeyValue("massScale", "0.75")
+    prop:SetKeyValue("massScale", "0.6")
     self:SetNextPrimaryFire(CurTime() + 1)
     if SERVER then
     	self:GetOwner():DrawWorldModel(false)
@@ -129,7 +129,7 @@ function SWEP:PrimaryAttack()
     local time = CurTime() + 2
     timer.Simple(2, function()
 	if IsValid(prop) then
-	    prop:Fire("physdamagescale", 3)
+	    prop:Fire("physdamagescale", 2)
 	end
     end)
     local function ragdollmass(ent)
@@ -184,30 +184,31 @@ function SWEP:PrimaryAttack()
 			end
 		    end
 		end
-		local stackedtracepara = {}
-		stackedtracepara.start = minetrace.Entity:WorldSpaceCenter()
-        	stackedtracepara.endpos = minetrace.Entity:WorldSpaceCenter() + Vector(0, 0, 30)
-		stackedtracepara.filter = minetrace.Entity
-		stackedtracepara.mask = MASK_SOLID
-		local stackedtrace = util.TraceLine(stackedtracepara)
-		if IsValid(stackedtrace.Entity) and stackedtrace.Hit then
-		    if stackedtrace.Entity:GetMoveType() == MOVETYPE_WALK then
-		    	triggermass = triggermass + 85
-		    end
-		    if stackedtrace.Entity:GetMoveType() == MOVETYPE_STEP then
-		    	triggermass = triggermass + stackedtrace.Entity:GetPhysicsObject():GetMass()
-		    end
-		    if stackedtrace.Entity:GetMoveType() == MOVETYPE_VPHYSICS then
-		        if stackedtrace.Entity:IsRagdoll() then
-		    	    triggermass = triggermass + ragdollmass(stackedtrace.Entity)
-		        else
-			    if IsValid(stackedtrace.Entity:GetPhysicsObject()) then
-			        triggermass = triggermass + stackedtrace.Entity:GetPhysicsObject():GetMass()
+		if minetrace.Hit then
+		    local stackedtracepara = {}
+		    stackedtracepara.start = minetrace.Entity:WorldSpaceCenter()
+        	    stackedtracepara.endpos = minetrace.Entity:WorldSpaceCenter() + Vector(0, 0, 30)
+		    stackedtracepara.filter = minetrace.Entity
+		    stackedtracepara.mask = MASK_SOLID
+		    local stackedtrace = util.TraceLine(stackedtracepara)
+		    if IsValid(stackedtrace.Entity) and stackedtrace.Hit then
+		        if stackedtrace.Entity:GetMoveType() == MOVETYPE_WALK then
+		    	    triggermass = triggermass + 85
+		        end
+		        if stackedtrace.Entity:GetMoveType() == MOVETYPE_STEP then
+		    	    triggermass = triggermass + stackedtrace.Entity:GetPhysicsObject():GetMass()
+		        end
+		        if stackedtrace.Entity:GetMoveType() == MOVETYPE_VPHYSICS then
+		            if stackedtrace.Entity:IsRagdoll() then
+		    	        triggermass = triggermass + ragdollmass(stackedtrace.Entity)
+		            else
+			        if IsValid(stackedtrace.Entity:GetPhysicsObject()) then
+			            triggermass = triggermass + stackedtrace.Entity:GetPhysicsObject():GetMass()
+			        end
 			    end
 			end
 		    end
 		end
-		self:GetOwner():PrintMessage(HUD_PRINTCENTER, triggermass)
 	    	if triggermass > 60 or triggermass == 60 and triggered == 0 then
 		    if triggered == 0 then
 			prop:EmitSound("weapons/smg1/switch_single.wav", 100, 80, 1, CHAN_WEAPON)
