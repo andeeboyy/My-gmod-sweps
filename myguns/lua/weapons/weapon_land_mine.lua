@@ -199,14 +199,27 @@ function SWEP:PrimaryAttack()
 			end
 		    end
 		end
-		if minetrace.Hit then
+		local blockedents = {minetrace.Entity}
+		
+		local function stacktrace(ent)
+		    local minb, maxb = ent:GetRotatedAABB(ent:OBBMins(), ent:OBBMaxs())
 		    local stackedtracepara = {}
-		    stackedtracepara.start = minetrace.Entity:WorldSpaceCenter()
-        	    stackedtracepara.endpos = minetrace.Entity:WorldSpaceCenter() + Vector(0, 0, 30)
-		    stackedtracepara.filter = minetrace.Entity
+		    stackedtracepara.start = ent:WorldSpaceCenter()
+        	    stackedtracepara.endpos = ent:WorldSpaceCenter() + Vector(0, 0, maxb.z)
+		    local tracefilter = table.Copy(blockedents)
+		    table.insert(tracefilter, ent)
+		    stackedtracepara.filter = blockedents
+		    stackedtracepara.maxs = maxb
+		    stackedtracepara.mins = Vector(minb.x, minb.y, 0)
 		    stackedtracepara.mask = MASK_SOLID
-		    local stackedtrace = util.TraceLine(stackedtracepara)
+		    local stackedtrace = util.TraceHull(stackedtracepara)
+		    if !IsValid(stackedtrace.Entity) and !stackedtrace.Hit then
+			return
+		    end
 		    if IsValid(stackedtrace.Entity) and stackedtrace.Hit then
+
+			table.insert(blockedents, stackedtrace.Entity)
+
 		        if stackedtrace.Entity:GetMoveType() == MOVETYPE_WALK then
 		    	    triggermass = triggermass + 85
 		        end
@@ -222,7 +235,12 @@ function SWEP:PrimaryAttack()
 			        end
 			    end
 			end
+			stacktrace(stackedtrace.Entity)
 		    end
+		end
+
+		if minetrace.Hit then
+		    stacktrace(minetrace.Entity)
 		end
 	    	if triggermass > 60 or triggermass == 60 and triggered == 0 then
 		    if triggered == 0 then
