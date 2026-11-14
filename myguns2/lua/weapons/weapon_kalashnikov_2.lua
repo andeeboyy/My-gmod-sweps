@@ -26,6 +26,8 @@ local canceled = 0
 
 local aimangles = Angle(0, 0, 0)
 
+local emptyshot = 0
+
 -- spawnmenu
 
 SWEP.Spawnable = true
@@ -73,13 +75,17 @@ function SWEP:PrimaryAttack()
 
 
     if self:Clip1() < 1 then
-	if shot == 0 then
-	    self:EmitSound("weapons/ar2/ar2_empty.wav", 50, 80, 1, CHAN_WEAPON)
-	    self:SetNextPrimaryFire(CurTime() + 0.1)
+	if emptyshot == 0 and shot == 0 then
+	    self:EmitSound("weapons/ar2/ar2_empty.wav", 50, 95, 1, CHAN_WEAPON)
+	    emptyshot = 1
 	    shot = 1
 	end
+	self:SetNextPrimaryFire(CurTime() + 0.1)
 	return
+    else
+	emptyshot = 0
     end
+
     if self:GetOwner():KeyDown(IN_SPEED) then return end
 
     self:SetNextPrimaryFire(CurTime() + 0.1)

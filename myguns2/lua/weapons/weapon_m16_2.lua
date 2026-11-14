@@ -30,6 +30,8 @@ local aimangles = Angle(0, 0, 0)
 
 local idletime = 0
 
+local emptyshot = 0
+
 -- spawnmenu
 
 SWEP.Spawnable = true
@@ -79,16 +81,20 @@ function SWEP:PrimaryAttack()
     if self:GetOwner():KeyDown(IN_SPEED) then return end
 
     
-    local function shoot()
+    local function shoot(burst)
 	if !IsValid(self) and !IsValid(self:GetOwner()) then return end
     	if self:Clip1() < 1 then
-	    if shot == 0 and IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():KeyPressed(IN_ATTACK) then
-	    	self:EmitSound("weapons/ar2/ar2_empty.wav", 50, 125, 1, CHAN_WEAPON)
-	    	self:SetNextPrimaryFire(CurTime() + 0.1)
+	    if emptyshot == 0 and shot == 0 and burst == 0 then
+	    	self:EmitSound("weapons/ar2/ar2_empty.wav", 50, 110, 1, CHAN_WEAPON)
+	    	emptyshot = 1
 	    	shot = 1
 	    end
+	    self:SetNextPrimaryFire(CurTime() + 0.1)
 	    return
+    	else
+	    emptyshot = 0
     	end
+
 	shot = 1
         local bullet = {}
 	    bullet.Damage = 55
@@ -133,9 +139,13 @@ function SWEP:PrimaryAttack()
         end
     end
     if burst == 1 then
-	shoot()
-	timer.Simple(0.07, shoot)
-	timer.Simple(0.14, shoot)
+	shoot(0)
+	timer.Simple(0.07, function()
+	    shoot(1)
+	end)
+	timer.Simple(0.14, function()
+	    shoot(1)
+	end)
 	self:SetNextPrimaryFire(CurTime() + 0.3)
     else
 	shoot()

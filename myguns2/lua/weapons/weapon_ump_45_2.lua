@@ -22,6 +22,8 @@ local mode = 1
 
 local canceled = 0
 
+local emptyshot = 0
+
 -- spawnmenu
 
 SWEP.Spawnable = true
@@ -72,15 +74,18 @@ function SWEP:PrimaryAttack()
 
     if (mode == 2 or mode == 3) and shot == 1 then return end
 
-    local function shoot()
+    local function shoot(burst)
 	if !IsValid(self) and !IsValid(self:GetOwner()) then return end
     	if self:Clip1() < 1 then
-	    if shot == 0 and IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():KeyPressed(IN_ATTACK) then
+	    if emptyshot == 0 and shot == 0 and burst == 0 then
 	    	self:EmitSound("weapons/pistol/pistol_empty.wav", 50, 100, 1, CHAN_WEAPON)
-	    	self:SetNextPrimaryFire(CurTime() + 0.1)
+	    	emptyshot = 1
 	    	shot = 1
 	    end
+	    self:SetNextPrimaryFire(CurTime() + 0.1)
 	    return
+    	else
+	    emptyshot = 0
     	end
 	shot = 1
         local bullet = {}
@@ -119,11 +124,13 @@ function SWEP:PrimaryAttack()
     	end
     end
     if mode == 3 then
-	shoot()
-	timer.Simple(0.1, shoot)
+	shoot(0)
+	timer.Simple(0.1, function()
+	    shoot(1)
+	end)
 	self:SetNextPrimaryFire(CurTime() + 0.3)
     else
-	shoot()
+	shoot(0)
 	self:SetNextPrimaryFire(CurTime() + 0.1)
     end
 end

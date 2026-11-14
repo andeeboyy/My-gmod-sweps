@@ -142,7 +142,6 @@ function SWEP:Reload()
 	reloading = 1
         self:SetHoldType("Shotgun")
 	self:SendWeaponAnim(ACT_SHOTGUN_RELOAD_START)
-	self:GetOwner():SetAnimation(PLAYER_RELOAD)
 	self:ReloadLoop()
     end
 end
@@ -194,6 +193,7 @@ function SWEP:ReloadLoop()
 	end)
 	if IsValid(self) and IsValid(self:GetOwner()) then
 	    self:SendWeaponAnim(ACT_VM_RELOAD)
+	    self:GetOwner():SetAnimation(PLAYER_RELOAD)
 	end
     end)
 end
@@ -289,7 +289,7 @@ function SWEP:Think()
 	    self:SetHoldType("rpg")
 	end
     else
-	if self:GetOwner():KeyDown(IN_SPEED) then
+	if self:GetOwner():KeyDown(IN_SPEED) or self:GetActivity() == 183 then
 	    moveside = math.Approach(moveside, -1, 5 * FrameTime())
 	    movevertical = math.Approach(movevertical, 6, 5 * FrameTime())
 	    turn = math.Approach(turn, -10, 15 * FrameTime())

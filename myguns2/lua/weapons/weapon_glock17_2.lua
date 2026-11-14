@@ -22,6 +22,8 @@ local sprinton = 1
 
 local candothing = 1
 
+local emptyshot = 0
+
 -- spawnmenu
 
 SWEP.Spawnable = true
@@ -85,9 +87,15 @@ end
 -- shoot
 function SWEP:PrimaryAttack()
     if self:Clip1() < 1 then
-	self:EmitSound("weapons/pistol/pistol_empty.wav", 50, 100, 1, CHAN_WEAPON)
+	if emptyshot == 0 and shot == 0 then
+	    self:EmitSound("weapons/pistol/pistol_empty.wav", 50, 100, 1, CHAN_WEAPON)
+	    emptyshot = 1
+	    shot = 1
+	end
 	self:SetNextPrimaryFire(CurTime() + 0.1)
 	return
+    else
+	emptyshot = 0
     end
     if self:GetOwner():KeyDown(IN_SPEED) then return end
     local bullet = {}

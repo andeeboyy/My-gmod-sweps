@@ -23,6 +23,8 @@ local shot = 0
 
 local canceled = 0
 
+local emptyshot = 0
+
 -- spawnmenu
 
 
@@ -71,13 +73,17 @@ function SWEP:PrimaryAttack()
 
 
     if self:Clip1() < 1 then
-	if shot == 0 then
+	if emptyshot == 0 and shot == 0 then
 	    self:EmitSound("weapons/ar2/ar2_empty.wav", 50, 90, 1, CHAN_WEAPON)
-	    self:SetNextPrimaryFire(CurTime() + 0.1)
+	    emptyshot = 1
 	    shot = 1
 	end
+	self:SetNextPrimaryFire(CurTime() + 0.1)
 	return
+    else
+	emptyshot = 0
     end
+
     if self:GetOwner():KeyDown(IN_SPEED) then return end
 
     self:SetNextPrimaryFire(CurTime() + 0.06)

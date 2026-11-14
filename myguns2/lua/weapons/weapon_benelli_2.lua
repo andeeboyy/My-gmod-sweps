@@ -144,7 +144,6 @@ function SWEP:Reload()
 	reloading = 1
         self:SetHoldType("Shotgun")
 	self:SendWeaponAnim(ACT_SHOTGUN_RELOAD_START)
-	self:GetOwner():SetAnimation(PLAYER_RELOAD)
 	self:ReloadLoop()
     end
 end
@@ -198,6 +197,7 @@ function SWEP:ReloadLoop()
 	end)
 	if IsValid(self) and IsValid(self:GetOwner()) then
 	    self:SendWeaponAnim(ACT_VM_RELOAD)
+	    self:GetOwner():SetAnimation(PLAYER_RELOAD)
 	end
     end)
 end
