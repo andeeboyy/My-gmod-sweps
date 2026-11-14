@@ -1,0 +1,326 @@
+AddCSLuaFile()
+local randsound = math.random(1, 4)
+local canfire = 1
+-- spawnmenu
+SWEP.Spawnable = true
+SWEP.PrintName = "Bomb Vest"
+SWEP.Base = "weapon_base"
+SWEP.Category = "my guns - Explosives"
+
+if SERVER then
+    util.AddNetworkString("DoParticleNet")
+end
+local function ParticlePlayNet(particle, pos, ang)
+    if SERVER then
+    	
+    
+    
+	net.Start("DoParticleNet")
+	net.WriteString(particle)
+	net.WriteVector(pos)
+	net.WriteAngle(ang)
+	net.Broadcast()
+    end
+end
+
+if CLIENT then
+    net.Receive("DoParticleNet", function()
+	local particle = net.ReadString()
+	local pos = net.ReadVector()
+	local ang = net.ReadAngle()
+	local effect = CreateParticleSystemNoEntity(particle, pos, ang)
+	if IsValid(effect) then
+	    effect:StartEmission()
+	end
+    end)
+end
+
+-- viewmodel
+SWEP.ViewModel = "models/weapons/c_slam.mdl"
+SWEP.WorldModel = "models/weapons/w_slam.mdl"
+SWEP.UseHands = true
+SWEP.ViewModelFov = 50
+-- slots
+
+SWEP.SlotPos = 1
+SWEP.Slot = 4
+
+-- stats
+SWEP.AccurateCrossHair = true
+SWEP.Primary.Ammo = "none"
+SWEP.Primary.ClipSize = -1
+SWEP.Primary.DefaultClip = -1
+SWEP.Primary.Automatic = true
+
+-- secondary
+
+SWEP.Secondary.ClipSize    = -1
+SWEP.Secondary.DefaultClip = -1
+SWEP.Secondary.Automatic   = true
+SWEP.Secondary.Ammo        = "none"
+
+-- function stuff
+
+-- anim
+function SWEP:Initialize()
+    self:SetHoldType("grenade")
+end
+-- shoot
+function SWEP:PrimaryAttack()
+    if CLIENT then return end
+    local plr = self:GetOwner()
+    self:SetNextPrimaryFire(CurTime() + 1)
+    if canfire == 0 then return end
+    if !IsValid(plr) or !plr:Alive() then return end
+    local function propdmg(attacker, tr, dmginfo)
+        local victim = tr.Entity
+        if prop ~= nil and IsValid(prop) then
+    	    local dist = tr.HitPos:Distance(prop:WorldSpaceCenter())
+	    local damage = 1000 / math.Clamp(dist * 0.0025, 1, math.huge)
+	    dmginfo:SetDamage(damage)
+        end
+    	if !victim:IsNPC() and !victim:IsNextBot() and !victim:IsPlayer() and !victim:IsRagdoll() then
+	    dmginfo:SetDamage(5)
+    	end
+    end
+    for i = 1, 2500 do
+    	local bullet = {}
+	local tracepara = {}
+	local bulletdir = Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)):Forward()
+	bullet.Damage = 1000
+	bullet.Attacker = plr
+	bullet.Inflictor = self
+	bullet.Num = 1
+	bullet.Force = 1
+	bullet.HullSize = 90
+	bullet.Tracer = 0
+	bullet.Dir = bulletdir
+	bullet.Src = plr:WorldSpaceCenter()
+	bullet.Callback = propdmg
+	self:FireBullets(bullet)
+    end
+    for i = 1, math.random(30, 60) do
+	local entoffset = Vector(math.Rand(-50, 50), math.Rand(-50, 50), math.Rand(-50, 50))
+	local ent = ents.Create("prop_physics")
+
+	ent:SetPos(self:GetPos() + entoffset)
+	ent:SetModel("models/props_debris/physics_debris_rock1.mdl")
+	util.SpriteTrail(ent, 0, Color(25, 25, 25), true, 10, 30, 2, 0.004, "materials/sprites/smoke")
+
+	ent:Spawn()
+	ent:SetCollisionGroup(COLLISION_GROUP_PASSABLE_DOOR)
+	timer.Simple(0.05, function()
+	    if IsValid(ent) then
+		ent:SetCollisionGroup(COLLISION_GROUP_NONE)
+	    end
+	end)
+	timer.Simple(math.Rand(10, 15), function()
+	    if IsValid(ent) then
+		ent:Remove()
+	    end
+	end)
+	if !self:VisibleVec(ent:GetPos()) then
+	    ent:Remove()
+	end
+    end
+    for i = 1, math.random(25, 50) do
+	local randscale = math.Rand(0.1, 1)
+	local randmass = randscale * 5
+	local debrisoffset = Vector(math.Rand(-50, 50), math.Rand(-50, 50), math.Rand(0, 100))
+	local debris = ents.Create("prop_physics")
+	debris:SetKeyValue("modelscale", randscale)
+	debris:SetPos(plr:GetShootPos() + debrisoffset)
+	local rand = math.random(1, 3)
+	if rand == 1 then
+	    debris:SetModel("models/props_debris/physics_debris_rock1.mdl")
+	end
+	if rand == 2 then
+	    debris:SetModel("models/props_debris/physics_debris_rock5.mdl")
+	end
+	if rand == 3 then
+	    debris:SetModel("models/props_debris/physics_debris_rock7.mdl")
+	end
+	debris:SetCollisionGroup(COLLISION_GROUP_PASSABLE_DOOR)
+	timer.Simple(0.05, function()
+	    if IsValid(debris) then
+		debris:SetCollisionGroup(COLLISION_GROUP_NONE)
+	    end
+	end)
+	debris:Spawn()
+	local debriswoosh = debris:GetPhysicsObject()
+    	if IsValid(debriswoosh) then
+	    debriswoosh:Wake()
+	    debriswoosh:SetMass(randmass)
+	    timer.Simple(0.1, function()
+	    	if IsValid(debriswoosh) then
+	            debriswoosh:SetMass(1)
+		end
+	    end)
+	    local debrisspin = Vector(math.random(-1000, 1000), math.random(-1000, 1000), math.random(-1000, 1000))
+            debriswoosh:AddAngleVelocity(debrisspin)
+
+	    timer.Simple(math.Rand(5, 15), function()
+	    	if IsValid(debris) then
+		    debris:Remove()
+		end
+	    end)
+	    if !self:VisibleVec(debris:GetPos()) then
+	    	debris:Remove()
+	    end
+        end
+    end
+    local offset = Vector(0, 0, 100)
+    ParticlePlayNet("striderbuster_explode_smoke", self:GetPos() + offset, Angle(0, 0, 0))
+    for i = 1, 10 do
+   	ParticlePlayNet("striderbuster_explode_dummy_parts", self:GetPos() + offset, Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)))
+    end
+    ParticlePlayNet("striderbuster_break_d", self:GetPos() + offset, Angle(0, 0, 0))
+    ParticlePlayNet("striderbuster_break_e", self:GetPos() + offset, Angle(0, 0, 0))
+    ParticlePlayNet("striderbuster_break_b", self:GetPos() + offset, Angle(0, 0, 0))
+    ParticlePlayNet("striderbuster_break_explode", self:GetPos() + offset, Angle(0, 0, 0))
+    local cloud = ents.Create("ar2explosion")
+    cloud:SetPos(self:GetPos() + offset)
+    cloud:Spawn()
+
+    local postracepara = {}
+    postracepara.start = plr:WorldSpaceCenter()
+    postracepara.endpos = plr:GetPos() + Vector(0, 0, 510)
+    postracepara.mask = MASK_SOLID
+    postracepara.filter = plr
+    local postrace = util.TraceLine(postracepara)
+    for i = 1, 300 do
+
+        local angle = Angle(0, math.Rand(0, 360), 0)
+
+        local vector = angle:Forward() * math.Rand(100, 3000) + plr:GetPos()
+
+        local tracepara = {}
+        tracepara.start = Vector(vector.x, vector.y, postrace.HitPos.z - 10)
+        tracepara.endpos = vector + Vector(0, 0, -500)
+        tracepara.mask = MASK_SOLID
+        local trace = util.TraceLine(tracepara)
+
+        local surfpos = trace.HitPos
+        if trace.Hit then
+            ParticlePlayNet("striderbuster_break_d", surfpos, Angle(0, 0, 0))
+        end
+    end
+
+    for i = 1, math.random(40, 80) do
+	local angle = Angle(math.Rand(-180, 180), math.Rand(-180, 180), math.Rand(-180, 180))
+	local vector = angle:Forward() * math.Rand(100, 1250) + self:GetPos()
+	local time = vector:Distance(self:GetPos()) / 5000
+	timer.Simple(time, function()
+	    ParticlePlayNet("striderbuster_explode_smoke", vector, Angle(0, 0, 0))
+	    ParticlePlayNet("striderbuster_explode_dummy_parts", vector + offset, Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)))
+	    local dust = ents.Create("ar2explosion")
+	    dust:SetPos(vector)
+	    dust:Spawn()
+	end)
+    end
+
+    local randompicker = math.random(1, 4)
+    if randompicker == 1 and IsFirstTimePredicted() then
+	self:EmitSound("ambient/explosions/explode_2.wav", 120, math.Rand(66, 133), 1, CHAN_AUTO)
+    end
+    if randompicker == 2 and IsFirstTimePredicted() then
+	self:EmitSound("ambient/explosions/explode_3.wav", 120, math.Rand(66, 133), 1, CHAN_AUTO)
+    end
+    if randompicker == 3 and IsFirstTimePredicted() then
+	self:EmitSound("ambient/explosions/explode_1.wav", 120, math.Rand(66, 133), 1, CHAN_AUTO)
+    end
+    if randompicker == 4 and IsFirstTimePredicted() then
+	self:EmitSound("ambient/explosions/explode_5.wav", 120, math.Rand(66, 133), 1, CHAN_AUTO)
+    end
+    if IsFirstTimePredicted() then
+    	self:EmitSound("phx/explode00.wav", 140, math.Rand(50, 75), 1, CHAN_AUTO)
+    end
+    local boom = ents.Create("env_explosion")
+    boom:SetPos(plr:GetShootPos())
+    boom:SetKeyValue("iMagnitude", 250)
+    boom:SetKeyValue("iRadiusOverride", 1500)
+    boom:Fire("Explode")
+
+    local propboom = ents.Create("prop_physics")
+    propboom:SetModel("models/props_phx/ww2bomb.mdl")
+    propboom:SetPos(plr:GetShootPos())
+    propboom:SetNoDraw(true)
+    propboom:Spawn()
+    timer.Simple(0.015, function()
+	if IsValid(propboom) then
+	    propboom:SetKeyValue("ExplodeDamage", 4500)
+	    propboom:SetKeyValue("ExplodeRadius", 650)
+	end
+    end)
+    timer.Simple(0.03, function()
+	if IsValid(propboom) then
+	    propboom:TakeDamage(1)
+	end
+    end)
+
+    for _, obj in ipairs(ents.FindInSphere(plr:WorldSpaceCenter(), 5000)) do
+	if IsValid(obj) and SERVER then
+	    local dist = obj:GetPos():Distance(plr:WorldSpaceCenter())
+	    local physobj = obj:GetPhysicsObject()
+	    if obj:VisibleVec(plr:WorldSpaceCenter()) then
+		
+		if IsValid(physobj) and obj:GetMoveType() == MOVETYPE_VPHYSICS then
+		    physobj:ApplyForceCenter((plr:WorldSpaceCenter() - obj:GetPos()):Angle():Forward() * (250000 / (dist * 0.2) * -1))
+	        end
+	        if obj:IsPlayer() then
+		    obj:SetVelocity((plr:WorldSpaceCenter() - obj:GetPos()):Angle():Forward() * (25000 / (dist * 0.2) * -1))
+	        end
+	    end
+        end
+    end
+
+    for _, obj in ipairs(ents.FindInSphere(plr:WorldSpaceCenter(), 6000)) do
+        if IsValid(obj) then
+            local dist = obj:GetPos():Distance(plr:WorldSpaceCenter())
+            if IsValid(obj) and obj:VisibleVec(plr:WorldSpaceCenter()) then
+                local dmg = DamageInfo()
+		local dmgv = 0
+                if obj:IsNPC() or obj:IsPlayer() or obj:IsNextBot() or obj:IsRagdoll() then
+                    dmgv = math.Clamp(1500 / ((dist * 0.02) + 1), 0, math.huge)
+		    if dmgv < 10 then
+			dmgv = 0
+		    end
+                else
+                    dmgv = math.Clamp(150 / ((dist * 0.02) + 1), 0, math.huge)
+		    if dmgv < 10 then
+			dmgv = 0
+		    end
+                end
+		dmg:SetDamage(dmgv)
+                dmg:SetAttacker(plr)
+                dmg:SetInflictor(self)
+                dmg:SetDamageType(DMG_BULLET)
+                dmg:SetDamagePosition(obj:WorldSpaceCenter())
+                obj:TakeDamageInfo(dmg)
+            end
+        end
+    end
+    if IsValid(self) and IsValid(plr) and SERVER then
+	plr:StripWeapon("weapon_vest_bomb")
+	if plr:Alive() and !plr:HasGodMode() then
+	    plr:Kill()
+	end
+	local ragdoll = plr:GetRagdollEntity()
+	if IsValid(ragdoll) then
+	    ragdoll:Remove()
+	end
+    end
+end
+
+function SWEP:SecondaryAttack()
+    return
+end
+
+function SWEP:Deploy()
+    canfire = 1
+    return true
+end
+function SWEP:Holster()
+    canfire = 0
+    return true
+end
