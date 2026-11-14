@@ -83,7 +83,7 @@ function SWEP:PrimaryAttack()
     self:SetNextPrimaryFire(CurTime() + 0.06)
     
     local bullet = {}
-	bullet.Damage = 120
+	bullet.Damage = 60
 	bullet.Attacker = self:GetOwner()
 	bullet.Inflictor = self
 	bullet.Tracer = 4

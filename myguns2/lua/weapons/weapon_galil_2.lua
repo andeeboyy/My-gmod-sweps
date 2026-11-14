@@ -85,7 +85,7 @@ function SWEP:PrimaryAttack()
     if auto == 0 and shot == 1 then return end
     
     local bullet = {}
-	bullet.Damage = 115
+	bullet.Damage = 60
 	bullet.Attacker = self:GetOwner()
 	bullet.Inflictor = self
 	bullet.Tracer = 0

@@ -91,7 +91,7 @@ function SWEP:PrimaryAttack()
     	end
 	shot = 1
         local bullet = {}
-	    bullet.Damage = 120
+	    bullet.Damage = 55
 	    bullet.Attacker = self:GetOwner()
 	    bullet.Inflictor = self
 	    bullet.Tracer = 0
