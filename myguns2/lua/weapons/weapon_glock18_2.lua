@@ -34,7 +34,7 @@ SWEP.Spawnable = true
 SWEP.PrintName = "Glock-18"
 SWEP.Base = "weapon_base"
 SWEP.Category = "my guns 2 - Sidearms"
-SWEP.Purpose = "Secondary attack to ADS."
+SWEP.Purpose = "Secondary attack to ADS.\n Secondary attack while sprinting toggles between full-auto and semi-auto."
 -- viewmodel
 
 SWEP.ViewModel = "models/weapons/cstrike/c_pist_glock18.mdl"
