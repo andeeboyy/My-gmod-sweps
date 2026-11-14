@@ -106,7 +106,7 @@ function SWEP:PrimaryAttack()
 	end
     	extrasound:Remove()
     end
-    self:SetNextPrimaryFire(CurTime() + 0.3)
+    self:SetNextPrimaryFire(CurTime() + 0.125)
     self:TakePrimaryAmmo(1)
     if !self:GetOwner():IsNPC() then
     	if ads == 1 then

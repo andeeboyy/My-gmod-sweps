@@ -131,7 +131,7 @@ function SWEP:PrimaryAttack()
 	self:SetNextPrimaryFire(CurTime() + 0.3)
     else
 	shoot(0)
-	self:SetNextPrimaryFire(CurTime() + 0.1)
+	self:SetNextPrimaryFire(CurTime() + 0.125)
     end
 end
 

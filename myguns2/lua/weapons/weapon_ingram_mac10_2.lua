@@ -82,7 +82,11 @@ function SWEP:PrimaryAttack()
     self:SetNextPrimaryFire(CurTime() + 0.05)
 
     if auto == 0 and shot == 1 then return end
-    
+
+    if auto == 0 then
+	self:SetNextPrimaryFire(CurTime() + 0.125)
+    end
+
     local bullet = {}
 	bullet.Attacker = self:GetOwner()
 	bullet.Inflictor = self

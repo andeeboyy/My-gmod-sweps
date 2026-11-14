@@ -96,7 +96,7 @@ function SWEP:PrimaryAttack()
     extrasound:EmitSound("weapons/explode5.wav", 140, 75, 1, CHAN_WEAPON)
     extrasound:Remove()
 
-    self:SetNextPrimaryFire(CurTime() + 0.2)
+    self:SetNextPrimaryFire(CurTime() + 0.125)
     self:TakePrimaryAmmo(1)
     if !self:GetOwner():IsNPC() then
 	if ads == 0 then
