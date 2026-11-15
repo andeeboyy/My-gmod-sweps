@@ -194,10 +194,6 @@ function SWEP:Think()
 	self:SetHoldType("revolver")
     end
 
-    if self:GetOwner():KeyReleased(IN_ATTACK) then
-	shot = 0
-    end
-
     if self:GetOwner():KeyDown(IN_ATTACK2) and ads == 1 and !self:GetOwner():KeyDown(IN_SPEED) then
 	turn = math.Approach(turn, 0, 5 * FrameTime())
 	moveside = math.Approach(moveside, -6.38, 10 * FrameTime())
@@ -226,7 +222,6 @@ function SWEP:Deploy()
 end
 
 function SWEP:Holster()
-    shot = 0
     if sprinton == 0 then
 	if SERVER then
     	    self:GetOwner():SprintEnable()

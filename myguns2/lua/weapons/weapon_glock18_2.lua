@@ -123,6 +123,7 @@ function SWEP:PrimaryAttack()
 	bullet.Spread = Vector(AccuracyMeter, AccuracyMeter, AccuracyMeter)
 	AccuracyMeter = math.Clamp(AccuracyMeter + 0.008, 0, 0.05)
     self:FireBullets(bullet)
+    shot = 1
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     self:GetOwner():SetAnimation(PLAYER_ATTACK1)
     self:EmitSound("weapons/pistol/pistol_fire2.wav", 140, 100, 1, CHAN_WEAPON)

@@ -281,10 +281,6 @@ function SWEP:Think()
 	self:SetNextPrimaryFire(CurTime() + 0.4)
     end
 
-    if self:GetOwner():KeyReleased(IN_ATTACK) then
-	shot = 0
-    end
-
     if self:GetOwner():KeyDown(IN_ATTACK2) and ads == 1 and !self:GetOwner():KeyDown(IN_SPEED) then
 	turn = math.Approach(turn, 0, 5 * FrameTime())
 	moveside = math.Approach(moveside, -6.985, 10 * FrameTime())
