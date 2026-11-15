@@ -210,7 +210,7 @@ function SWEP:PrimaryAttack()
 		    end
 		    brokendoor:EmitSound("physics/wood/wood_panel_impact_hard1.wav", 125, 100, 1, CHAN_AUTO)
 		end
-		if entity:GetClass() == "prop_door_rotating" then
+		if entity:GetClass() == "prop_door_rotating" and GetBoxVolume(entity:GetCollisionBounds()) < 1000000 then
 		    local model = entity:GetModel()
 		    
 		    local brokendoor = ents.Create("prop_physics_override")
@@ -223,10 +223,11 @@ function SWEP:PrimaryAttack()
 		    brokendoor:Spawn()
 		    local physobj = brokendoor:GetPhysicsObject()
 		    if IsValid(physobj) then
-			brokendoor:SetHealth(physobj:GetVolume() * (physobj:GetMass() * 0.0001))
+			brokendoor:SetHealth(physobj:GetMass())
 			physobj:Wake()
-		    	physobj:ApplyForceCenter(self:GetOwner():GetAimVector() * 25000)
+		    	physobj:ApplyForceCenter(self:GetOwner():GetAimVector() * 35000)
 		    end
+		    brokendoor:EmitSound("physics/wood/wood_panel_impact_hard1.wav", 125, 100, 1, CHAN_AUTO)
 		end
 	    end
 	end	
