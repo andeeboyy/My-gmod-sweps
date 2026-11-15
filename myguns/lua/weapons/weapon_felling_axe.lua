@@ -1,6 +1,19 @@
 AddCSLuaFile()
 local randsound = math.random(1, 2)
 local canfire = 1
+
+local function TransferBodygroups(source, target)
+    for i, bg in ipairs(source:GetBodyGroups()) do
+	local id = bg.id
+	local state = source:GetBodygroup(id)
+	target:SetBodygroup(id, state)
+    end
+
+    if target.SetSkin and source.GetSkin then
+	target:SetSkin(source:GetSkin())
+    end
+end
+
 -- spawnmenu
 SWEP.Spawnable = true
 SWEP.PrintName = "Felling Axe"
@@ -219,6 +232,7 @@ function SWEP:PrimaryAttack()
 		    brokendoor:SetAngles(entity:GetAngles())
 		    brokendoor:SetName(entity:GetName())
 		    brokendoor:SetKeyValue("health", 200)
+		    TransferBodygroups(entity, brokendoor)
 		    entity:Remove()
 		    brokendoor:Spawn()
 		    local physobj = brokendoor:GetPhysicsObject()
