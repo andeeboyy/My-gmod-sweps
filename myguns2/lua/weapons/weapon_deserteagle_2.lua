@@ -89,13 +89,15 @@ function SWEP:PrimaryAttack()
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     self:GetOwner():SetAnimation(PLAYER_ATTACK1)
     self:EmitSound("weapons/357/357_fire2.wav", 140, 75, 1, CHAN_WEAPON)
-
-    local extrasound = ents.Create("base_gmodentity")
-    extrasound:Spawn()
-    extrasound:SetPos(self:GetOwner():GetShootPos())
-    extrasound:EmitSound("weapons/explode5.wav", 140, 75, 1, CHAN_WEAPON)
-    extrasound:Remove()
-
+    if SERVER then
+    	local extrasound = ents.Create("base_gmodentity")
+    	extrasound:Spawn()
+    	extrasound:SetPos(self:GetOwner():GetShootPos())
+	if IsFirstTimePredicted() then
+    	    extrasound:EmitSound("weapons/explode5.wav", 140, 75, 1, CHAN_WEAPON)
+	end
+    	extrasound:Remove()
+    end
     self:SetNextPrimaryFire(CurTime() + 0.125)
     self:TakePrimaryAmmo(1)
     if !self:GetOwner():IsNPC() then
