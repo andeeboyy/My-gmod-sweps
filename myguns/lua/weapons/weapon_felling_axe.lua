@@ -4,6 +4,7 @@ local canfire = 1
 -- spawnmenu
 SWEP.Spawnable = true
 SWEP.PrintName = "Felling Axe"
+SWEP.Purpose = "Not just for cutting down trees.\n\nThis can bust down doors, and also chop things up."
 SWEP.Base = "weapon_base"
 SWEP.Category = "my guns - Melee"
 
@@ -79,7 +80,7 @@ function SWEP:PrimaryAttack()
 
 	    local entity = trace.Entity
 	    local dmg = DamageInfo()
-	    local dmgvalue = 80
+	    local dmgvalue = 65
 	    dmg:SetDamage(dmgvalue)
 	    if trace.HitGroup == HITGROUP_HEAD then
 		dmg:SetDamage(dmgvalue * 2)
@@ -158,6 +159,75 @@ function SWEP:PrimaryAttack()
 			sound2()
 	    	    end
 	    	end
+
+		function GetBoxVolume(minsize, maxsize)
+		    local boundsX = maxsize.x - minsize.x
+		    local boundsY = maxsize.y - minsize.y
+		    local boundsZ = maxsize.z - minsize.z
+		    return boundsX * boundsY * boundsZ
+		end
+		if (entity:GetClass() == "func_door_rotating" or entity:GetClass() == "func_door") and GetBoxVolume(entity:GetCollisionBounds()) < 1000000 then
+		    local model = entity:GetModel()
+		    
+		    local brokendoor = ents.Create("func_physbox")
+		    brokendoor:SetModel(model)
+		    brokendoor:SetPos(entity:GetPos())
+		    brokendoor:SetAngles(entity:GetAngles())
+		    brokendoor:SetName(entity:GetName())
+		    brokendoor:SetHealth(200)
+		    local mat = trace.MatType
+		    if mat == MAT_GLASS then
+		        brokendoor:SetKeyValue("material", 0)
+	            elseif mat == MAT_WOOD then
+		        brokendoor:SetKeyValue("material", 1)
+		    elseif mat == MAT_METAL or mat == MAT_VENT or mat then
+		        brokendoor:SetKeyValue("material", 2)
+		    elseif hitmaterials[mat] then
+		        brokendoor:SetKeyValue("material", 3)
+		    elseif mat == MAT_CONCRETE then
+		        brokendoor:SetKeyValue("material", 4)
+		    elseif mat == MAT_TILE then
+		        brokendoor:SetKeyValue("material", 5)
+	            elseif mat == MAT_COMPUTER then
+		        brokendoor:SetKeyValue("material", 6)
+		    elseif mat == MAT_DIRT or mat == MAT_GRASS then
+		        brokendoor:SetKeyValue("material", 8)
+		    else
+		        brokendoor:SetKeyValue("material", 10)
+		    end
+		    for _, child in ipairs(entity:GetChildren()) do
+			child:SetParent()
+			child:SetParent(brokendoor)
+		    end
+
+		    entity:Remove()
+		    brokendoor:Spawn()
+		    local physobj = brokendoor:GetPhysicsObject()
+		    if IsValid(physobj) then
+			brokendoor:SetHealth(physobj:GetMass())
+			physobj:Wake()
+		    	physobj:ApplyForceCenter(self:GetOwner():GetAimVector() * 35000)
+		    end
+		    brokendoor:EmitSound("physics/wood/wood_panel_impact_hard1.wav", 125, 100, 1, CHAN_AUTO)
+		end
+		if entity:GetClass() == "prop_door_rotating" then
+		    local model = entity:GetModel()
+		    
+		    local brokendoor = ents.Create("prop_physics_override")
+		    brokendoor:SetModel(model)
+		    brokendoor:SetPos(entity:GetPos())
+		    brokendoor:SetAngles(entity:GetAngles())
+		    brokendoor:SetName(entity:GetName())
+		    brokendoor:SetKeyValue("health", 200)
+		    entity:Remove()
+		    brokendoor:Spawn()
+		    local physobj = brokendoor:GetPhysicsObject()
+		    if IsValid(physobj) then
+			brokendoor:SetHealth(physobj:GetVolume() * (physobj:GetMass() * 0.0001))
+			physobj:Wake()
+		    	physobj:ApplyForceCenter(self:GetOwner():GetAimVector() * 25000)
+		    end
+		end
 	    end
 	end	
     end)
