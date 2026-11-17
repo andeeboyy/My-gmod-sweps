@@ -96,7 +96,7 @@ function SWEP:PrimaryAttack()
     self:SetNextSecondaryFire(CurTime() + 1)
     local prop = ents.Create("prop_physics_override")
     if !IsValid(prop) then return end
-    prop:SetKeyValue("ExplodeDamage", "175")
+    prop:SetKeyValue("ExplodeDamage", "30")
     prop:SetKeyValue("ExplodeRadius", "350")
     prop:SetKeyValue("health", "50")
     prop:SetKeyValue("massScale", "0.7")
@@ -261,7 +261,7 @@ function SWEP:PrimaryAttack()
     	    local victim = tr.Entity
     	    if prop ~= nil and IsValid(prop) then
     		local dist = tr.HitPos:Distance(prop:WorldSpaceCenter())
-		local damage = 350 / math.Clamp(dist * 0.0025, 1, math.huge)
+		local damage = 50 / math.Clamp(dist * 0.01, 1, math.huge)
 		dmginfo:SetDamage(damage)
             end
     	    if !victim:IsNPC() and !victim:IsNextBot() and !victim:IsPlayer() and !victim:IsRagdoll() then
@@ -272,12 +272,12 @@ function SWEP:PrimaryAttack()
     	    local bullet = {}
 	    local tracepara = {}
 	    local bulletdir = Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)):Forward()
-	    bullet.Damage = 350
+	    bullet.Damage = 200
 	    bullet.Attacker = prop
 	    bullet.Inflictor = prop
 	    bullet.Num = 1
 	    bullet.Force = 1
-	    bullet.HullSize = 25
+	    bullet.HullSize = 10
 	    bullet.Tracer = 0
 	    bullet.Dir = bulletdir
 	    bullet.Src = prop:WorldSpaceCenter()
@@ -346,7 +346,7 @@ function SWEP:PrimaryAttack()
 	end
 	
 	local offset = Vector(0, 0, 100)
-	ParticlePlayNet("striderbuster_explode_smoke", prop:GetPos() + offset, Angle(0, 0, 0))
+	ParticlePlayNet("striderbuster_explode_dummy_core", prop:GetPos() + offset, Angle(0, 0, 0))
 	for i = 1, 10 do
 	    ParticlePlayNet("striderbuster_explode_dummy_parts", prop:GetPos() + offset, Angle(math.Rand(0, 360), math.Rand(0, 360), math.Rand(0, 360)))
 	end
@@ -359,7 +359,7 @@ function SWEP:PrimaryAttack()
 	cloud:Spawn()
 
 	if IsFirstTimePredicted() then
-	    prop:EmitSound("npc/env_headcrabcanister/explosion.wav", 140, 100, 1, CHAN_AUTO)
+	    prop:EmitSound("ambient/explosions/explode_4.wav", 160, 100, 1, CHAN_AUTO)
 	end
 	local postracepara = {}
 	postracepara.start = prop:WorldSpaceCenter()
@@ -367,11 +367,11 @@ function SWEP:PrimaryAttack()
 	postracepara.mask = MASK_SOLID
 	postracepara.filter = prop
 	local postrace = util.TraceLine(postracepara)
-    	for i = 1, 100 do
+    	for i = 1, 25 do
 
 	    local angle = Angle(0, math.Rand(0, 360), 0)
 
-	    local vector = angle:Forward() * math.Rand(100, 750) + prop:GetPos()
+	    local vector = angle:Forward() * math.Rand(100, 500) + prop:GetPos()
 
 	    local tracepara = {}
 	    tracepara.start = Vector(vector.x, vector.y, postrace.HitPos.z - 10)
@@ -385,9 +385,9 @@ function SWEP:PrimaryAttack()
 	    end
     	end
 
-	for i = 1, math.random(10, 20) do
+	for i = 1, math.random(5, 10) do
 	    local angle = Angle(math.Rand(-180, 180), math.Rand(-180, 180), math.Rand(-180, 180))
-	    local vector = angle:Forward() * math.Rand(100, 500) + prop:GetPos()
+	    local vector = angle:Forward() * math.Rand(50, 250) + prop:GetPos()
 	    local time = vector:Distance(prop:GetPos()) / 5000
 	    timer.Simple(time, function()
 	    	ParticlePlayNet("striderbuster_explode_dummy_core", vector, Angle(0, 0, 0))
@@ -408,8 +408,8 @@ function SWEP:PrimaryAttack()
 	propboom:Spawn()
 	timer.Simple(0.015, function()
 	    if IsValid(propboom) then
-	    	propboom:SetKeyValue("ExplodeDamage", 350)
-	    	propboom:SetKeyValue("ExplodeRadius", 300)
+	    	propboom:SetKeyValue("ExplodeDamage", 50)
+	    	propboom:SetKeyValue("ExplodeRadius", 150)
 	    end
 	end)
 	timer.Simple(0.03, function()
@@ -418,19 +418,19 @@ function SWEP:PrimaryAttack()
 	    end
 	end)
 
-	for _, obj in ipairs(ents.FindInSphere(prop:GetPos(), 4000)) do
+	for _, obj in ipairs(ents.FindInSphere(prop:GetPos(), 1000)) do
 	    if IsValid(obj) then
 	    	local dist = obj:GetPos():Distance(prop:GetPos())
 		if IsValid(obj) and obj:VisibleVec(prop:WorldSpaceCenter()) then
 	    	    local dmg = DamageInfo()
 		    local dmgv = 0
 		    if obj:IsNPC() or obj:IsPlayer() or obj:IsNextBot() or obj:IsRagdoll() then
-	    	    	dmgv = math.Clamp(400 / ((dist * 0.025) + 1), 0, math.huge)
+	    	    	dmgv = math.Clamp(100 / ((dist * 0.05) + 1), 0, math.huge)
 			if dmgv < 10 then
 			    dmgv = 0
 			end
 		    else
-			dmgv = math.Clamp(50 / ((dist * 0.025) + 1), 0, math.huge)
+			dmgv = math.Clamp(50 / ((dist * 0.05) + 1), 0, math.huge)
 			if dmgv < 10 then
 			    dmgv = 0
 			end
