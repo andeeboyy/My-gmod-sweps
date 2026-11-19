@@ -82,7 +82,7 @@ end
 -- throw grenade
 function SWEP:PrimaryAttack()
     if CLIENT then return end
-    nextReload = CurTime() + 2
+    nextReload = CurTime() + 1
     if self:IsValid() then
     	if self:Ammo1() == 0 then
 	    timer.Simple(0.65, function()
@@ -161,6 +161,9 @@ function SWEP:PrimaryAttack()
     end
     local triggered = 0
     hook.Add("Think", prop, function()
+	if IsValid(prop) and prop:IsOnFire() then
+	    prop:Extinguish()
+	end
 	if time > CurTime() then return end
 	if !IsValid(prop) then
 	    hook.Remove("Think", prop)
@@ -498,13 +501,14 @@ function SWEP:Deploy()
     	    if SERVER then
 		self:GetOwner():DrawWorldModel(true, 0)
     	    end
-   	    self:SetNextPrimaryFire(nextReload + 0.5 / GetConVar("sv_defaultdeployspeed"):GetFloat())
+   	    self:SetNextPrimaryFire(nextReload + 1)
 	else
     	    if SERVER then
 		self:GetOwner():DrawWorldModel(true, 0)
     	    end
-	    self:SetNextPrimaryFire(CurTime() + 0.5 / GetConVar("sv_defaultdeployspeed"):GetFloat())
+	    self:SetNextPrimaryFire(CurTime() + 1)
 	end
+	
 	self:SetNextSecondaryFire(CurTime() + 0.5)
     else
 	self:SetNextPrimaryFire(CurTime() + 0.5 / GetConVar("sv_defaultdeployspeed"):GetFloat())

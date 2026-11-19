@@ -412,11 +412,11 @@ function SWEP:Deploy()
 	end
 	self:DefaultReload(ACT_VM_DRAW)
 	if nextReload > CurTime() then
-   	    self:SetNextPrimaryFire(nextReload + 0.5 / GetConVar("sv_defaultdeployspeed"):GetFloat())
+   	    self:SetNextPrimaryFire(nextReload + 1)
 	else
-	    self:SetNextPrimaryFire(CurTime() + 0.5 / GetConVar("sv_defaultdeployspeed"):GetFloat())
+	    self:SetNextPrimaryFire(CurTime() + 1)
 	end
-	self:SetNextSecondaryFire(CurTime() + 0.5)
+	self:SetNextSecondaryFire(CurTime() + 1.3)
     else
 	self:SetNextPrimaryFire(CurTime() + 0.5 / GetConVar("sv_defaultdeployspeed"):GetFloat())
     end
