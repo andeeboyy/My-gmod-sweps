@@ -496,7 +496,7 @@ function SWEP:Think()
 	    	timerrunning = timerrunning - 1
 	    	if threw2 == 0 and timerrunning < 1 and specialpullpin == 1 then
 		    primed2 = 0
-		    throw(1, self, false)
+		    throw(1, self, false, false)
 	    	end
 	    end)
 	end
