@@ -46,7 +46,7 @@ function SWEP:PrimaryAttack()
     if CLIENT then return end
     local randnumber = math.Rand(8, 15)
     local firephys = ents.Create("prop_physics")
-    firephys:SetModel("models/hunter/plates/plate.mdl")
+    firephys:SetModel("models/hunter/misc/sphere025x025.mdl")
     local tracepara = {}
     tracepara.start = self:GetOwner():GetShootPos()
     tracepara.endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 100
@@ -60,7 +60,9 @@ function SWEP:PrimaryAttack()
     end
     firephys:SetNoDraw(true)
     firephys:Spawn()
+    local firevelocity = firephys:GetPhysicsObject()
     local function Ignite(collider, colData)
+	firevelocity:SetVelocity(firevelocity:GetVelocity() * 0.5)
 	local victim = colData.HitEntity
 	if IsValid(victim) and !victim:IsWorld() and victim:IsOnFire() then
 	    local dmg = DamageInfo()
@@ -71,7 +73,6 @@ function SWEP:PrimaryAttack()
 	    victim:TakeDamageInfo(dmg)
 	end
 	if IsValid(victim) and !victim:IsWorld() and !victim:IsOnFire() then
-	    firephys:EmitSound("ambient/fire/ignite.wav", 140, 85, 1, CHAN_WEAPON)
 	    victim:Ignite(10)
 	    firephys:Remove()
 	end
@@ -89,11 +90,12 @@ function SWEP:PrimaryAttack()
     fire:Spawn()
     fire:SetParent(firephys)
     fire:Fire("StartFire")
-    local firevelocity = firephys:GetPhysicsObject()
+    
     if firevelocity:IsValid() then
 	firevelocity:Wake()
 	local speedinherit = self:GetOwner():GetVelocity()
 	firevelocity:SetVelocity(speedinherit + self:GetOwner():GetAimVector() * 2000)
+	firevelocity:SetMaterial("Default_silent")
 	timer.Simple(randnumber, function()
 	    if IsValid(firephys) then
 		firephys:Remove()
@@ -101,12 +103,12 @@ function SWEP:PrimaryAttack()
 	end)
     end
     self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
-    self:EmitSound("ambient/fire/gascan_ignite1.wav", 140, 100, 1, CHAN_WEAPON)
+    self:EmitSound("ambient/fire/gascan_ignite1.wav", 100, 100, 1, CHAN_WEAPON)
     self:SetNextPrimaryFire(CurTime() + 0.06)
     self:GetOwner():SetAnimation(PLAYER_ATTACK1)
     self:TakePrimaryAmmo(1)
     if !self:GetOwner():IsNPC() then
-    	self:GetOwner():SetEyeAngles(self:GetOwner():EyeAngles() + Angle(math.Rand(-1, 1), math.Rand(-1, 1), 0))
+    	self:GetOwner():SetEyeAngles(self:GetOwner():EyeAngles() + Angle(math.Rand(-1, -1.5), math.Rand(-1, 1), 0))
     end
 end
 

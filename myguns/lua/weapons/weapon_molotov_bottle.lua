@@ -69,7 +69,7 @@ local function throw(drop, entity)
     if entity:IsValid() then
     	if (entity:Clip1() < 1) then return end
     end
-    if !entity:GetOwner():Alive() or !IsValid(entity:GetOwner()) then return end
+    if !entity:IsValid() or !IsValid(entity:GetOwner()) then return end
 
     local prop = ents.Create("prop_physics")
     if !IsValid(prop) then return end
@@ -102,46 +102,44 @@ local function throw(drop, entity)
 	if SERVER then
 	prop:EmitSound("ambient/fire/ignite.wav", 140, 100, 1, CHAN_AUTO)
 	flamesound:Stop()
-	    for i = 1, 30 do
-		 local offset = Vector(
-		     math.Rand(-100, 100),
-		     math.Rand(-100, 100),
-		     math.Rand(0, 100)
-		 )
-		 
+	    for i = 1, 60 do
+		 local offsetdir = Angle(math.Rand(-180, 180), math.Rand(-180, 180), math.Rand(-180, 180))
+		
+		 local offset = offsetdir:Forward() * math.Rand(0, 50)		 
 	    	-- fire
 		 local randnumber = math.random(10, 30)
 	   	 local firephys = ents.Create("prop_physics")
-	   	 firephys:SetModel("models/hunter/plates/plate1x1.mdl")
+	   	 firephys:SetModel("models/hunter/misc/sphere025x025.mdl")
 	   	 firephys:SetPos(prop:GetPos() + offset)
 	   	 firephys:SetNoDraw(true)
 	   	 firephys:Spawn()
-		 firephys:SetFriction(100)
-		 firephys:Ignite(1000)
+		 firephys:Ignite(randnumber)
 		 if !prop:VisibleVec(firephys:GetPos()) then
 		     firephys:Remove()
 		 end
 		 constraint.Keepupright(firephys, Angle(0,0,0), 0, 999999)
-	   	 local fire = ents.Create("env_fire")
+	   	 local fire = ents.Create("point_hurt")
 	   	 fire:SetPos(firephys:GetPos())
-	   	 fire:SetKeyValue("health", "randnumber")
-	  	 fire:SetKeyValue("firesize", "200")
-	   	 fire:SetKeyValue("spawnflags", "400")
-	    	 fire:SetKeyValue("damagescale", "6.2125")
-	   	 fire:SetKeyValue("fireattack", "1")
+	  	 fire:SetKeyValue("DamageRadius", 75)
+	   	 fire:SetKeyValue("spawnflags", 1)
+	    	 fire:SetKeyValue("Damage", 20)
+	   	 fire:SetKeyValue("DamageType", "8")
+		 fire:SetKeyValue("DamageDelay", "0.25")
+		 ParticleEffectAttach("env_fire_small", PATTACH_ABSORIGIN_FOLLOW, firephys, 0)
 	   	 fire:Spawn()
 	   	 fire:SetParent(firephys)
-	    	 fire:Fire("StartFire")
+	    	 
 		 local firevelocity = firephys:GetPhysicsObject()
 		 if firevelocity:IsValid() then
 		     firevelocity:Wake()
 		     local speedinherit = prop:GetVelocity()
 		     firevelocity:SetVelocity(speedinherit)
+		     firevelocity:SetMaterial("Default_silent")
 		 end
     		 local function Ignite(collider, colData)
+		     firevelocity:SetVelocity(firevelocity:GetVelocity() * 0.5)
 		     local victim = colData.HitEntity
 		     if IsValid(victim) and !victim:IsWorld() and !victim:IsOnFire() then
-		    	 firephys:EmitSound("ambient/fire/ignite.wav", 140, 85, 1, CHAN_WEAPON)
 		    	 victim:Ignite(15)
 		     end
     	         end
@@ -180,8 +178,13 @@ local function throw(drop, entity)
     end
     entity:TakePrimaryAmmo(1)
     end)
-    entity:SendWeaponAnim(ACT_VM_THROW)
+    
     entity:GetOwner():SetAnimation(PLAYER_ATTACK1)
+    if drop == false then
+	entity:SendWeaponAnim(ACT_VM_THROW)
+    else
+	entity:SendWeaponAnim(ACT_VM_SECONDARYATTACK)
+    end
     entity:EmitSound("ambient/fire/mtov_flame2.wav", 100, 100, 1, CHAN_WEAPON)
    
 end
