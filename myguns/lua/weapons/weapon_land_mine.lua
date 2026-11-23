@@ -259,15 +259,8 @@ function SWEP:PrimaryAttack()
 	    	end
 	    end
 	end
-	if !minetrace.Hit then
-	    sound.EmitHint(SOUND_DANGER, prop:GetPos(), 350, 0.1, prop)
-	else
-	    if triggered == 0 then
-	    	local volume = math.Clamp(minetrace.Entity:GetPhysicsObject():GetVolume() * 0.0235, 0, 350)
-	    	sound.EmitHint(SOUND_DANGER, prop:GetPos(), 350 - volume, 0.1, prop)
-	    else
-	    	sound.EmitHint(SOUND_DANGER, prop:GetPos(), 750, 0.1, prop)
-	    end
+	if triggered == 1 then
+	    sound.EmitHint(SOUND_DANGER, prop:GetPos(), 750, 0.1, prop)
 	end
     end)
     prop:CallOnRemove("Explode", function(ent)
