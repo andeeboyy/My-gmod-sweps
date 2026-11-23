@@ -324,6 +324,7 @@ end
 function SWEP:SecondaryAttack()
     self:EmitSound("buttons/button16.wav", 75, 100, 1, CHAN_WEAPON)
     self:SetNextSecondaryFire(CurTime() + 1.25)
+    self:SendWeaponAnim(ACT_SLAM_DETONATOR_DETONATE)
     if self.armed == 0 then
 	self:GetOwner():PrintMessage(HUD_PRINTCENTER, "Arming..")
 	self.armed = 1
@@ -346,7 +347,7 @@ end
 
 function SWEP:Deploy()
     canfire = 1
-    self:SendWeaponAnim(ACT_SLAM_THROW_DRAW)
+    self:SendWeaponAnim(ACT_SLAM_DETONATOR_DRAW)
     local function scare()
 	if IsValid(self) and IsValid(self:GetOwner()) then
 	    sound.EmitHint(SOUND_DANGER, self:GetOwner():GetPos(), 2500, 0.1, self:GetOwner())
