@@ -93,6 +93,7 @@ function SWEP:PrimaryAttack()
 	    end
 	    if SERVER then
 	    	self:GetOwner():DrawWorldModel(false)
+		self:GetOwner():SprintEnable()
 	    end
 	    self:SetHoldType("normal")
 	end
@@ -377,11 +378,21 @@ function SWEP:PrimaryAttack()
 end
 function SWEP:SecondaryAttack()
     if armed == 1 then
+	if SERVER then
+	    timer.Simple(1.3, function()
+		if IsValid(self) and IsValid(self:GetOwner()) then
+	    	    self:GetOwner():SprintEnable()
+		end
+	    end)
+	end
 	self:SendWeaponAnim(ACT_VM_IDLE_LOWERED)
 	self:SetNextSecondaryFire(CurTime() + 1.3)
 	self:SetHoldType("shotgun")
 	armed = 0
     else
+	if SERVER then
+	    self:GetOwner():SprintDisable()
+	end
 	self:SendWeaponAnim(ACT_VM_DRAW)
 	self:SetHoldType("rpg")
 	self:SetNextSecondaryFire(CurTime() + 1.3)
@@ -393,6 +404,7 @@ function SWEP:SecondaryAttack()
 end
 
 function SWEP:Deploy()
+    self:GetOwner():SprintEnable()
     if dropped > 0 then
 	timer.Simple(0, function()
 	    if IsValid(self) and IsValid(self:GetOwner()) then
@@ -420,6 +432,7 @@ end
 function SWEP:Reload()
     if self:HasAmmo() and self:Ammo1() > 0 and dropped == 1 then
 	if SERVER then
+	    self:GetOwner():SprintEnable()
 	    self:GetOwner():DrawWorldModel(true)
 	end
 	self:GetOwner():DrawViewModel(true, 0)
@@ -437,6 +450,12 @@ function SWEP:OnRemove()
     armed = 0
 end
 
+function SWEP:Holster()
+    if SERVER then
+	self:GetOwner():SprintEnable()
+    end
+    return true
+end
 function SWEP:GetViewModelPosition(pos, ang)
     pos = pos + ang:Right() * -10 + ang:Up() * 2 + ang:Forward() * -15
     return pos, ang
