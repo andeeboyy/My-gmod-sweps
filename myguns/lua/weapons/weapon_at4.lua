@@ -3,6 +3,8 @@ AddCSLuaFile()
 local armed = 0
 -- spawnmenu
 local shoot = 0
+local dropped = 0
+
 SWEP.Spawnable = true
 SWEP.PrintName = "AT4"
 SWEP.Purpose = "M136 AT4 \n Secondary Fire to shoulder the weapon."
@@ -52,7 +54,7 @@ SWEP.Slot = 4
 -- stats
 
 SWEP.AccurateCrossHair = true
-SWEP.Primary.Ammo = "none"
+SWEP.Primary.Ammo = "RPG_Round"
 SWEP.Primary.ClipSize = 1
 SWEP.Primary.DefaultClip = 1
 SWEP.Primary.Automatic = false
@@ -66,34 +68,39 @@ SWEP.Secondary.Ammo        = "none"
 
 -- function stuff
 
--- anim
-
-function SWEP:Initialize()
-    self:SetDeploySpeed(0.5)
-end
 -- shoot
 function SWEP:PrimaryAttack()
     if CLIENT then return end
     if self:Clip1() < 1 then
-	self:GetOwner():ConCommand("lastinv")
-	self:GetOwner():SetWalkSpeed(200)
-        self:GetOwner():SetRunSpeed(400)
-	self:GetOwner():SetDuckSpeed(0.1)
-	self:GetOwner():SetUnDuckSpeed(0.1)
-	self:GetOwner():SetJumpPower(200)
-	local drop = ents.Create("prop_physics")
-	drop:SetModel("models/weapons/w_rocket_launcher.mdl")
-	drop:SetPos(self:GetOwner():GetShootPos())
-	drop:SetAngles(self:GetOwner():GetAimVector():Angle())
-	drop:Spawn()
-	local throw = drop:GetPhysicsObject()
-	if IsValid(throw) then
-	    throw:Wake()
-	    local throwVelocity = self:GetOwner():GetAimVector() * 50
-            local playerVelocity2 = self:GetOwner():GetVelocity()
-            throw:SetVelocity(throwVelocity + playerVelocity2)
+	if dropped == 0 then
+	    local drop = ents.Create("prop_physics")
+	    drop:SetModel("models/weapons/w_rocket_launcher.mdl")
+	    drop:SetPos(self:GetOwner():GetShootPos())
+	    drop:SetAngles(self:GetOwner():GetAimVector():Angle())
+	    drop:SetCollisionGroup(COLLISION_GROUP_PASSABLE_DOOR)
+	    timer.Simple(0.05, function()
+	    	if IsValid(drop) then
+		    drop:SetCollisionGroup(COLLISION_GROUP_NONE)
+	    	end
+	    end)
+	    drop:Spawn()
+	    local throw = drop:GetPhysicsObject()
+	    if IsValid(throw) then
+	    	throw:Wake()
+	    	local throwVelocity = self:GetOwner():GetAimVector() * 50
+            	local playerVelocity2 = self:GetOwner():GetVelocity()
+            	throw:SetVelocity(throwVelocity + playerVelocity2)
+	    end
+	    if SERVER then
+	    	self:GetOwner():DrawWorldModel(false)
+	    end
+	    self:SetHoldType("normal")
 	end
-	self:GetOwner():StripWeapon("weapon_at4")
+	self:GetOwner():DrawViewModel(false, 0)
+	dropped = 1
+	if !self:HasAmmo() then
+	    self:GetOwner():StripWeapon("weapon_at4")
+	end
     else
 	if armed == 0 then return end
 	self:TakePrimaryAmmo(1)
@@ -130,6 +137,18 @@ function SWEP:PrimaryAttack()
 	prop:SetKeyValue("ExplodeRadius", "500")
 	prop:SetKeyValue("massScale", 1.65)
 	prop:SetNoDraw(true)
+
+	local function scare()
+	    if IsValid(prop) then
+		for i = 1, 10 do
+		    local line = prop:GetVelocity():Angle():Forward()
+		    local scarepos = (line * (i * 250)) + prop:WorldSpaceCenter()
+		    sound.EmitHint(SOUND_DANGER, scarepos, i * 100, 0.1, prop)
+		end
+	    end
+	end
+	hook.Add("Think", prop, scare)
+
     	rocket:Spawn()
 	prop:Spawn()
 	rocket:SetParent(prop)
@@ -358,24 +377,11 @@ function SWEP:PrimaryAttack()
 end
 function SWEP:SecondaryAttack()
     if armed == 1 then
-	timer.Simple(1.3, function()
-	    if !IsValid(self) then return end
-    	    self:GetOwner():SetWalkSpeed(200)
-    	    self:GetOwner():SetRunSpeed(400)
-    	    self:GetOwner():SetDuckSpeed(0.1)
-    	    self:GetOwner():SetUnDuckSpeed(0.1)
-    	    self:GetOwner():SetJumpPower(200)
-	end)
 	self:SendWeaponAnim(ACT_VM_IDLE_LOWERED)
 	self:SetNextSecondaryFire(CurTime() + 1.3)
 	self:SetHoldType("shotgun")
 	armed = 0
     else
-	self:GetOwner():SetWalkSpeed(50)
-    	self:GetOwner():SetRunSpeed(50)
-    	self:GetOwner():SetDuckSpeed(0.95)
-    	self:GetOwner():SetUnDuckSpeed(0.95)
-    	self:GetOwner():SetJumpPower(0)
 	self:SendWeaponAnim(ACT_VM_DRAW)
 	self:SetHoldType("rpg")
 	self:SetNextSecondaryFire(CurTime() + 1.3)
@@ -387,19 +393,48 @@ function SWEP:SecondaryAttack()
 end
 
 function SWEP:Deploy()
-    armed = 0
-    self:SendWeaponAnim(ACT_VM_IDLE_LOWERED)
-    self:SetHoldType("shotgun")
+    if dropped > 0 then
+	timer.Simple(0, function()
+	    if IsValid(self) and IsValid(self:GetOwner()) then
+	    	if SERVER then
+	    	    self:GetOwner():DrawWorldModel(false)
+	    	end
+	    	self:GetOwner():DrawViewModel(false, 0)
+	    end
+	end)
+	
+    else
+	dropped = 0
+	armed = 0
+    	self:SendWeaponAnim(ACT_VM_IDLE_LOWERED)
+    	self:SetHoldType("shotgun")
+	if SERVER then
+	    self:GetOwner():DrawWorldModel(true)
+	end
+	self:GetOwner():DrawViewModel(true, 0)
+
+    end
     return true
 end
 
-function SWEP:Holster()
-    self:GetOwner():SetWalkSpeed(200)
-    self:GetOwner():SetRunSpeed(400)
-    self:GetOwner():SetDuckSpeed(0.1)
-    self:GetOwner():SetUnDuckSpeed(0.1)
-    self:GetOwner():SetJumpPower(200)
-    return true
+function SWEP:Reload()
+    if self:HasAmmo() and self:Ammo1() > 0 and dropped == 1 then
+	if SERVER then
+	    self:GetOwner():DrawWorldModel(true)
+	end
+	self:GetOwner():DrawViewModel(true, 0)
+
+	self:DefaultReload(ACT_VM_RELOAD)
+	self:SendWeaponAnim(ACT_VM_IDLE_LOWERED)
+        self:SetHoldType("shotgun")
+    	armed = 0
+	dropped = 0
+    end
+end
+
+function SWEP:OnRemove()
+    dropped = 0
+    armed = 0
 end
 
 function SWEP:GetViewModelPosition(pos, ang)
