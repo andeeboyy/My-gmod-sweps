@@ -93,7 +93,12 @@ local function throw(drop, entity)
     prop:SetKeyValue("ExplodeRadius", "300")
 
     prop:SetKeyValue("massScale", "3")
-    
+    local function scare()
+	if IsValid(prop) then
+	    sound.EmitHint(SOUND_DANGER, prop:GetPos(), 500, 0.1, prop)
+	end
+    end
+    hook.Add("Think", prop, scare)
     prop:Spawn()
 
     ParticleEffectAttach("env_fire_small", PATTACH_ABSORIGIN_FOLLOW, prop, 0)
@@ -102,7 +107,7 @@ local function throw(drop, entity)
 	if SERVER then
 	prop:EmitSound("ambient/fire/ignite.wav", 140, 100, 1, CHAN_AUTO)
 	flamesound:Stop()
-	    for i = 1, 60 do
+	    for i = 1, 30 do
 		 local offsetdir = Angle(math.Rand(-180, 180), math.Rand(-180, 180), math.Rand(-180, 180))
 		
 		 local offset = offsetdir:Forward() * math.Rand(0, 50)		 
@@ -111,8 +116,10 @@ local function throw(drop, entity)
 	   	 local firephys = ents.Create("prop_physics")
 	   	 firephys:SetModel("models/hunter/misc/sphere025x025.mdl")
 	   	 firephys:SetPos(prop:GetPos() + offset)
-	   	 firephys:SetNoDraw(true)
+	   	 firephys:SetMaterial("models/shadertest/unlitgenericmodel")
+		 firephys:SetModelScale(0.25)
 	   	 firephys:Spawn()
+		 firephys:Activate()
 		 firephys:Ignite(randnumber)
 		 if !prop:VisibleVec(firephys:GetPos()) then
 		     firephys:Remove()
@@ -122,7 +129,7 @@ local function throw(drop, entity)
 	   	 fire:SetPos(firephys:GetPos())
 	  	 fire:SetKeyValue("DamageRadius", 75)
 	   	 fire:SetKeyValue("spawnflags", 1)
-	    	 fire:SetKeyValue("Damage", 20)
+	    	 fire:SetKeyValue("Damage", 5)
 	   	 fire:SetKeyValue("DamageType", "8")
 		 fire:SetKeyValue("DamageDelay", "0.25")
 		 ParticleEffectAttach("env_fire_small", PATTACH_ABSORIGIN_FOLLOW, firephys, 0)
@@ -139,8 +146,9 @@ local function throw(drop, entity)
     		 local function Ignite(collider, colData)
 		     firevelocity:SetVelocity(firevelocity:GetVelocity() * 0.5)
 		     local victim = colData.HitEntity
-		     if IsValid(victim) and !victim:IsWorld() and !victim:IsOnFire() then
+		     if IsValid(victim) and !victim:IsWorld() and !string.StartsWith(victim:GetClass(), "func") and !victim:IsOnFire() then
 		    	 victim:Ignite(15)
+			 firephys:EmitSound("ambient/fire/mtov_flame2.wav", 140, 100, 1, CHAN_AUTO)
 		     end
     	         end
 

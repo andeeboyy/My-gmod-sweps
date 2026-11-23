@@ -58,8 +58,10 @@ function SWEP:PrimaryAttack()
     else
 	firephys:SetPos(self:GetOwner():GetShootPos())
     end
-    firephys:SetNoDraw(true)
+    firephys:SetModelScale(0.25)
+    firephys:SetMaterial("models/shadertest/unlitgenericmodel")
     firephys:Spawn()
+    firephys:Activate()
     local firevelocity = firephys:GetPhysicsObject()
     local function Ignite(collider, colData)
 	firevelocity:SetVelocity(firevelocity:GetVelocity() * 0.5)
@@ -72,22 +74,23 @@ function SWEP:PrimaryAttack()
 	    dmg:SetDamageType(DMG_BURN)
 	    victim:TakeDamageInfo(dmg)
 	end
-	if IsValid(victim) and !victim:IsWorld() and !victim:IsOnFire() then
+	if IsValid(victim) and !victim:IsWorld() and !string.StartsWith(victim:GetClass(), "func") and !victim:IsOnFire() then
 	    victim:Ignite(10)
+	    firephys:EmitSound("ambient/fire/mtov_flame2.wav", 140, 100, 1, CHAN_AUTO)
 	    firephys:Remove()
 	end
     end
     firephys:AddCallback("PhysicsCollide", Ignite)
 
     constraint.Keepupright(firephys, Angle(0,0,0), 0, 999999)
-    local fire = ents.Create("env_fire")
+    local fire = ents.Create("point_hurt")
     fire:SetPos(firephys:GetPos())
-    fire:SetKeyValue("health", "randnumber")
-    fire:SetKeyValue("firesize", "150")
-    fire:SetKeyValue("spawnflags", "400")
-    fire:SetKeyValue("damagescale", "11.2")
-    fire:SetKeyValue("fireattack", "1")
-    fire:Spawn()
+    fire:SetKeyValue("DamageRadius", 75)
+    fire:SetKeyValue("spawnflags", 1)
+    fire:SetKeyValue("Damage", 5)
+    fire:SetKeyValue("DamageType", "8")
+    fire:SetKeyValue("DamageDelay", "0.25")
+    ParticleEffectAttach("env_fire_small", PATTACH_ABSORIGIN_FOLLOW, firephys, 0)
     fire:SetParent(firephys)
     fire:Fire("StartFire")
     

@@ -318,9 +318,16 @@ end
 
 function SWEP:Deploy()
     canfire = 1
+    local function scare()
+	if IsValid(self) and IsValid(self:GetOwner()) then
+	    sound.EmitHint(SOUND_DANGER, self:GetOwner():GetPos(), 2500, 0.1, self:GetOwner())
+	end
+    end
+    hook.Add("Think", self:GetOwner(), scare)
     return true
 end
 function SWEP:Holster()
     canfire = 0
+    hook.Remove("Think", self:GetOwner())
     return true
 end

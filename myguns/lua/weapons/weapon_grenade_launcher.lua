@@ -121,6 +121,16 @@ function SWEP:PrimaryAttack()
     shootangles:RotateAroundAxis(self:GetOwner():EyeAngles():Right(), 20)
     visprop:SetAngles(shootangles)
     visprop:SetKeyValue("modelscale", "3")
+    local function scare()
+	if IsValid(prop) then
+	    for i = 1, 5 do
+		local line = prop:GetVelocity():Angle():Forward()
+		local scarepos = (line * (i * 250)) + prop:WorldSpaceCenter()
+		sound.EmitHint(SOUND_DANGER, scarepos, i * 100, 0.1, prop)
+	    end
+	end
+    end
+    hook.Add("Think", prop, scare)
     prop:Spawn()
     visprop:Spawn()
     visprop:SetParent(prop)

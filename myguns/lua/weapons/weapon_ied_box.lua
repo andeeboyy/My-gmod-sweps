@@ -128,7 +128,15 @@ function SWEP:PrimaryAttack()
 	    prop:SetCollisionGroup(COLLISION_GROUP_NONE)
 	end
     end)
-   
+
+    local function scare()
+	if IsValid(prop) then
+	    sound.EmitHint(SOUND_DANGER, prop:GetPos(), 2500, 0.1, prop)
+	end
+    end
+
+    hook.Add("Think", prop, scare)
+
     prop:Spawn()
     prop:CallOnRemove("Explode", function(ent)
 	if CLIENT then return end

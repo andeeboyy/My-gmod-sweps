@@ -168,6 +168,7 @@ function SWEP:PrimaryAttack()
 	if !IsValid(prop) then
 	    hook.Remove("Think", prop)
 	end
+	
 	local minetracepara = {}
 	minetracepara.start = prop:WorldSpaceCenter()
         minetracepara.endpos = prop:WorldSpaceCenter() + Vector(0, 0, 10)
@@ -256,6 +257,16 @@ function SWEP:PrimaryAttack()
 		    end)
 		    triggered = 1
 	    	end
+	    end
+	end
+	if !minetrace.Hit then
+	    sound.EmitHint(SOUND_DANGER, prop:GetPos(), 350, 0.1, prop)
+	else
+	    if triggered == 0 then
+	    	local volume = math.Clamp(minetrace.Entity:GetPhysicsObject():GetVolume() * 0.0235, 0, 350)
+	    	sound.EmitHint(SOUND_DANGER, prop:GetPos(), 350 - volume, 0.1, prop)
+	    else
+	    	sound.EmitHint(SOUND_DANGER, prop:GetPos(), 750, 0.1, prop)
 	    end
 	end
     end)

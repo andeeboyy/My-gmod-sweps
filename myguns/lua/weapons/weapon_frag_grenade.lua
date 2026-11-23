@@ -131,6 +131,13 @@ local function throw(time, ent, toss, deathgrenade)
 	    	prop:Remove()
 	    end
     	end)
+	local function scare()
+	    if IsValid(prop) then
+		sound.EmitHint(SOUND_DANGER, prop:GetPos(), 750, 0.1, prop)
+	    end
+	end
+	hook.Add("Think", prop, scare)
+	
     	prop:Spawn()
     	local woosh = prop:GetPhysicsObject()
 	if deathgrenade == true then
