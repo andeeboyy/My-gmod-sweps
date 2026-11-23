@@ -1,9 +1,11 @@
 AddCSLuaFile()
 local randsound = math.random(1, 4)
 local canfire = 1
+
 -- spawnmenu
 SWEP.Spawnable = true
 SWEP.PrintName = "Bomb Vest"
+SWEP.Purpose = "Secondary attack will arm or disarm the bomb.\n\nYou can only holster the bomb when it is disarmed."
 SWEP.Base = "weapon_base"
 SWEP.Category = "my guns - Explosives"
 
@@ -50,13 +52,13 @@ SWEP.AccurateCrossHair = true
 SWEP.Primary.Ammo = "none"
 SWEP.Primary.ClipSize = -1
 SWEP.Primary.DefaultClip = -1
-SWEP.Primary.Automatic = true
+SWEP.Primary.Automatic = false
 
 -- secondary
 
 SWEP.Secondary.ClipSize    = -1
 SWEP.Secondary.DefaultClip = -1
-SWEP.Secondary.Automatic   = true
+SWEP.Secondary.Automatic   = false
 SWEP.Secondary.Ammo        = "none"
 
 -- function stuff
@@ -64,9 +66,10 @@ SWEP.Secondary.Ammo        = "none"
 -- anim
 function SWEP:Initialize()
     self:SetHoldType("grenade")
+    self.armed = 0
 end
 -- shoot
-function SWEP:PrimaryAttack()
+function SWEP:Explode()
     if CLIENT then return end
     local plr = self:GetOwner()
     self:SetNextPrimaryFire(CurTime() + 1)
@@ -312,12 +315,38 @@ function SWEP:PrimaryAttack()
     end
 end
 
+function SWEP:PrimaryAttack()
+    if self.armed == 1 then
+	self:Explode()
+    end
+end
+
 function SWEP:SecondaryAttack()
-    return
+    self:EmitSound("buttons/button16.wav", 75, 100, 1, CHAN_WEAPON)
+    self:SetNextSecondaryFire(CurTime() + 1.25)
+    if self.armed == 0 then
+	self:GetOwner():PrintMessage(HUD_PRINTCENTER, "Arming..")
+	self.armed = 1
+	self:SetNextPrimaryFire(CurTime() + 1)
+	timer.Simple(1, function()
+	    if IsValid(self) and IsValid(self:GetOwner()) then
+		self:GetOwner():PrintMessage(HUD_PRINTCENTER, "Armed!")
+	    end
+	end)
+    else
+	self:GetOwner():PrintMessage(HUD_PRINTCENTER, "Disarming..")
+	timer.Simple(1, function()
+	    if IsValid(self) and IsValid(self:GetOwner()) then
+		self:GetOwner():PrintMessage(HUD_PRINTCENTER, "Disarmed!")
+		self.armed = 0
+	    end
+	end)
+    end
 end
 
 function SWEP:Deploy()
     canfire = 1
+    self:SendWeaponAnim(ACT_SLAM_THROW_DRAW)
     local function scare()
 	if IsValid(self) and IsValid(self:GetOwner()) then
 	    sound.EmitHint(SOUND_DANGER, self:GetOwner():GetPos(), 2500, 0.1, self:GetOwner())
@@ -329,5 +358,7 @@ end
 function SWEP:Holster()
     canfire = 0
     hook.Remove("Think", self:GetOwner())
-    return true
+    if self.armed == 0 then
+    	return true
+    end
 end
