@@ -90,7 +90,7 @@ local function throw(drop, entity)
     flamesound:Play()
     -- explosion
     prop:SetKeyValue("ExplodeDamage", "10")
-    prop:SetKeyValue("ExplodeRadius", "300")
+    prop:SetKeyValue("ExplodeRadius", "100")
 
     prop:SetKeyValue("massScale", "3")
     local function scare()
@@ -118,6 +118,14 @@ local function throw(drop, entity)
 	   	 firephys:SetPos(prop:GetPos() + offset)
 	   	 firephys:SetMaterial("models/shadertest/unlitgenericmodel")
 		 firephys:SetModelScale(0.25)
+
+		 local function scarefire()
+	    	     if IsValid(firephys) then
+		 	 sound.EmitHint(SOUND_DANGER, firephys:GetPos(), 100, 0.1, firephys)
+	    	     end
+		 end
+		 hook.Add("Think", firephys, scarefire)
+
 	   	 firephys:Spawn()
 		 firephys:Activate()
 		 firephys:Ignite(randnumber)

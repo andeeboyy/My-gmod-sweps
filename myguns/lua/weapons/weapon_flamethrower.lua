@@ -60,6 +60,18 @@ function SWEP:PrimaryAttack()
     end
     firephys:SetModelScale(0.25)
     firephys:SetMaterial("models/shadertest/unlitgenericmodel")
+
+    local function scarefire()
+	if IsValid(firephys) then
+	    for i = 1, 5 do
+		local line = firephys:GetVelocity():Angle():Forward()
+		local scarepos = (line * (i * firephys:GetVelocity():Length())) + firephys:WorldSpaceCenter()
+		sound.EmitHint(SOUND_DANGER, scarepos, i * (firephys:GetVelocity():Length() / 2) + 100, 0.1, firephys)
+	    end
+	end
+    end
+    hook.Add("Think", firephys, scarefire)
+
     firephys:Spawn()
     firephys:Activate()
     local firevelocity = firephys:GetPhysicsObject()
@@ -91,8 +103,8 @@ function SWEP:PrimaryAttack()
     fire:SetKeyValue("DamageType", "8")
     fire:SetKeyValue("DamageDelay", "0.25")
     ParticleEffectAttach("env_fire_small", PATTACH_ABSORIGIN_FOLLOW, firephys, 0)
+    fire:Spawn()
     fire:SetParent(firephys)
-    fire:Fire("StartFire")
     
     if firevelocity:IsValid() then
 	firevelocity:Wake()
