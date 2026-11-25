@@ -250,10 +250,13 @@ function SWEP:Holster()
     if SERVER then
 	self:GetOwner():CrosshairEnable()
     end
-    local vm = self:GetOwner():GetViewModel()
-    vm:SetSubMaterial(1)
-    vm:SetSubMaterial(2)
-    vm:SetSubMaterial(3)
+    
+    if LocalPlayer() == self:GetOwner() then
+	local vm = self:GetOwner():GetViewModel()
+    	vm:SetSubMaterial(1)
+    	vm:SetSubMaterial(2)
+    	vm:SetSubMaterial(3)
+    end
     return true
 end
 
