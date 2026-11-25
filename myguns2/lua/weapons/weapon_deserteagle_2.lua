@@ -80,7 +80,7 @@ function SWEP:PrimaryAttack()
 	bullet.Damage = 40
 	bullet.Num = 1
 	bullet.Tracer = 0
-	bullet.Force = 6
+	bullet.Force = 3.5
 	bullet.Dir = self:GetOwner():GetAimVector()
 	bullet.Src = self:GetOwner():GetShootPos()
 	bullet.Spread = Vector(AccuracyMeter, AccuracyMeter, AccuracyMeter)
