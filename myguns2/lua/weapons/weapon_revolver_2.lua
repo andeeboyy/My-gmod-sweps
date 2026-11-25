@@ -158,7 +158,7 @@ function SWEP:Reload()
     	timer.Simple(2, function()
 	    if candothing == 1 then
 		canads = 1
-		if SERVER then
+		if SERVER and IsValid(self) and IsValid(self:GetOwner()) then
 		    self:GetOwner():SprintEnable()
 		    self:GetOwner():CrosshairEnable()
 		end
